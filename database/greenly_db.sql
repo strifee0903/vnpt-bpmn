@@ -90,12 +90,12 @@ CREATE TABLE media (
 -- BẢNG vote: Lượt đánh giá (like/dislike) cho moment
 -- ========================================
 CREATE TABLE vote (
-    vote_id INT PRIMARY KEY AUTO_INCREMENT,
     moment_id INT,
     vote_state BOOLEAN, -- true: like, false: dislike
     acc_id INT,
     FOREIGN KEY (moment_id) REFERENCES moment(moment_id),
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
+    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id),
+    primary key(moment_id, acc_id)
 );
 
 -- ========================================
