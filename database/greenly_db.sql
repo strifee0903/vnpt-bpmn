@@ -159,10 +159,10 @@ CREATE TABLE participation (
 -- ========================================
 -- BẢNG notification: Gửi thông báo cho người dùng (ví dụ: được cộng điểm, nhắc nhở tham gia chiến dịch)
 -- ========================================
-CREATE TABLE notification (
-    notification_id INT PRIMARY KEY AUTO_INCREMENT,
-    acc_id INT,
-    content TEXT,
-    created_at DATETIME,
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
-);
+-- CREATE TABLE notification (
+--     notification_id INT PRIMARY KEY AUTO_INCREMENT,
+--     acc_id INT,
+--     content TEXT,
+--     created_at DATETIME,
+--     FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
+-- );
