@@ -1,3 +1,4 @@
 **/node_modules/
 .qodo
 .vscode
+greenly_app/backend-api/.env
