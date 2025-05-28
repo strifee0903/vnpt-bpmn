@@ -166,3 +166,41 @@ CREATE TABLE participation (
 --     created_at DATETIME,
 --     FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
 -- );
+
+
+-- Table for processes
+CREATE TABLE processes (
+    process_id VARCHAR(100) PRIMARY KEY,
+    name VARCHAR(255),
+    xml_content TEXT
+);
+
+-- Table for steps (tasks, events, gateways, etc.)
+CREATE TABLE steps (
+    step_id VARCHAR(100) PRIMARY KEY,
+    process_id VARCHAR(100),
+    name VARCHAR(255),
+    type VARCHAR(50), -- e.g., startEvent, task, endEvent, exclusiveGateway
+    FOREIGN KEY (process_id) REFERENCES processes(process_id)
+);
+
+-- Table for flows (sequence flows, message flows, etc.)
+CREATE TABLE flows (
+    flow_id VARCHAR(100) PRIMARY KEY,
+    process_id VARCHAR(100),
+    source_ref VARCHAR(100),
+    target_ref VARCHAR(100),
+    type VARCHAR(50), -- e.g., sequenceFlow, messageFlow
+    FOREIGN KEY (process_id) REFERENCES processes(process_id),
+    FOREIGN KEY (source_ref) REFERENCES steps(step_id),
+    FOREIGN KEY (target_ref) REFERENCES steps(step_id)
+);
+
+-- Table for custom properties (e.g., magic:spell)
+CREATE TABLE custom_properties (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    step_id VARCHAR(100),
+    property_name VARCHAR(100),
+    property_value TEXT,
+    FOREIGN KEY (step_id) REFERENCES steps(step_id)
+);
