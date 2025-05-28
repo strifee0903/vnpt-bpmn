@@ -204,3 +204,67 @@ CREATE TABLE custom_properties (
     property_value TEXT,
     FOREIGN KEY (step_id) REFERENCES steps(step_id)
 );
+
+/***********************************************************************************************************/
+INSERT INTO roles (role_name) VALUES 
+('admin'), ('user'), ('moderator');
+
+INSERT INTO users (role_id, u_name, u_birthday, u_address) VALUES
+(1, 'Alice Nguyen', '1995-06-15', '123 Green St, Can Tho'),
+(2, 'Bob Tran', '1998-03-22', '456 Eco Ave, HCMC'),
+(3, 'Charlie Le', '1990-09-01', '789 Recycle Rd, Hanoi'),
+(2, 'Duyen Pham', '2000-01-01', '101 River St, Da Nang'),
+(1, 'Emily Dao', '1985-12-12', '202 Forest Ln, Hue'),
+(3, 'Frank Vu', '1992-07-07', '303 Ocean Dr, Nha Trang'),
+(2, 'Giang Ho', '2002-08-08', '404 Bamboo Way, Haiphong'),
+(1, 'Helen Bui', '1999-05-05', '505 Lotus St, Dalat'),
+(2, 'Ivy Vo', '1993-11-11', '606 Solar Blvd, Vung Tau'),
+(3, 'Jacky Ngo', '1997-04-04', '707 Wind Rd, Bien Hoa');
+
+INSERT INTO accounts (u_id, acc_name, acc_pass) VALUES
+(1, 'alice123', 'passAlice'),
+(2, 'bobtran', 'bobpass'),
+(3, 'cle1990', 'charliepass'),
+(4, 'duyen01', 'duyenpass'),
+(5, 'emilydao', 'emilypass'),
+(6, 'fvu92', 'frankpass'),
+(7, 'g_ho', 'giangpass'),
+(8, 'hbui', 'helenpass'),
+(9, 'ivyvo', 'ivypass'),
+(10, 'jackyn', 'jackypass');
+
+INSERT INTO category (category_name) VALUES
+('Nhặt rác'),
+('Trồng cây'),
+('Tái chế'),
+('Tiết kiệm điện'),
+('Không dùng nhựa'),
+('Chia sẻ kiến thức môi trường'),
+('Đi xe đạp'),
+('Sử dụng năng lượng mặt trời'),
+('Sống xanh'),
+('Làm sạch bãi biển');
+
+INSERT INTO moment (acc_id, moment_content, moment_img, moment_address, category_id) VALUES
+(1, 'Tôi vừa hoàn thành việc nhặt rác tại công viên.', 'img1.jpg', 'Công viên Lê Văn Tám', 1),
+(2, 'Chúng tôi đã trồng 5 cây xanh ở sân trường.', 'img2.jpg', 'Trường Đại học Cần Thơ', 2),
+(3, 'Tái chế chai nhựa thành chậu cây.', 'img3.jpg', 'Nhà riêng', 3),
+(4, 'Hạn chế sử dụng máy lạnh để tiết kiệm điện.', NULL, 'Văn phòng', 4),
+(5, 'Sử dụng bình nước cá nhân thay vì chai nhựa.', 'img4.jpg', 'Ký túc xá', 5),
+(6, 'Chia sẻ thông tin về phân loại rác.', NULL, 'Online', 6),
+(7, 'Đi xe đạp đi làm thay vì dùng xe máy.', 'img5.jpg', 'Đường Nguyễn Văn Cừ', 7),
+(8, 'Lắp đặt pin mặt trời trên mái nhà.', 'img6.jpg', 'Thủ Đức', 8),
+(9, 'Sống xanh bằng cách trồng rau sạch.', NULL, 'Ban công nhà', 9),
+(10, 'Tham gia làm sạch bãi biển cùng nhóm tình nguyện.', 'img7.jpg', 'Bãi biển Cần Giờ', 10);
+
+INSERT INTO vote (moment_id, vote_state, acc_id) VALUES
+(1, TRUE, 2),
+(1, TRUE, 3),
+(2, TRUE, 1),
+(2, FALSE, 4),
+(3, TRUE, 5),
+(3, TRUE, 6),
+(4, TRUE, 7),
+(5, FALSE, 8),
+(6, TRUE, 9),
+(7, TRUE, 10);
