@@ -32,22 +32,29 @@ CREATE TABLE roles (
 CREATE TABLE users (
     u_id INT PRIMARY KEY AUTO_INCREMENT,
     role_id INT,
-    u_name VARCHAR(100),
+    u_name VARCHAR(100) not null,
     u_birthday DATE,
-    u_address VARCHAR(255),
+    u_address VARCHAR(255) not null,
+    u_email VARCHAR(255) not null unique,
+    u_pass text not null,
+    is_verified int(11) not null,
+    u_avt varchar(500),
+    last_login timestamp,
+    created_at timestamp,
+    updated_at timestamp,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
 
 -- ========================================
 -- BẢNG accounts: Thông tin đăng nhập tài khoản
 -- ========================================
-CREATE TABLE accounts (
-    acc_id INT PRIMARY KEY AUTO_INCREMENT,
-    u_id INT,
-    acc_name VARCHAR(100) UNIQUE,
-    acc_pass VARCHAR(255),
-    FOREIGN KEY (u_id) REFERENCES users(u_id)
-);
+-- CREATE TABLE accounts (
+--     acc_id INT PRIMARY KEY AUTO_INCREMENT,
+--     u_id INT,
+--     acc_name VARCHAR(100) UNIQUE,
+--     acc_pass VARCHAR(255),
+--     FOREIGN KEY (u_id) REFERENCES users(u_id)
+-- );
 
 -- ========================================
 -- BẢNG category: Phân loại các hành động vì môi trường
@@ -65,12 +72,12 @@ CREATE TABLE category (
 -- ========================================
 CREATE TABLE moment (
     moment_id INT PRIMARY KEY AUTO_INCREMENT,
-    acc_id INT, -- tài khoản đăng bài
+    u_id INT, -- tài khoản đăng bài
     moment_content TEXT, -- nội dung chia sẻ hành động
     moment_img VARCHAR(255), -- ảnh đại diện chính của bài (tuỳ chọn)
     moment_address VARCHAR(255), -- địa điểm thực hiện hành động
     category_id INT, -- loại hành động (vd: nhặt rác, trồng cây, v.v.)
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id),
+    FOREIGN KEY (u_id) REFERENCES users(u_id),
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
@@ -92,10 +99,10 @@ CREATE TABLE media (
 CREATE TABLE vote (
     moment_id INT,
     vote_state BOOLEAN, -- true: like, false: dislike
-    acc_id INT,
+    u_id INT,
     FOREIGN KEY (moment_id) REFERENCES moment(moment_id),
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id),
-    primary key(moment_id, acc_id)
+     FOREIGN KEY (u_id) REFERENCES users(u_id),
+    primary key(moment_id, u_id)
 );
 
 -- ========================================
@@ -112,10 +119,10 @@ CREATE TABLE times (
 CREATE TABLE contribution (
     contr_id INT PRIMARY KEY AUTO_INCREMENT,
     time_id INT,
-    acc_id INT,
+    u_id INT,
     eco_point INT,
     FOREIGN KEY (time_id) REFERENCES times(time_id),
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
+	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
 
 -- ========================================
@@ -123,10 +130,10 @@ CREATE TABLE contribution (
 -- ========================================
 CREATE TABLE diary (
     diary_id INT PRIMARY KEY AUTO_INCREMENT,
-    acc_id INT,
+    u_id INT,
     diary_category VARCHAR(100), -- ví dụ: "phân loại rác", "không dùng nhựa"
     state ENUM('not started', 'in progress', 'completed'), 
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
+	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
 
 -- ========================================
@@ -134,14 +141,14 @@ CREATE TABLE diary (
 -- ========================================
 CREATE TABLE campaign (
     campaign_id INT PRIMARY KEY AUTO_INCREMENT,
-    acc_id INT, -- người khởi tạo chiến dịch
+    u_id INT, -- người khởi tạo chiến dịch
     title VARCHAR(255),
     description TEXT,
     location VARCHAR(255),
     start_date DATE,
     end_date DATE,
     status ENUM('not started', 'in progress', 'completed'), 
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
+	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
 
 -- ========================================
@@ -150,10 +157,10 @@ CREATE TABLE campaign (
 CREATE TABLE participation (
     participation_id INT PRIMARY KEY AUTO_INCREMENT,
     campaign_id INT,       -- ID chiến dịch
-    acc_id INT,            -- ID tài khoản người tham gia
+    u_id INT,            -- ID tài khoản người tham gia
     joined_at DATETIME,    -- Thời điểm tham gia
     FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id),
-    FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
+	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
 
 -- ========================================
@@ -221,17 +228,17 @@ INSERT INTO users (role_id, u_name, u_birthday, u_address) VALUES
 (2, 'Ivy Vo', '1993-11-11', '606 Solar Blvd, Vung Tau'),
 (3, 'Jacky Ngo', '1997-04-04', '707 Wind Rd, Bien Hoa');
 
-INSERT INTO accounts (u_id, acc_name, acc_pass) VALUES
-(1, 'alice123', 'passAlice'),
-(2, 'bobtran', 'bobpass'),
-(3, 'cle1990', 'charliepass'),
-(4, 'duyen01', 'duyenpass'),
-(5, 'emilydao', 'emilypass'),
-(6, 'fvu92', 'frankpass'),
-(7, 'g_ho', 'giangpass'),
-(8, 'hbui', 'helenpass'),
-(9, 'ivyvo', 'ivypass'),
-(10, 'jackyn', 'jackypass');
+-- INSERT INTO accounts (u_id, acc_name, acc_pass) VALUES
+-- (1, 'alice123', 'passAlice'),
+-- (2, 'bobtran', 'bobpass'),
+-- (3, 'cle1990', 'charliepass'),
+-- (4, 'duyen01', 'duyenpass'),
+-- (5, 'emilydao', 'emilypass'),
+-- (6, 'fvu92', 'frankpass'),
+-- (7, 'g_ho', 'giangpass'),
+-- (8, 'hbui', 'helenpass'),
+-- (9, 'ivyvo', 'ivypass'),
+-- (10, 'jackyn', 'jackypass');
 
 INSERT INTO category (category_name) VALUES
 ('Nhặt rác'),
