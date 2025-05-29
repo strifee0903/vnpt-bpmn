@@ -20,19 +20,18 @@ function resourceNotFound(req, res, next) {
     return next(new ApiError(404, 'Resource not found'));
 }
 function handleError(error, req, res, next) {
-    // The centralized error handling function.
-    // In any route handler, calling next(error)
-    // will pass to this error handling function.
     if (res.headersSent) {
         return next(error);
     }
     const statusCode = error.statusCode || 500;
     const message = error.message || "Internal Server Error";
+    const data = error.headers || {}; 
     return res
         .status(statusCode)
         .set(error.headers || {})
-        .json(statusCode >= 500 ? JSend.error(message) : JSend.fail(message));
+        .json(statusCode >= 500 ? JSend.error(message, data) : JSend.fail(message, data));
 }
+
 module.exports = {
     methodNotAllowed,
     resourceNotFound,

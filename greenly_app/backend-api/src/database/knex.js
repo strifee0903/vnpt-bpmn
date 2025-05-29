@@ -1,6 +1,6 @@
 const { DB_HOST, DB_PORT, DB_USER, DB_PASS, DB_NAME } = process.env;
 module.exports = require("knex")({
-    client: "mysql",
+    client: "mysql2",
     connection: {
         host: DB_HOST,
         port: DB_PORT,
@@ -10,3 +10,4 @@ module.exports = require("knex")({
     },
     pool: { min: 0, max: 10 },
 });
+
