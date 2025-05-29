@@ -4,13 +4,13 @@ publish_to: "none"
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.6.0
+  sdk: ">=3.4.0 <4.0.0" # Adjusted for Flutter 3.22.3; update if using 3.32.0
 
 dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
-  provider: ^6.0.0
+  provider: ^6.1.0 # Use latest if possible
   intl: ^0.20.2
   http: ^1.3.0
   shared_preferences: ^2.5.2
@@ -21,6 +21,7 @@ dependencies:
   flutter_dotenv: ^5.2.1
   uuid: ^4.5.1
   google_fonts: ^6.2.1
+  font_awesome_flutter: ^10.7.0
 
 dev_dependencies:
   flutter_test:
@@ -30,3 +31,13 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/contribution.png
+    - assets/images/greenlibrary.jpg
+    - assets/images/campaign.jpg
+    - assets/images/mydiary.png
+    - assets/images/we.jpg
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png" # Adjust path to your icon

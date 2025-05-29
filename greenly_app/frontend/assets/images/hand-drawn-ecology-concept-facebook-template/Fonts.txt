@@ -1,0 +1,9 @@
+Fonts used in this design:
+
+Font: Titan One
+Author: Rodrigo Fuenzalida
+Url: https://fonts.google.com/specimen/Titan+One
+
+Font: Montserrat
+Author: Julieta Ulanovsky,Sol Matas,Juan Pablo del Peral,Jacques Le Bailly
+Url: https://fonts.google.com/specimen/Montserrat
