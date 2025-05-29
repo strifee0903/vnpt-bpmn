@@ -2,6 +2,7 @@ const usersService = require('../services/user.service');
 const ApiError = require('../api-error');
 const JSend = require('../jsend');
 const { validationResult } = require('express-validator');
+const sendMail = require('../helpers/sendMail');
 
 async function register(req, res, next) {
     const errors = validationResult(req);
@@ -33,17 +34,26 @@ async function register(req, res, next) {
             u_address: req.body.u_address,
             u_email: req.body.u_email,
             u_pass: req.body.u_pass,
-            u_avt: req.file ? `/public/uploads/${req.file.filename}` : null,
+            u_avt: req.file ? `/public/uploads/${req.file.filename}` : '/public/images/blank_avt.jpg',
         };
         const result = await usersService.registerUser(userData);
+
+        // Send verification email
+        const mailSubject = 'Mail Verification';
+        const content = `<p>Hi ${req.body.u_name}, \nPlease <a href="http://127.0.0.1:3000/mail-verification?token=${result.token}">Verify</a> your email.</p>`;
+        await sendMail(req.body.u_email, mailSubject, content);
+
         return res
             .status(201)
             .set({ Location: `${req.baseUrl}/${result.user.u_id}` })
-            .json(JSend.success({ user: result.user }));
+            .json(JSend.success({ message: 'The user has been registered! Please verify your email.', user: result.user }));
     } catch (error) {
-        console.error('Registration error:', error); // Log error for debugging
-        if (error.message === 'Email already exists!') { // Updated error message
+        console.error('Registration error:', error);
+        if (error.message === 'This email has been registered with us!') {
             return next(new ApiError(409, error.message));
+        }
+        if (error.message.includes('Failed to send email')) {
+            return next(new ApiError(500, 'User registered, but failed to send verification email. Please try again later.'));
         }
         return next(new ApiError(500, 'System error, please try again later.'));
     }
