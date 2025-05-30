@@ -37,6 +37,8 @@ flutter:
     - assets/images/campaign.jpg
     - assets/images/mydiary.png
     - assets/images/we.jpg
+    - assets/images/pdiary.png
+    - assets/images/pagediary.png
 flutter_launcher_icons:
   android: true
   ios: true
