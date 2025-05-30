@@ -2,28 +2,8 @@ const express = require("express");
 const router = express.Router();
 const { signUpValidation } = require('../helpers/validation');
 const userController = require('../controllers/user.controller');
+const avatarUpload = require ('../middlewares/avatar-upload.middleware')
 const { methodNotAllowed } = require('../controllers/errors.controller');
-const path = require('path');
-const multer = require('multer');
-const storage = multer.diskStorage({
-    destination: function (req, file, cb){
-        cb(null, path.join(dirname,'../public/uploads'));
-    },
-    filename: function(req, file, cb){
-        const name = Date.now() + '-' + file.originalname;
-        cb(null, name);
-    }
-});
-
-const filefilter = (req, file, cb) => {
-    (file.mimetype == 'u_avt/jpeg' || file.mimetype == 'u_avt/png')?cb(null, true):cb(null, false);
-}
-
-const upload = multer ({
-    storage: storage,
-    filefilter: filefilter
-});
-
 module.exports.setup = (app) => {
     app.use('/api/users', router);
 
@@ -94,6 +74,7 @@ module.exports.setup = (app) => {
      *       500:
      *         description: Internal Server Error
      */
-    router.post('/registration/', upload.single('u_avt'), signUpValidation, userController.register);
+    // router.post('/registration/', upload.single('u_avt'), signUpValidation, userController.register);
+    router.post('/registration/', avatarUpload, signUpValidation, userController.register);
     router.all('/', methodNotAllowed);
 };

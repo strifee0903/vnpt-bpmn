@@ -5,6 +5,8 @@ const { validationResult } = require('express-validator');
 const sendMail = require('../helpers/sendMail');
 
 async function register(req, res, next) {
+    console.log('Request Body:', req.body); // Log form data (excluding file)
+    console.log('Uploaded File (Controller):', req.file); // Log file details in controlle
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return next(new ApiError(400, 'Validation failed', { errors: errors.array() }));
@@ -36,8 +38,12 @@ async function register(req, res, next) {
             u_pass: req.body.u_pass,
             u_avt: req.file ? `/public/uploads/${req.file.filename}` : '/public/images/blank_avt.jpg',
         };
-        const result = await usersService.registerUser(userData);
-
+        console.log('Constructed User Data:', userData); // Log the final user data
+        const result = await usersService.registerUser({
+            ...req.body,
+            u_avt: req.file ? `/public/uploads/${req.file.filename}` : null,
+        });
+        
         // Send verification email
         const mailSubject = 'Mail Verification';
         const content = `<p>Hi ${req.body.u_name}, \nPlease <a href="https://example.com/mail-verification?token=${result.token}">Verify</a> your email.</p>`;
