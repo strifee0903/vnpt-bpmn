@@ -40,7 +40,7 @@ async function register(req, res, next) {
 
         // Send verification email
         const mailSubject = 'Mail Verification';
-        const content = `<p>Hi ${req.body.u_name}, \nPlease <a href="http://127.0.0.1:3000/mail-verification?token=${result.token}">Verify</a> your email.</p>`;
+        const content = `<p>Hi ${req.body.u_name}, \nPlease <a href="https://example.com/mail-verification?token=${result.token}">Verify</a> your email.</p>`;
         await sendMail(req.body.u_email, mailSubject, content);
 
         return res
