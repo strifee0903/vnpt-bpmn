@@ -1,3 +1,4 @@
+drop database greenly_db;
 CREATE DATABASE greenly_db;
 USE greenly_db;
 
@@ -25,6 +26,10 @@ CREATE TABLE roles (
     role_id INT PRIMARY KEY AUTO_INCREMENT,
     role_name ENUM('admin', 'user', 'moderator') NOT NULL
 );
+INSERT INTO roles (role_name) VALUES 
+('admin'), ('user'), ('moderator');
+select * from roles;
+
 
 -- ========================================
 -- BẢNG users: Thông tin cá nhân người dùng
@@ -38,12 +43,15 @@ CREATE TABLE users (
     u_email VARCHAR(255) not null unique,
     u_pass text not null,
     is_verified int(11) not null,
+    token text,
     u_avt varchar(500),
     last_login timestamp,
     created_at timestamp,
     updated_at timestamp,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
+
+select * from users;
 
 -- ========================================
 -- BẢNG accounts: Thông tin đăng nhập tài khoản
@@ -213,8 +221,7 @@ CREATE TABLE custom_properties (
 );
 
 /***********************************************************************************************************/
-INSERT INTO roles (role_name) VALUES 
-('admin'), ('user'), ('moderator');
+
 
 INSERT INTO users (role_id, u_name, u_birthday, u_address) VALUES
 (1, 'Alice Nguyen', '1995-06-15', '123 Green St, Can Tho'),

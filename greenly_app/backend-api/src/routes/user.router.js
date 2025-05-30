@@ -1,9 +1,9 @@
 const express = require("express");
 const router = express.Router();
-const { signUpValidation } = require('../controllers/validation');
+const { signUpValidation } = require('../helpers/validation');
 const userController = require('../controllers/user.controller');
+const avatarUpload = require ('../middlewares/avatar-upload.middleware')
 const { methodNotAllowed } = require('../controllers/errors.controller');
-
 module.exports.setup = (app) => {
     app.use('/api/users', router);
 
@@ -74,6 +74,7 @@ module.exports.setup = (app) => {
      *       500:
      *         description: Internal Server Error
      */
-    router.post('/registration/', signUpValidation, userController.register);
+    // router.post('/registration/', upload.single('u_avt'), signUpValidation, userController.register);
+    router.post('/registration/', avatarUpload, signUpValidation, userController.register);
     router.all('/', methodNotAllowed);
 };
