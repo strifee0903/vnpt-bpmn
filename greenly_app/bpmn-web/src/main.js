@@ -12,6 +12,3 @@ app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
-while (true) {
-    console.log('alo')
-}
