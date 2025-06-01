@@ -69,4 +69,38 @@ async function signUpValidation (req, res, next) {
     }
 };
 
-module.exports = { signUpValidation };
+async function logInValidation(req, res, next) {
+    // Define validation checks
+    const validations = [
+        check('u_email')
+            .isEmail().withMessage('Please enter a valid email')
+            .normalizeEmail({ gmail_remove_dots: true }),
+        check('u_pass')
+            .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
+    ];
+
+    // Run validations
+    try {
+        await Promise.all(validations.map(validation => validation.run(req)));
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Login failed',
+                errors: errors.array()
+            });
+        }
+        next();
+    } catch (error) {
+        console.error('Login error:', error);
+        return res.status(500).json({
+            status: 'error',
+            message: 'System error during login, please try again later.'
+        });
+    }
+};
+
+module.exports = { 
+    signUpValidation,
+    logInValidation,
+};

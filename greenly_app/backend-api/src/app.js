@@ -2,6 +2,8 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const bodyParser = require('body-parser');
+const crypto = require('crypto');
+const session = require('express-session');
 
 // Thiết lập view engine 
 const path = require('path');
@@ -15,6 +17,16 @@ const {
     resourceNotFound,
     handleError,
 } = require("./controllers/errors.controller");
+
+const secretKey = crypto.randomBytes(32).toString('hex');
+app.use(session({
+    secret: secretKey,
+    resave: false,              // Không lưu session nếu không thay đổi
+    saveUninitialized: false,   // Không lưu session nếu chưa khởi tạo
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 // Session tồn tại trong 1 ngày
+    }
+}));
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));

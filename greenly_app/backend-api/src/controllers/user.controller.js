@@ -4,6 +4,9 @@ const JSend = require('../jsend');
 const { validationResult } = require('express-validator');
 const sendMail = require('../middlewares/sendMail');
 
+const jwt = require('jsonwebtoken');
+const { JWT_SECRET } = process.env;
+
 async function register(req, res, next) {
     console.log('Request Body:', req.body); // Log form data (excluding file)
     console.log('Uploaded File (Controller):', req.file); // Log file details in controller
@@ -62,7 +65,73 @@ async function verifyMail(req, res) {
     }
 };
 
+async function login(req, res, next) {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return next(new ApiError(400, 'Validation failed', { errors: errors.array() }));
+    }
+
+    const { u_email, u_pass } = req.body;
+    try {
+        // Check if session middleware is available
+        if (!req.session) {
+            return next(new ApiError(500, 'Session middleware is not configured properly.'));
+        }
+
+        // Check if user is already logged in
+        if (req.session.user && req.session.user.u_id) {
+            return res.json(JSend.success({ message: 'Already logged in!', data: req.session.user }));
+        }
+
+        // Check if email exists
+        const checkExistEmail = await usersService.checkExistEmail(u_email);
+        if (!checkExistEmail) {
+            return next(new ApiError(404, "You don't have an account yet. Please click register."));
+        }
+
+        // Attempt login
+        const user = await usersService.login(u_email, u_pass);
+        req.session.user = {
+            u_id: user.u_id,
+            u_email: user.u_email,
+            role_id: user.role_id,
+            u_avt: user.u_avt
+        };
+        console.log('Session User:', req.session.user.u_id, req.session.user.u_avt);
+
+        // Save session and respond
+        req.session.save(err => {
+            if (err) {
+                return next(new ApiError(500, 'Failed to save session.'));
+            }
+            return res.status(200).json(JSend.success({
+                message: 'Log in successfully!',
+                data: req.session.user,
+            }));
+        });
+    } catch (error) {
+        console.error('Login error:', error);
+        return next(new ApiError(500, error.message));
+    }
+};
+
+async function logout(req, res, next) {
+    if (!req.session.user) {
+        return res.json(JSend.success('You are not logged in!'));
+    }
+    req.session.destroy((err) => {
+        if (err) {
+            return next(new ApiError(500, 'Error logging out, please try again.'));
+        }
+        res.clearCookie('connect.sid');
+
+        return res.status(200).json(JSend.success({ message: 'Sign out successfully!' }));
+    });
+}
+
 module.exports = {
     register,
-    verifyMail
+    verifyMail,
+    login,
+    logout,
 };
