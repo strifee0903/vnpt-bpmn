@@ -2,7 +2,7 @@ const usersService = require('../services/user.service');
 const ApiError = require('../api-error');
 const JSend = require('../jsend');
 const { validationResult } = require('express-validator');
-const sendMail = require('../helpers/sendMail');
+const sendMail = require('../middlewares/sendMail');
 
 async function register(req, res, next) {
     console.log('Request Body:', req.body); // Log form data (excluding file)
@@ -48,7 +48,7 @@ async function register(req, res, next) {
     }
 }
 
-async function verifyMail (req, res) {
+async function verifyMail(req, res) {
     try {
         const token = req.query.token;
         const result = await usersService.verifyUserEmail(token);
@@ -62,7 +62,7 @@ async function verifyMail (req, res) {
     }
 };
 
-module.exports = { 
-    register, 
-    verifyMail 
+module.exports = {
+    register,
+    verifyMail
 };

@@ -41,6 +41,5 @@ webRouter.setup(app);
 
 // Handle 404 response
 app.use(resourceNotFound);
-
 app.use(handleError);
 module.exports = app;

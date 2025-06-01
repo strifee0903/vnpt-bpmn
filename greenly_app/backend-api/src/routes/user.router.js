@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const { signUpValidation } = require('../helpers/validation');
+const { signUpValidation } = require('../middlewares/validation');
 const userController = require('../controllers/user.controller');
-const avatarUpload = require ('../middlewares/avatar-upload.middleware')
+const avatarUpload = require('../middlewares/avatar-upload.middleware')
 const { methodNotAllowed } = require('../controllers/errors.controller');
 module.exports.setup = (app) => {
     app.use('/api/users', router);
-    
+
     /**
      * @swagger
      * /api/users/registration/:
