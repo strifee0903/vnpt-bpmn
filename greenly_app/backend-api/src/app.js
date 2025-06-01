@@ -2,6 +2,12 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const bodyParser = require('body-parser');
+
+// Thiết lập view engine 
+const path = require('path');
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Check connection
 require('./database/dbHealthCheck')();
 const JSend = require("./jsend");
@@ -27,8 +33,11 @@ app.use("/public", express.static("public"));
 // Routes
 const usersRouter = require('./routes/user.router')
 const bpmnRouter = require("./routes/bpmn.router");
+const webRouter = require('./routes/verification.router')
+
 usersRouter.setup(app);
 bpmnRouter.setup(app);
+webRouter.setup(app);
 
 // Handle 404 response
 app.use(resourceNotFound);

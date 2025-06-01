@@ -15,7 +15,7 @@ USE greenly_db;
 -- DROP TABLE IF EXISTS media;
 -- DROP TABLE IF EXISTS moment;
 -- DROP TABLE IF EXISTS accounts;
--- DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users;
 -- DROP TABLE IF EXISTS roles;
 -- DROP TABLE IF EXISTS category;
 
@@ -42,12 +42,12 @@ CREATE TABLE users (
     u_address VARCHAR(255) not null,
     u_email VARCHAR(255) not null unique,
     u_pass text not null,
-    is_verified int(11) not null,
+    is_verified TINYINT(1) not null,
     token text,
     u_avt varchar(500),
-    last_login timestamp,
-    created_at timestamp,
-    updated_at timestamp,
+    last_login TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
 

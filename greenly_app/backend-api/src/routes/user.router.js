@@ -6,7 +6,7 @@ const avatarUpload = require ('../middlewares/avatar-upload.middleware')
 const { methodNotAllowed } = require('../controllers/errors.controller');
 module.exports.setup = (app) => {
     app.use('/api/users', router);
-
+    
     /**
      * @swagger
      * /api/users/registration/:
