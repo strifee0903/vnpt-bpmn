@@ -2,3 +2,4 @@
 .qodo
 .vscode
 **/.env 
+greenly_app/backend-api/.env

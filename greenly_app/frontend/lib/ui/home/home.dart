@@ -122,7 +122,7 @@ class _HomePageState extends State<HomePage> {
                                     ),
                                     const SizedBox(height: 4),
                                     const Text(
-                                      'Capture and share your favorite memories',
+                                      'Capture your favorite memories',
                                       style: TextStyle(
                                         fontSize: 12, // Reduced from 14
                                         fontWeight: FontWeight.normal,
@@ -139,8 +139,7 @@ class _HomePageState extends State<HomePage> {
                                   onPressed: () {
                                     _onTabTapped(2);
                                   },
-                                  backgroundColor:
-                                      const Color.fromARGB(255, 49, 107, 51),
+                                  backgroundColor: button,
                                   elevation: 0,
                                   mini: false,
                                   child: const Icon(
