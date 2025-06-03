@@ -31,14 +31,34 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  fonts:
+    - family: Oswald
+      fonts:
+        - asset: assets/fonts/OTF/Oswald-Regular.otf
+        - asset: assets/fonts/OTF/Oswald-Bold.otf
+          weight: 700
+    - family: Noelty
+      fonts:
+        - asset: assets/fonts/Noelty/NOELTY DEMO.ttf
+    - family: Oktah
+      fonts:
+        - asset: assets/fonts/Oktah/Trial-OktahRound-Black.otf
+          weight: 900
+        - asset: assets/fonts/Oktah/Trial-OktahRound-Bold.otf
+          weight: 700
+        - asset: assets/fonts/Oktah/Trial-OktahRound-Medium.otf
+          weight: 500
   assets:
     - assets/images/contribution.png
     - assets/images/greenlibrary.jpg
     - assets/images/campaign.jpg
+    - assets/images/cleanriver.jpg
     - assets/images/mydiary.png
-    - assets/images/we.jpg
-    - assets/images/pdiary.png
+    - assets/images/we.png
     - assets/images/pagediary.png
+    - assets/images/planting.png
+    - assets/images/post1.jpg
+    - assets/images/post2.jpg
 flutter_launcher_icons:
   android: true
   ios: true

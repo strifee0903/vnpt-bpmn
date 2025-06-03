@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/home/home.dart'; // Import HomePage
 import 'ui/pages/mydiary/mydiary.dart';
+import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
+import 'ui/moments/moments.dart';
 
 void main() {
   runApp(const MyApp());
@@ -20,8 +22,10 @@ class MyApp extends StatelessWidget {
       ),
       home: const HomePage(),
       routes: {
-        '/myDiary': (context) => const MyDiary(), // Assume MyDiary widget
-      }, // Use HomePage instead of MyHomePage
+        '/myDiary': (context) => const MyDiary(),
+        '/greenLibrary': (context) => const GreenLibrary(),
+        '/moments': (context) => const MomentsPage(),
+      },
     );
   }
 }
