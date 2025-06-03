@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../components/paths.dart';
-
+bool _obscurePassword = true;
 class AuthCard extends StatefulWidget {
   @override
   _AuthCardState createState() => _AuthCardState();
@@ -94,21 +94,41 @@ class _AuthCardState extends State<AuthCard> {
               SizedBox(height: 16),
               TextFormField(
                 controller: _passController,
+                obscureText: _obscurePassword,
                 decoration: InputDecoration(
                   labelText: 'Password',
                   labelStyle: TextStyle(color: Color(0xFF1A3C34)),
-                  prefixIcon: Icon(Icons.lock_outlined, color: Color(0xFF1A3C34)),
+                  prefixIcon:
+                      Icon(Icons.lock_outlined, color: Color(0xFF1A3C34)),
                   filled: true,
                   fillColor: Colors.white.withOpacity(0.8),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscurePassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
+                      color: Color(0xFF1A3C34),
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscurePassword = !_obscurePassword;
+                      });
+                    },
+                  ),
                 ),
-                obscureText: true,
-                validator: (val) => val == null || val.length < 8
-                    ? 'Password must be at least 8 characters'
-                    : null,
+                validator: (value) {
+                  if (value!.isEmpty) {
+                    return 'Please enter a password';
+                  }
+                  if (value.length < 8) {
+                    return 'Password must be at least 8 characters';
+                  }
+                  return null;
+                },
               ),
               SizedBox(height: 16),
               Row(
