@@ -26,7 +26,7 @@
       <!-- Main BPMN editor -->
       <div class="col-9 position-relative p-0">
         <!-- Input tên -->
-        <div class="position-absolute top-0 start-50 m-3 z-3">
+        <div class="position-absolute top-0 end-50 m-3 z-3">
           <input
             v-model="processName"
             placeholder="Tên quy trình"

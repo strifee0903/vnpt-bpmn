@@ -1,16 +1,20 @@
 <template>
-  <body class="d-flex flex-column h-100">
-    <NavBar />
-    <div class="flex-fill overflow-auto">
-      <router-view />
-    </div>
-  </body>
+  <component :is="layout">
+    <router-view />
+  </component>
 </template>
 
 <script setup>
-import NavBar from './components/NavBar.vue'
-</script>
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
+import DefaultLayout from './layouts/DefaultLayout.vue'
+import EmptyLayout from './layouts/NoNavLayout.vue'
 
+const route = useRoute()
+const layout = computed(() =>
+  route.meta.layout === 'none' ? EmptyLayout : DefaultLayout
+)
+</script>
 <style>
 /* html,
 body,
