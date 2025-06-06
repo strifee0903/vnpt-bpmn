@@ -17,30 +17,37 @@ class AuthManager with ChangeNotifier {
 
   User? _user;
   bool _isSplashComplete = false;
-
   bool get isSplashComplete => _isSplashComplete;
+  bool _isInitialized = false;
+  // Fix the isInitialized getter
+  bool get isInitialized => _isInitialized;
   bool get isAuth => _user != null;
   User? get user => _user;
 
-  bool get isInitialized => _isSplashComplete;
-
   Future<void> initialize() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userData = prefs.getString('user');
+    if (_isInitialized) return;
 
-    if (userData != null) {
-      try {
-        _user = User.fromJson(jsonDecode(userData));
-      } catch (e) {
-        _user = null;
-      }
-    }
-
-    _isSplashComplete = true;
+    _isInitialized = true;
+    _isSplashComplete = false;
     notifyListeners();
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final userData = prefs.getString('user');
+      if (userData != null) {
+        _user = User.fromJson(jsonDecode(userData));
+        print('Loaded user from SharedPreferences: ${_user?.u_email}');
+        notifyListeners(); // Add this to trigger rebuild
+      }
+    } catch (e) {
+      _user = null;
+      print('Failed to load user: $e');
+    }
+    _isSplashComplete = true;
+    notifyListeners(); // This will trigger the Consumer rebuild
   }
 
-  Future<void> login({
+Future<bool> login({
     required String uEmail,
     required String uPass,
   }) async {
@@ -55,9 +62,13 @@ class AuthManager with ChangeNotifier {
       _user = User.fromJson(json['data']['data']);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('user', jsonEncode(_user!.toJson()));
+
+      // Ensure these are the last operations before return
       notifyListeners();
+      print('🔴notifyListeners called');
+      return true;
     } catch (e) {
-      print('AuthManager error: $e');
+      print('🔴AuthManager error: $e');
       rethrow;
     }
   }
@@ -69,30 +80,35 @@ class AuthManager with ChangeNotifier {
     required String uAddress,
     required String uBirthday,
   }) async {
-    final response = await _authService.registerUser(
-      uName: uName,
-      uEmail: uEmail,
-      uPass: uPass,
-      uAddress: uAddress,
-      uBirthday: uBirthday,
-    );
-
-    final json = jsonDecode(response.body);
-    if (json['status'] != 'success') {
-      throw Exception(json['message'] ?? 'Registration failed');
-    }
-
-    final userData = json['data']['user'];
-    if (userData['is_verified'] == 0) {
-      throw EmailVerificationRequiredException(
-        'Registration successful! Please verify your email to continue.',
+    try {
+      final response = await _authService.registerUser(
+        uName: uName,
+        uEmail: uEmail,
+        uPass: uPass,
+        uAddress: uAddress,
+        uBirthday: uBirthday,
       );
-    }
 
-    _user = User.fromJson(userData);
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('user', jsonEncode(_user!.toJson()));
-    notifyListeners();
+      final json = jsonDecode(response.body);
+      if (json['status'] != 'success') {
+        throw Exception(json['message'] ?? 'Registration failed');
+      }
+
+      final userData = json['data']['user'];
+      if (userData['is_verified'] == 0) {
+        throw EmailVerificationRequiredException(
+          'Registration successful! Please verify your email to continue.',
+        );
+      }
+
+      _user = User.fromJson(userData);
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('user', jsonEncode(_user!.toJson()));
+      notifyListeners();
+    } catch (e) {
+      print('Registration error: $e');
+      rethrow;
+    }
   }
 
   Future<void> logout() async {

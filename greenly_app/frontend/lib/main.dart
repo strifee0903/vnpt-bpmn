@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'components/paths.dart';
 
-
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   try {
@@ -12,7 +11,6 @@ Future<void> main() async {
     print("✅ Dotenv loaded successfully! BASE_URL=${dotenv.env['BASE_URL']}");
   } catch (e) {
     print("❌ Dotenv loaded failed: $e");
-    // Optionally, set a default BASE_URL or handle gracefully
   }
   runApp(const MyApp());
 }
@@ -27,102 +25,105 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
+    
+    final themeData = ThemeData(
+      primarySwatch: Colors.blueGrey,
+      scaffoldBackgroundColor: const Color(0xFFE8F5E9),
+      textTheme: GoogleFonts.poppinsTextTheme(),
+      useMaterial3: true,
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF1A3C34),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: const Color(0xFF1A3C34),
+          textStyle: const TextStyle(fontWeight: FontWeight.w600),
+        ),
+      ),
+      inputDecorationTheme: InputDecorationTheme(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFF1A3C34), width: 2),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      appBarTheme: const AppBarTheme(
+        backgroundColor: Color(0xFF1A3C34),
+        foregroundColor: Colors.white,
+        elevation: 4,
+      ),
+      dialogTheme: DialogTheme(
+        titleTextStyle: GoogleFonts.playfairDisplay(
+          fontSize: 24,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+        contentTextStyle: GoogleFonts.poppins(
+          fontSize: 20,
+          color: Colors.black87,
+        ),
+      ),
+    );
+
     return MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (ctx) => AuthManager()..initialize()),
+        ChangeNotifierProvider(create: (ctx) => AuthManager()),
       ],
-      child: Builder(
-        builder: (context) {
-          return Consumer<AuthManager>(
-            builder: (ctx, authManager, child) {
-              print(
-                  '🔴 Building app: isInitialized=${authManager.isInitialized}, isAuth=${authManager.isAuth}, isSplashComplete=${authManager.isSplashComplete}');
+      child: Builder(builder: (context) {
+        final authManager = Provider.of<AuthManager>(context, listen: false);
+        if (!authManager.isInitialized) {
+          authManager.initialize();
+        }
 
-              Widget homeScreen;
-              if (!authManager.isSplashComplete) {
-                homeScreen = const SplashScreen();
-              } else if (!authManager.isAuth) {
-                homeScreen = const AuthScreen();
-              } else {
-                homeScreen = const UserScreen();
-              }
+        return Consumer<AuthManager>(
+          builder: (ctx, authManager, child) {
+            print('🔴 Building app: isInitialized=${authManager.isInitialized}, isAuth=${authManager.isAuth}, isSplashComplete=${authManager.isSplashComplete}');
 
-              return MaterialApp(
-                debugShowCheckedModeBanner: false,
-                title: 'Beauty & Elegance',
-                theme: ThemeData(
-                  primarySwatch: Colors.blueGrey,
-                  scaffoldBackgroundColor: Colors.white,
-                  textTheme: GoogleFonts.poppinsTextTheme(),
-                  useMaterial3: true,
-                  elevatedButtonTheme: ElevatedButtonThemeData(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1A3C34),
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
+            Widget homeScreen;
+            if (!authManager.isSplashComplete) {
+              homeScreen = const SplashScreen();
+            } else if (!authManager.isAuth) {
+              homeScreen = const AuthScreen();
+            } else {
+              homeScreen = const UserScreen();
+            }
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Greenly',
+              theme: themeData,
+              home: homeScreen,
+              routes: {
+                AuthScreen.routeName: (ctx) => const AuthScreen(),
+                UserScreen.routeName: (ctx) => const UserScreen(),
+              },
+              onGenerateRoute: (settings) {
+                print('🔴 Navigating to route: ${settings.name}');
+                return MaterialPageRoute(
+                  builder: (ctx) => const SafeArea(
+                    child: Scaffold(
+                      body: Center(child: Text('Page not found')),
                     ),
                   ),
-                  textButtonTheme: TextButtonThemeData(
-                    style: TextButton.styleFrom(
-                      foregroundColor: const Color(0xFF1A3C34),
-                      textStyle: const TextStyle(fontWeight: FontWeight.w600),
-                    ),
-                  ),
-                  inputDecorationTheme: InputDecorationTheme(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide(color: Colors.grey.shade300),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide:
-                          const BorderSide(color: Color(0xFF1A3C34), width: 2),
-                    ),
-                    filled: true,
-                    fillColor: Colors.grey.shade50,
-                    contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 16, vertical: 12),
-                  ),
-                  appBarTheme: const AppBarTheme(
-                    backgroundColor: Color(0xFF1A3C34),
-                    foregroundColor: Colors.white,
-                    elevation: 4,
-                  ),
-                  dialogTheme: DialogTheme(
-                    titleTextStyle: GoogleFonts.playfairDisplay(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
-                    ),
-                    contentTextStyle: GoogleFonts.poppins(
-                      fontSize: 20,
-                      color: Colors.black87,
-                    ),
-                  ),
-                ),
-                home: homeScreen,
-                routes: {
-                  AuthScreen.routeName: (ctx) => const AuthScreen(),
-                  RegisterScreen.routeName: (ctx) => const RegisterScreen(),
-                },
-                onGenerateRoute: (settings) {
-                  print('🔴 Navigating to route: ${settings.name}');
-                  return MaterialPageRoute(
-                    builder: (ctx) => const SafeArea(
-                      child: Scaffold(
-                        body: Center(child: Text('Page not found')),
-                      ),
-                    ),
-                  );
-                },
-              );
-            },
-          );
-        },
-      ),
+                );
+              },
+            );
+          },
+        );
+      }),
     );
   }
 }

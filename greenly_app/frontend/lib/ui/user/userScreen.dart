@@ -4,6 +4,7 @@ import '../auth/auth_manager.dart';
 
 class UserScreen extends StatelessWidget {
   const UserScreen({super.key});
+  static const routeName = '/users';
 
   @override
   Widget build(BuildContext context) {
@@ -28,13 +29,11 @@ class UserScreen extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Hello, ${user?.u_name ?? 'User'}!',
+              'Hello!',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
             const SizedBox(height: 12),
             Text('Email: ${user?.u_email ?? ''}'),
-            const SizedBox(height: 12),
-            Text('Address: ${user?.u_address ?? ''}'),
           ],
         ),
       ),

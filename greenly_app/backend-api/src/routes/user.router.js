@@ -119,11 +119,11 @@ module.exports.setup = (app) => {
      *         description: Bad Request - Invalid input or missing parameters
      *         $ref: '#/components/responses/400' 
      */
-    // router.post('/login/', avatarUpload, logInValidation, userController.login);
-    router.post('/login/', (req, res, next) => {
-        console.log('Login request received:', req.body);
-        next();
-    }, avatarUpload, logInValidation, userController.login);
+    router.post('/login/', avatarUpload, logInValidation, userController.login);
+    // router.post('/login/', (req, res, next) => {
+    //     console.log('Login request received:', req.body);
+    //     next();
+    // }, avatarUpload, logInValidation, userController.login);
 
     /**
      * @swagger

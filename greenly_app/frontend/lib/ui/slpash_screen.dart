@@ -16,7 +16,7 @@ class _SplashScreenState extends State<SplashScreen>
   late AnimationController _animationController;
   late Animation<double> _fadeAnimation;
   late Animation<Offset> _slideAnimation;
-  Timer? _timer; // Make the Timer nullable so we can cancel it
+  Timer? _timer;
 
   @override
   void initState() {
@@ -48,7 +48,6 @@ class _SplashScreenState extends State<SplashScreen>
 
     _timer = Timer(const Duration(seconds: 5), () {
       if (mounted) {
-        // Check if the widget is still mounted
         Navigator.of(context).pushReplacement(
           MaterialPageRoute(
             builder: (_) => const AuthScreen(),
@@ -60,8 +59,7 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   void dispose() {
-    _timer
-        ?.cancel(); // Cancel the timer to prevent it from running after dispose
+    _timer?.cancel();
     _animationController.dispose();
     super.dispose();
   }
@@ -69,76 +67,82 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              color14,
-              color10,
-              color17,
-            ],
-          ),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              FadeTransition(
-                opacity: _fadeAnimation,
-                child: Icon(
-                  Icons.storefront,
-                  size: 100,
-                  color: Colors.white,
+      backgroundColor: skyLight,
+      body: Stack(
+        children: [
+          Positioned(
+            top: -100,
+            right: -80,
+            child: Container(
+              width: 250,
+              height: 250,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [leafGreen.withOpacity(0.2), Colors.transparent],
                 ),
               ),
-              const SizedBox(height: 20),
-              SlideTransition(
-                position: _slideAnimation,
-                child: Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: color3.withOpacity(0.2),
-                    borderRadius: BorderRadius.circular(20),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color.fromARGB(255, 246, 133, 133)
-                            .withOpacity(0.5),
-                        blurRadius: 10,
-                        spreadRadius: 2,
-                      ),
-                    ],
+            ),
+          ),
+          Positioned(
+            bottom: -60,
+            left: -80,
+            child: Container(
+              width: 220,
+              height: 220,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: RadialGradient(
+                  colors: [ecoGreen.withOpacity(0.2), Colors.transparent],
+                ),
+              ),
+            ),
+          ),
+          Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Icon(
+                    Icons.eco,
+                    size: 100,
+                    color: ecoGreen,
                   ),
-                  child: Text(
-                    'Beauty & Elegance',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 30,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      letterSpacing: 1.2,
-                      shadows: [
-                        Shadow(
-                          color: color14.withOpacity(0.7),
-                          offset: const Offset(0, 0),
+                ),
+                const SizedBox(height: 20),
+                SlideTransition(
+                  position: _slideAnimation,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: mistWhite.withOpacity(0.95),
+                      borderRadius: BorderRadius.circular(24),
+                      boxShadow: [
+                        BoxShadow(
+                          color: deepForest.withOpacity(0.2),
                           blurRadius: 8,
-                        ),
-                        const Shadow(
-                          color: Colors.black26,
-                          offset: Offset(2, 2),
-                          blurRadius: 4,
+                          offset: const Offset(0, 4),
                         ),
                       ],
                     ),
+                    child: Text(
+                      'Greenly Awakens 🌿',
+                      style: GoogleFonts.poppins(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: deepForest,
+                      ),
+                    ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 30),
-              const _CustomLoadingIndicator(),
-            ],
+                const SizedBox(height: 40),
+                const _CustomLoadingIndicator(),
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -189,13 +193,13 @@ class _CustomLoadingIndicatorState extends State<_CustomLoadingIndicator>
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: color15,
+                  color: ecoGreen,
                   shape: BoxShape.circle,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black12,
+                      color: ecoGreen.withOpacity(0.3),
                       blurRadius: 4,
-                      offset: Offset(0, 2),
+                      offset: const Offset(0, 2),
                     ),
                   ],
                 ),

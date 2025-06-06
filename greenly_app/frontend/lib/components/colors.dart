@@ -8,6 +8,21 @@ const Color optcard2 = Color(0xFF708C5B);
 const Color optcardtitle = Color.fromARGB(255, 0, 0, 0);
 const Color button = Color.fromARGB(255, 50, 122, 85);
 
+// Nature-inspired color palette
+const Color deepForest = Color(0xFF0A2E24);       // Dark green (unchanged)
+const Color ecoGreen = Color(0xFF2E7D32);         // Vibrant green (primary)
+const Color leafGreen = Color(0xFF4CAF50);        // Lighter green
+const Color mistWhite = Color(0xFFF5FFFA);        // Soft white with green tint
+const Color barkBrown = Color(0xFF5D4037);        // Earthy accent
+const Color skyLight = Color(0xFFE8F5E9);         // Light background
+
+// Text colors
+const Color textNatureDark = Color(0xFF263238);   // Dark gray-green
+const Color textNatureLight = Color(0xFFECEFF1);  // Light text
+
+// Buttons & accents
+const Color buttonPrimary = ecoGreen;
+const Color buttonSecondary = Color(0xFF81C784);  // Soft green
 
 const color1 = Color(0xFFb77a8f);
 const color2 = Color(0xFFefdad7);
