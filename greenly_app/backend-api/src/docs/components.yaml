@@ -1,0 +1,58 @@
+# Common references
+components:
+  responses:
+    200NoData:
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Trạng thái phản hồi
+                enum:
+                  - success
+              data:
+                type: object
+                nullable: true
+                default: null
+                description: Dữ liệu phản hồi
+    '400':
+      description: "Bad Request - ID không hợp lệ"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [error]
+              message:
+                type: string
+                description: "Thông điệp lỗi chi tiết"
+    '404':
+      description: "Not Found - Người dùng không tìm thấy"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [error]
+              message:
+                type: string
+                description: "Người dùng với ID chỉ định không được tìm thấy"
+    '500':
+      description: "Internal Server Error - Đã xảy ra lỗi bất ngờ trên máy chủ"
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              status:
+                type: string
+                enum: [error]
+              message:
+                type: string
+                description: "Thông điệp lỗi máy chủ nội bộ"

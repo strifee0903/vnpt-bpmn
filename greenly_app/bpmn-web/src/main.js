@@ -1,5 +1,5 @@
 import './assets/main.css'
-
+import 'bootstrap/dist/css/bootstrap.min.css'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 
@@ -12,6 +12,3 @@ app.use(createPinia())
 app.use(router)
 
 app.mount('#app')
-while (true) {
-    console.log('alo')
-}

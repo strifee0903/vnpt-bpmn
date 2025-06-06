@@ -42,12 +42,12 @@ CREATE TABLE users (
     u_address VARCHAR(255) not null,
     u_email VARCHAR(255) not null unique,
     u_pass text not null,
-    is_verified int(11) not null,
+    is_verified TINYINT(1) not null,
     token text,
     u_avt varchar(500),
-    last_login timestamp,
-    created_at timestamp,
-    updated_at timestamp,
+    last_login TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
 
@@ -192,23 +192,25 @@ CREATE TABLE processes (
 
 -- Table for steps (tasks, events, gateways, etc.)
 CREATE TABLE steps (
-    step_id VARCHAR(100) PRIMARY KEY,
+    step_id VARCHAR(100),
     process_id VARCHAR(100),
     name VARCHAR(255),
     type VARCHAR(50), -- e.g., startEvent, task, endEvent, exclusiveGateway
-    FOREIGN KEY (process_id) REFERENCES processes(process_id)
+    FOREIGN KEY (process_id) REFERENCES processes(process_id),
+    PRIMARY KEY (step_id, process_id)
 );
 
 -- Table for flows (sequence flows, message flows, etc.)
 CREATE TABLE flows (
-    flow_id VARCHAR(100) PRIMARY KEY,
+    flow_id VARCHAR(100),
     process_id VARCHAR(100),
     source_ref VARCHAR(100),
     target_ref VARCHAR(100),
     type VARCHAR(50), -- e.g., sequenceFlow, messageFlow
     FOREIGN KEY (process_id) REFERENCES processes(process_id),
     FOREIGN KEY (source_ref) REFERENCES steps(step_id),
-    FOREIGN KEY (target_ref) REFERENCES steps(step_id)
+    FOREIGN KEY (target_ref) REFERENCES steps(step_id),
+    PRIMARY KEY (flow_id, process_id)
 );
 
 -- Table for custom properties (e.g., magic:spell)
