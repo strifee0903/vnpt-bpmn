@@ -3,10 +3,6 @@ import 'dart:ui' as ui;
 import '../../shared/appbar.dart'; // Import the custom AppBar
 import '../../components/colors.dart'; // Import colors.dart
 
-void main() {
-  runApp(const MyApp());
-}
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
