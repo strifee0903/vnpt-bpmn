@@ -15,7 +15,7 @@ USE greenly_db;
 -- DROP TABLE IF EXISTS media;
 -- DROP TABLE IF EXISTS moment;
 -- DROP TABLE IF EXISTS accounts;
-DROP TABLE IF EXISTS users;
+-- DROP TABLE IF EXISTS users;
 -- DROP TABLE IF EXISTS roles;
 -- DROP TABLE IF EXISTS category;
 
@@ -192,23 +192,25 @@ CREATE TABLE processes (
 
 -- Table for steps (tasks, events, gateways, etc.)
 CREATE TABLE steps (
-    step_id VARCHAR(100) PRIMARY KEY,
+    step_id VARCHAR(100),
     process_id VARCHAR(100),
     name VARCHAR(255),
     type VARCHAR(50), -- e.g., startEvent, task, endEvent, exclusiveGateway
-    FOREIGN KEY (process_id) REFERENCES processes(process_id)
+    FOREIGN KEY (process_id) REFERENCES processes(process_id),
+    PRIMARY KEY (step_id, process_id)
 );
 
 -- Table for flows (sequence flows, message flows, etc.)
 CREATE TABLE flows (
-    flow_id VARCHAR(100) PRIMARY KEY,
+    flow_id VARCHAR(100),
     process_id VARCHAR(100),
     source_ref VARCHAR(100),
     target_ref VARCHAR(100),
     type VARCHAR(50), -- e.g., sequenceFlow, messageFlow
     FOREIGN KEY (process_id) REFERENCES processes(process_id),
     FOREIGN KEY (source_ref) REFERENCES steps(step_id),
-    FOREIGN KEY (target_ref) REFERENCES steps(step_id)
+    FOREIGN KEY (target_ref) REFERENCES steps(step_id),
+    PRIMARY KEY (flow_id, process_id)
 );
 
 -- Table for custom properties (e.g., magic:spell)
