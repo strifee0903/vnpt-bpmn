@@ -1,15 +1,8 @@
 import 'package:flutter/material.dart';
-<<<<<<< HEAD
-import 'package:greenly_app/ui/home/home.dart'; // Import HomePage
-import 'ui/pages/mydiary/mydiary.dart';
-import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
-import 'ui/moments/moments.dart'; // Import MomentsPage
-=======
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'components/paths.dart';
->>>>>>> 477bcfc0740c0da90060dda174bea58e74d5d81b
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,24 +25,6 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
-<<<<<<< HEAD
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.green), // Đồng bộ với theme xanh
-        useMaterial3: true,
-      ),
-      home: const HomePage(),
-      routes: {
-        '/myDiary': (context) => const MyDiary(),
-        '/greenLibrary': (context) => const GreenLibrary(),
-        '/moments': (context) =>
-            const MomentsPage(), // Thêm route cho MomentsPage
-      },
-=======
-    
     final themeData = ThemeData(
       primarySwatch: Colors.blueGrey,
       scaffoldBackgroundColor: const Color(0xFFE8F5E9),
@@ -115,7 +90,8 @@ class _MyAppState extends State<MyApp> {
 
         return Consumer<AuthManager>(
           builder: (ctx, authManager, child) {
-            print('🔴 Building app: isInitialized=${authManager.isInitialized}, isAuth=${authManager.isAuth}, isSplashComplete=${authManager.isSplashComplete}');
+            print(
+                '🔴 Building app: isInitialized=${authManager.isInitialized}, isAuth=${authManager.isAuth}, isSplashComplete=${authManager.isSplashComplete}');
 
             Widget homeScreen;
             if (!authManager.isSplashComplete) {
@@ -148,7 +124,6 @@ class _MyAppState extends State<MyApp> {
           },
         );
       }),
->>>>>>> 477bcfc0740c0da90060dda174bea58e74d5d81b
     );
   }
 }
