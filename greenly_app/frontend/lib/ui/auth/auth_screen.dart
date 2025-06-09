@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'auth_card.dart';
 // import '../../components/paths.dart';
 import '../../components/colors.dart';
+import '';
 
 class AuthScreen extends StatefulWidget {
   static const routeName = '/auth';

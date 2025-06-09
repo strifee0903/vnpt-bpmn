@@ -6,6 +6,17 @@ const user_url = 'http://10.0.2.2:3000/api/users';
 class AuthService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? user_url;
 
+  Future<http.Response> getUserProfile() async {
+    final uri = Uri.parse('$baseUrl/users/profile/');
+    final response = await http.get(uri);
+
+    if (response.statusCode != 200) {
+      throw Exception('Failed to load user profile: ${response.body}');
+    }
+
+    return response;
+  }
+
   Future<http.Response> registerUser({
     required String uName,
     required String uEmail,
