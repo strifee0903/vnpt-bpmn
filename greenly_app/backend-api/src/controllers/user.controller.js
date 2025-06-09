@@ -90,7 +90,7 @@ async function login(req, res, next) {
             }
             return res.status(200).json(JSend.success({
                 message: 'Log in successfully!',
-                data: req.session.user,
+                user: req.session.user,
             }));
             
         },
