@@ -47,7 +47,8 @@ class _AuthCardState extends State<AuthCard> {
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
     );
-    if (pickedDate != null) {
+    if (pickedDate != null && mounted) {
+      // Check mounted before setState
       setState(() {
         _selectedBirthday = pickedDate;
         _birthdayController.text = "${pickedDate.toLocal()}".split(' ')[0];
@@ -110,6 +111,8 @@ class _AuthCardState extends State<AuthCard> {
   }
 
   Future<void> _submit() async {
+    if (!mounted) return; // Early return if not mounted
+
     _formKey.currentState!.save();
     _isSubmitting.value = true;
 
@@ -118,7 +121,10 @@ class _AuthCardState extends State<AuthCard> {
     // Validate fields and show errors in popup if validation fails
     final isValid = await _validateFields();
     if (!isValid) {
-      _isSubmitting.value = false;
+      if (mounted) {
+        // Check mounted before updating
+        _isSubmitting.value = false;
+      }
       return;
     }
 
@@ -131,28 +137,30 @@ class _AuthCardState extends State<AuthCard> {
         );
       } else {
         await authManager.signup(
-          _authData['uName']!,
-          _authData['uEmail']!,
-          _authData['uPass']!,
-          _authData['uAddress']!,
-          _authData['uBirthday']!
-        );
+            _authData['uName']!,
+            _authData['uEmail']!,
+            _authData['uPass']!,
+            _authData['uAddress']!,
+            _authData['uBirthday']!);
         await authManager.logout();
         if (mounted) {
           await showSuccessDialog(
               context, 'Account created successfully! Please log in.');
         }
-        final email = _authData['uEmail'];
-        final password = _authData['uPass'];
-        _authData['uName'] = '';
-        _authData['uPass'] = '';
-        _switchAuthMode();
-        setState(() {
-          _authData['uEmail'] = email!;
-          _authData['uPass'] = password!;
-          _emailController.text = email;
-          _passwordController.text = password;
-        });
+        // Only proceed if still mounted
+        if (mounted) {
+          final email = _authData['uEmail'];
+          final password = _authData['uPass'];
+          _authData['uName'] = '';
+          _authData['uPass'] = '';
+          _switchAuthMode();
+          setState(() {
+            _authData['uEmail'] = email!;
+            _authData['uPass'] = password!;
+            _emailController.text = email;
+            _passwordController.text = password;
+          });
+        }
       }
     } catch (error) {
       log('$error');
@@ -164,14 +172,21 @@ class _AuthCardState extends State<AuthCard> {
         showErrorDialog(context, errorMessage);
       }
     }
-    _isSubmitting.value = false;
+
+    // Check mounted before updating UI
+    if (mounted) {
+      _isSubmitting.value = false;
+    }
   }
 
   void _switchAuthMode() {
-    setState(() {
-      _authMode =
-          _authMode == AuthMode.login ? AuthMode.signup : AuthMode.login;
-    });
+    if (mounted) {
+      // Check mounted before setState
+      setState(() {
+        _authMode =
+            _authMode == AuthMode.login ? AuthMode.signup : AuthMode.login;
+      });
+    }
   }
 
   @override

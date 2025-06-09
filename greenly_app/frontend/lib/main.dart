@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:greenly_app/ui/user/not_found_screen.dart';
-import 'package:greenly_app/ui/user/userScreen.dart';
 import 'package:provider/provider.dart';
 
 import 'components/colors.dart';
 import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
+import 'ui/home/home.dart';
 import 'ui/slpash_screen.dart';
 
 class SlideUpRoute extends PageRouteBuilder {
@@ -262,7 +262,7 @@ class _MyAppState extends State<MyApp> {
               } else if (!authManager.isAuth) {
                 homeScreen = const AuthScreen();
               } else {
-                homeScreen = const UserScreen();
+                homeScreen = const HomePage();
               }
 
               return MaterialApp(
@@ -273,22 +273,17 @@ class _MyAppState extends State<MyApp> {
                 routes: {
                   AuthScreen.routeName: (ctx) =>
                       const SafeArea(child: AuthScreen()),
-                  UserScreen.routeName: (ctx) =>
-                      const SafeArea(child: UserScreen()),
+                  HomePage.routeName: (ctx) =>
+                      const SafeArea(child: HomePage()),
                 },
                 onGenerateRoute: (settings) {
                   print('🔴 Navigating to route: ${settings.name}');
                   switch (settings.name) {
-                    case UserScreen.routeName:
-                      return SlideUpRoute(page: const UserScreen());
+                    case HomePage.routeName:
+                      return SlideUpRoute(page: const HomePage());
                     default:
                       print('🔴 Unknown route: ${settings.name}');
-                      return MaterialPageRoute(
-                        builder: (ctx) => const SafeArea(
-                          child: Scaffold(
-                              body: Center(child: Text('Page not found'))),
-                        ),
-                      );
+                      return SlideUpRoute(page: const NotFoundScreen());
                   }
                 },
                 onUnknownRoute: (settings) {

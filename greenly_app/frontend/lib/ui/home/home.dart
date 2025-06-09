@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-import 'dart:ui' as ui;
+import 'package:provider/provider.dart';
 import '../../shared/appbar.dart'; // Import the custom AppBar
-import '../../components/colors.dart'; // Import colors.dart
+import '../../components/colors.dart';
+import '../auth/auth_manager.dart'; // Import colors.dart
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -22,6 +23,7 @@ class MyApp extends StatelessWidget {
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
+  static const routeName = '/home';
 
   @override
   _HomePageState createState() => _HomePageState();
@@ -39,6 +41,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final authManager = Provider.of<AuthManager>(context);
     return Scaffold(
       backgroundColor: background, // Đặt màu nền toàn bộ Scaffold là background
       body: SafeArea(
@@ -61,7 +64,22 @@ class _HomePageState extends State<HomePage> {
                       ),
                     ),
                     const Spacer(),
-                    const Icon(Icons.more_vert),
+                    // const Icon(Icons.more_vert),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert),
+                      onSelected: (value) {
+                        if (value == 'logout') {
+                          authManager.logout(); // Gọi logout
+                        }
+                      },
+                      itemBuilder: (BuildContext context) => const [
+                        PopupMenuItem<String>(
+                          value: 'logout',
+                          child: Text('Log out'),
+                        ),
+                      ],
+                    ),
+
                   ],
                 ),
               ),

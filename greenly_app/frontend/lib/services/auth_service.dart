@@ -1,9 +1,9 @@
 import 'dart:convert';
-
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
+import '../shared/api_exception.dart';
 
 const user_url = 'http://10.0.2.2:3000/api/users';
 
@@ -50,31 +50,17 @@ class AuthService {
         print('✅ Registration success! User data: $userData');
 
         return user;
-      } else if (response.statusCode == 409) {
-        throw Exception("⚠️ Email already exists.");
       } else {
-        print('❌ Registration failed: ${response.body}');
-        throw Exception("Registration failed: ${response.body}");
+        final errorJson = json.decode(response.body);
+        final message = errorJson['message'] ?? 'Registration failed.';
+        throw ApiException(message);
       }
     } catch (error) {
       print('💥 Signup exception: $error');
-      throw Exception("Signup failed: $error");
+      throw ApiException("Signup failed: $error");
     }
   }
 
-  Future<User?> getUserFromStore() async {
-    if (_currentUser != null) return _currentUser;
-
-    final prefs = await SharedPreferences.getInstance();
-    final userJson = prefs.getString('auth_user');
-    if (userJson == null) return null;
-
-    final data = jsonDecode(userJson);
-    final user = User.fromJson(data);
-    _currentUser = user;
-    onAuthChange?.call(user); 
-    return user;
-  }
   Future<User> login(String email, String password) async {
     final uri = Uri.parse('$baseUrl/users/login/');
     var request = http.MultipartRequest('POST', uri);
@@ -95,13 +81,12 @@ class AuthService {
 
         if (jsonResponse['data'] == null ||
             jsonResponse['data']['user'] == null) {
-          throw Exception("⚠️ Invalid response format: missing user data.");
+          throw ApiException("Invalid response format: missing user data.");
         }
 
         final userData = jsonResponse['data']['user'];
         final user = User.fromJson(userData);
 
-        // Lưu dữ liệu người dùng vào SharedPreferences
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_user', jsonEncode(userData));
 
@@ -111,16 +96,29 @@ class AuthService {
         print('✅ Login success! User data: $userData');
 
         return user;
-      } else if (response.statusCode == 400) {
-        throw Exception("⚠️ Invalid email or password.");
       } else {
-        print('❌ Login failed: ${response.body}');
-        throw Exception("Login failed: ${response.body}");
+        final errorJson = json.decode(response.body);
+        final message = errorJson['message'] ?? 'Login failed.';
+        throw ApiException(message);
       }
     } catch (error) {
       print('💥 Login exception: $error');
-      throw Exception("Login failed: $error");
+      throw ApiException("Login failed: $error");
     }
+  }
+
+  Future<User?> getUserFromStore() async {
+    if (_currentUser != null) return _currentUser;
+
+    final prefs = await SharedPreferences.getInstance();
+    final userJson = prefs.getString('auth_user');
+    if (userJson == null) return null;
+
+    final data = jsonDecode(userJson);
+    final user = User.fromJson(data);
+    _currentUser = user;
+    onAuthChange?.call(user);
+    return user;
   }
 
   Future<void> logout() async {
