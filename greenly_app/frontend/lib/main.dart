@@ -251,6 +251,10 @@ class _MyAppState extends State<MyApp> {
                   'isAuth=${authManager.isAuth}, '
                   'isSplashComplete=${authManager.isSplashComplete}, '
                   'loggedInUser=${authManager.loggedInUser?.u_email}');
+        return Consumer<AuthManager>(
+          builder: (ctx, authManager, child) {
+            print(
+                '🔴 Building app: isInitialized=${authManager.isInitialized}, isAuth=${authManager.isAuth}, isSplashComplete=${authManager.isSplashComplete}');
 
               Widget homeScreen;
               if (!authManager.isSplashComplete) {
@@ -294,7 +298,7 @@ class _MyAppState extends State<MyApp> {
             },
           );
         },
-      ),
-    );
+      );
+  }));
   }
 }

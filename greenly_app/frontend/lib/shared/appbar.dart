@@ -14,64 +14,132 @@ class CustomBottomAppBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 60,
-      decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: const Color.fromARGB(255, 255, 255, 255))),
-      child: Stack(
-        clipBehavior: Clip.none, // Allow overflow for elevation
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(
-                top: 4), // Dời xuống dưới 8px, có thể điều chỉnh giá trị này
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildNavItem(FontAwesomeIcons.house, 0, 'Home'),
-                _buildNavItem(FontAwesomeIcons.book, 1, 'Post'),
-                const SizedBox(
-                    width: 48), // Placeholder for the elevated button
-                _buildNavItem(FontAwesomeIcons.locationDot, 3, 'Maps'),
-                _buildNavItem(FontAwesomeIcons.userLarge, 4, 'Profile'),
-              ],
-            ),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 15.0),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(40),
+        child: Container(
+          height: 66,
+          color: button,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+            children: [
+              _buildNavItem(
+                  context, FontAwesomeIcons.house, 0, 'Home', 17.0, 0.0, 5.0),
+              _buildNavItem(
+                  context, FontAwesomeIcons.book, 1, 'Post', 17.0, 0.0, 5.0),
+              _buildNavItem(context, FontAwesomeIcons.locationDot, 2, 'Maps',
+                  17.0, 0.0, 4.0),
+              _buildNavItem(context, FontAwesomeIcons.userLarge, 3, 'Profile',
+                  16.0, 0.0, 4.0),
+            ],
           ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 30, // Elevate halfway above the app bar
-            child: Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color.fromARGB(255, 253, 253, 253),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.2),
-                      blurRadius: 5,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: _buildNavItem(FontAwesomeIcons.plus, 2, 'Add Post'),
-              ),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, int index, String label) {
-    return IconButton(
-      icon: Icon(
-        icon,
-        color: currentIndex == index ? button : Colors.grey,
-        size: 21, // Giảm kích thước icon
+  Widget _buildNavItem(
+      BuildContext context,
+      IconData icon,
+      int index,
+      String label,
+      double iconPaddingLeft,
+      double labelPaddingLeft,
+      double labelPaddingTop) {
+    bool isSelected = currentIndex == index;
+
+    return GestureDetector(
+      onTap: () {
+        onTap(index); // Gọi callback để cập nhật currentIndex ở HomePage
+        // Điều hướng đến các trang tương ứng
+        switch (index) {
+          case 0:
+            // Trang Home: Pop đến trang gốc (nếu cần) hoặc không làm gì
+            Navigator.popUntil(context, (route) => route.isFirst);
+            break;
+          case 1:
+            Navigator.pushNamed(context, '/moments'); // Chuyển đến MomentsPage
+            break;
+          case 2:
+            Navigator.pushNamed(
+                context, '/maps'); // Chuyển đến Maps (cần tạo nếu chưa có)
+            break;
+          case 3:
+            Navigator.pushNamed(context,
+                '/profile'); // Chuyển đến Profile (cần tạo nếu chưa có)
+            break;
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+        width: isSelected ? 120.0 : 50.0,
+        height: 40.0,
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              width: isSelected ? 120.0 : 50.0,
+              height: 40.0,
+              decoration: BoxDecoration(
+                borderRadius: isSelected
+                    ? BorderRadius.circular(17.0)
+                    : BorderRadius.zero,
+                color: isSelected
+                    ? const Color.fromARGB(255, 255, 255, 255)
+                    : Colors.transparent,
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.only(left: iconPaddingLeft),
+                    child: Transform.translate(
+                      offset: icon == FontAwesomeIcons.house
+                          ? const Offset(-1, 0)
+                          : Offset.zero,
+                      child: Icon(
+                        icon,
+                        color: isSelected
+                            ? const Color.fromARGB(255, 63, 78, 45)
+                            : const Color.fromARGB(255, 255, 255, 255),
+                        size: 19,
+                      ),
+                    ),
+                  ),
+                  if (isSelected)
+                    Flexible(
+                      fit: FlexFit.loose,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                            left: labelPaddingLeft, top: labelPaddingTop),
+                        child: Align(
+                          alignment: Alignment.center,
+                          child: Text(
+                            label,
+                            style: const TextStyle(
+                              color: Color.fromARGB(255, 63, 78, 45),
+                              fontSize: 16,
+                              fontFamily: 'Oktah',
+                              fontWeight: FontWeight.w900,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
-      tooltip: label,
-      onPressed: () => onTap(index),
     );
   }
 }
