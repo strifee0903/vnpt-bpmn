@@ -93,7 +93,7 @@ onMounted(async () => {
 
 const fetchProcesses = async () => {
   try {
-    const res = await axios.get('/api/v1/bpmn/all')
+    const res = await axios.get('/api/v1/bpmn/allxml')
     processes.value = res.data.data // [{ process_id, xml_content }]
     console.log('Danh sách quy trình:', res.data.data)
     console.log('Danh sách quy trình:', processes.value)

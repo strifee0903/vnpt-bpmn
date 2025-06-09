@@ -56,7 +56,8 @@ module.exports.setup = (app) => {
  * 
  */
   router.post("/process", bpmnController.postProcess);
-  router.get("/all", bpmnController.getAllProcessesXml);
+  router.get("/allxml", bpmnController.getAllProcessesXml);
+  router.get("/all", bpmnController.getAllProcessesWithDetails);
   router.get("/:process_id", bpmnController.getProcessXml);
  /**
  * @swagger

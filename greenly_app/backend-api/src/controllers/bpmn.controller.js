@@ -24,6 +24,17 @@ const postProcess = async (req, res, next) => {
         return res.status(500).json(JSend.error("Internal Server Error"));
     }
 };
+
+const getAllProcessesWithDetails = async (req, res) => {
+    try {
+        const processes = await service.getAllProcessesWithDetails();
+        res.json(JSend.success(processes));
+    } catch (error) {
+        console.error("Error fetching all processes with details:", error);
+        res.status(500).json(JSend.error("Failed to fetch all processes"));
+    }
+}
+
 const getProcessXml = async (req, res) => {
     const { process_id } = req.params;
     try {
@@ -70,5 +81,9 @@ module.exports = {
     postProcess: postProcess,
     getProcessXml: getProcessXml,
     getAllProcessesXml: getAllProcessesXml,
-    updateBpmn: updateBpmn
+
+    updateBpmn: updateBpmn,
+
+    getAllProcessesWithDetails: getAllProcessesWithDetails
+
 };
