@@ -1,3 +1,4 @@
+const e = require("express");
 const knex = require("../database/knex");
 const JSend = require("../jsend");
 const { XMLParser, XMLBuilder } = require("fast-xml-parser");
@@ -179,12 +180,53 @@ const getAllProcessesXml = async (req, res) => {
   });
 };
 
+const updateProcess = async (process_id, name, xml_content) => {
+  try {
+    const process = await knex("processes").where({ process_id }).first();
+
+    if (process) {
+      await knex.transaction(async (trx) => {
+        // Step 1: Delete flows that reference steps with the given process_id
+        await trx("flows")
+          .whereIn("source_ref", trx("steps").select("step_id").where({ process_id }))
+          .orWhereIn("target_ref", trx("steps").select("step_id").where({ process_id }))
+          .delete();
+
+        // Step 2: Delete flows with the given process_id (for completeness)
+        await trx("flows").where({ process_id }).delete();
+
+        // Step 3: Delete steps with the given process_id
+        await trx("steps").where({ process_id }).delete();
+
+        // Step 4: Delete the process
+        await trx("processes").where({ process_id }).delete();
+
+        // Step 5: Recreate the process with createBpmn
+        console.log(`Recreating process ${process_id}...`);
+        await createBpmn({ process_id, name, xml_content }, { trx });
+      });
+
+      console.log(`Process ${process_id} updated successfully.`);
+    } else {
+      await createBpmn({ process_id, name, xml_content });
+      console.log(`Process ${process_id} created successfully.`);
+    }
+  } catch (error) {
+    console.error(`Error processing process ${process_id}:`, error.message);
+    if (error.sqlMessage) {
+      console.error("SQL Error:", error.sqlMessage);
+    }
+    throw error; // Re-throw to let the caller handle it
+  }
+};
+
 module.exports = {
   createBpmn: createBpmn,
   // buildAllProcessesXml: buildAllProcessesXml,
   // buildProcessXml: buildProcessXml,
   getProcessXml: getProcessXml,
   getAllProcessesXml: getAllProcessesXml,
+  updateProcess: updateProcess,
 
 
 };
