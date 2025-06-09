@@ -11,6 +11,7 @@ async function signUpValidation (req, res, next) {
             .not().isEmpty().withMessage('Address is required')
             .isString().withMessage('Address must be a string'),
         check('u_email')
+            .not().isEmpty().withMessage('Email is required')
             .isEmail().withMessage('Please enter a valid email')
             .normalizeEmail({ gmail_remove_dots: true })
             .custom(async (value) => {
@@ -21,6 +22,7 @@ async function signUpValidation (req, res, next) {
                 return true;
             }),
         check('u_pass')
+            .not().isEmpty().withMessage('Password is required')
             .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
         check('u_birthday')
             .not().isEmpty().withMessage('Birthday is required')
@@ -73,9 +75,11 @@ async function logInValidation(req, res, next) {
     // Define validation checks
     const validations = [
         check('u_email')
+            .not().isEmpty().withMessage('Email is required')
             .isEmail().withMessage('Please enter a valid email')
             .normalizeEmail({ gmail_remove_dots: true }),
         check('u_pass')
+            .not().isEmpty().withMessage('Password is required')
             .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long'),
     ];
 

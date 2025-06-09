@@ -10,11 +10,6 @@ const { JWT_SECRET } = process.env;
 async function register(req, res, next) {
     console.log('Request Body:', req.body); // Log form data (excluding file)
     console.log('Uploaded File (Controller):', req.file); // Log file details in controller
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return next(new ApiError(400, 'Validation failed', { errors: errors.array() }));
-    }
-
     try {
         const userData = {
             u_name: req.body.u_name,
@@ -27,7 +22,7 @@ async function register(req, res, next) {
         console.log('Constructed User Data:', userData); // Log the final user data
         const result = await usersService.registerUser({
             ...req.body,
-            u_avt: req.file ? `/public/uploads/${req.file.filename}` : null,
+            u_avt: req.file ? `/public/uploads/${req.file.filename}` : '/public/images/blank_avt.jpg',
         });
 
         // Send verification email
@@ -66,11 +61,6 @@ async function verifyMail(req, res) {
 };
 
 async function login(req, res, next) {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-        return next(new ApiError(400, 'Validation failed', { errors: errors.array() }));
-    }
-
     const { u_email, u_pass } = req.body;
     try {
         // Check if session middleware is available
@@ -81,12 +71,6 @@ async function login(req, res, next) {
         // Check if user is already logged in
         if (req.session.user && req.session.user.u_id) {
             return res.json(JSend.success({ message: 'Already logged in!', data: req.session.user }));
-        }
-
-        // Check if email exists
-        const checkExistEmail = await usersService.checkExistEmail(u_email);
-        if (!checkExistEmail) {
-            return next(new ApiError(404, "You don't have an account yet. Please click register."));
         }
 
         // Attempt login
@@ -108,7 +92,10 @@ async function login(req, res, next) {
                 message: 'Log in successfully!',
                 data: req.session.user,
             }));
-        });
+            
+        },
+            console.log('Log in successfully!')
+        );
     } catch (error) {
         console.error('Login error:', error);
         return next(new ApiError(500, error.message));
@@ -127,11 +114,31 @@ async function logout(req, res, next) {
 
         return res.status(200).json(JSend.success({ message: 'Sign out successfully!' }));
     });
-}
+};
+
+async function checkAdminSession(req, res, next) {
+    try {
+        await usersService.checkAdminSessionTimeout(req.session);
+        return res.status(200).json(JSend.success({ message: 'Admin session is valid.' }));
+    } catch (error) {
+        console.error('Admin session check failed:', error.message);
+
+        if (error.status === 440) {
+            req.session.destroy(() => {
+                res.clearCookie('connect.sid');
+                return res.status(440).json(JSend.fail({ message: error.message }));
+            });
+        } else {
+            return next(error);
+        }
+    }
+};
+
 
 module.exports = {
     register,
     verifyMail,
     login,
     logout,
+    checkAdminSession,
 };

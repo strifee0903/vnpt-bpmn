@@ -120,6 +120,10 @@ module.exports.setup = (app) => {
      *         $ref: '#/components/responses/400' 
      */
     router.post('/login/', avatarUpload, logInValidation, userController.login);
+    // router.post('/login/', (req, res, next) => {
+    //     console.log('Login request received:', req.body);
+    //     next();
+    // }, avatarUpload, logInValidation, userController.login);
 
     /**
      * @swagger
@@ -149,5 +153,6 @@ module.exports.setup = (app) => {
      *         $ref: '#/components/responses/400' 
      */
     router.post('/logout/', userController.logout);
+    router.get('/admin-check-session/', userController.checkAdminSession);
     router.all('/', methodNotAllowed);
 };

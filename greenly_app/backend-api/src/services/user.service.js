@@ -1,6 +1,10 @@
 const knex = require('../database/knex');
 const bcrypt = require('bcrypt');
 const randomString = require('randomstring');
+const ApiError = require('../api-error');
+
+// const ADMIN_TIMEOUT = 15 * 60 * 1000; // 15 phút
+const ADMIN_TIMEOUT = 10 * 1000; // 10 giây cho test
 
 // Repository function to abstract the table
 function userRepository() {
@@ -94,22 +98,87 @@ async function verifyUserEmail(token) {
 
 async function login(email, password) {
     const user = await userRepository().where({ u_email: email }).first();
-    const isMatch = await bcrypt.compare(password, user.u_pass);
-
-    if (!isMatch) {
-        throw new Error('Wrong Password!');
+    if (!user) {
+        throw new ApiError(404, "You don't have an account yet. Please click register.");
     }
-    return {
-        u_id: user.u_id,
-        u_email: user.u_email,
-        role_id: user.role_id,
-        u_avt: user.u_avt
-    };
+
+    if (user.is_verified !== 1) {
+        throw new ApiError(403, 'Please verify your email to continue.');
+    }
+
+    // Compare password using bcrypt with async/await
+    let isMatch;
+    try {
+        isMatch = await bcrypt.compare(password, user.u_pass);
+    } catch (error) {
+        // Handle bcrypt comparison errors
+        throw new ApiError(500, 'Error comparing passwords: ' + error.message);
+    }
+
+    // Use if-else to check password match and throw error if it fails
+    if (isMatch) {
+        await updateLastLogin(user.u_id);
+        return {
+            u_id: user.u_id,
+            u_email: user.u_email,
+            role_id: user.role_id,
+            u_avt: user.u_avt
+        };
+    } else {
+        throw new ApiError(400, 'Password is incorrect!');
+    }
+};
+
+// Update last_login for user
+async function updateLastLogin(u_id) {
+    await userRepository().where({ u_id }).update({
+        last_login: knex.fn.now(),
+        updated_at: knex.fn.now(),
+    });
+};
+
+async function checkAdminSessionTimeout(session) {
+    if (!session || !session.user) {
+        throw new ApiError(401, 'You must log in first.');
+    }
+
+    const { u_id, role_id } = session.user;
+
+    if (role_id !== 1) return true; // Không phải admin → bỏ qua
+
+    const now = Date.now();
+
+    // Ưu tiên RAM
+    if (session.adminLastActive) {
+        const elapsed = now - session.adminLastActive;
+        if (elapsed > ADMIN_TIMEOUT) {
+            throw new ApiError(440, 'Admin session expired (RAM).');
+        }
+        session.adminLastActive = now;
+        return true;
+    }
+
+    // Fallback: check DB
+    const user = await userRepository().where({ u_id }).first();
+
+    if (!user || !user.last_login) {
+        throw new ApiError(403, 'Invalid login time. Please log in again.');
+    }
+
+    const lastLogin = new Date(user.last_login).getTime();
+    if (now - lastLogin > ADMIN_TIMEOUT) {
+        throw new ApiError(440, 'Admin session expired (DB).');
+    }
+
+    session.adminLastActive = now;
+    return true;
 }
 
 module.exports = {
     registerUser,
     checkExistEmail,
     verifyUserEmail,
-    login
+    login,
+    updateLastLogin,
+    checkAdminSessionTimeout
 };

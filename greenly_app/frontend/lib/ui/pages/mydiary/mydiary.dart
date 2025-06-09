@@ -38,8 +38,11 @@ class MyDiary extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text(
-          'MyDiary',
-          style: TextStyle(fontWeight: FontWeight.bold),
+          'My Diary',
+          style: TextStyle(
+            fontFamily: 'Oktah',
+            fontWeight: FontWeight.w900,
+          ),
         ),
         actions: [
           Column(
@@ -134,24 +137,29 @@ class MyDiary extends StatelessWidget {
                                   entry['title']!,
                                   style: TextStyle(
                                     fontSize: 20,
-                                    fontWeight: FontWeight.bold,
+                                    fontFamily: 'Oktah',
+                                    fontWeight: FontWeight.w700,
                                     color: colors['text'], // Unique text color
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                const SizedBox(height: 6),
                                 Text(
                                   entry['description']!,
                                   style: TextStyle(
                                     fontSize: 16,
+                                    fontFamily: 'Oktah',
+                                    fontWeight: FontWeight.w500,
                                     color: colors['text']!.withOpacity(
                                         0.7), // Slightly lighter for description
                                   ),
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: 6),
                                 Text(
                                   entry['time']!,
                                   style: TextStyle(
                                     fontSize: 12,
+                                    fontFamily: 'Oktah',
+                                    fontWeight: FontWeight.w500,
                                     color: colors['text']!.withOpacity(
                                         0.5), // Even lighter for time
                                   ),
