@@ -9,7 +9,7 @@ class UserScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final authManager = Provider.of<AuthManager>(context);
-    final user = authManager.user;
+    final user = authManager.loggedInUser;
 
     return Scaffold(
       appBar: AppBar(

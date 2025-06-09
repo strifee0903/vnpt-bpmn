@@ -1,6 +1,4 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../models/user.dart';
 import '../../services/auth_service.dart';
 
@@ -13,108 +11,89 @@ class EmailVerificationRequiredException implements Exception {
 }
 
 class AuthManager with ChangeNotifier {
-  final AuthService _authService = AuthService();
-
-  User? _user;
-  bool _isSplashComplete = false;
-  bool get isSplashComplete => _isSplashComplete;
+  final AuthService _authService;
+  User? _loggedInUser;
   bool _isInitialized = false;
-  // Fix the isInitialized getter
-  bool get isInitialized => _isInitialized;
-  bool get isAuth => _user != null;
-  User? get user => _user;
+  bool _isSplashComplete = false;
 
-  Future<void> initialize() async {
-    if (_isInitialized) return;
-
-    _isInitialized = true;
-    _isSplashComplete = false;
-    notifyListeners();
-
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final userData = prefs.getString('user');
-      if (userData != null) {
-        _user = User.fromJson(jsonDecode(userData));
-        print('Loaded user from SharedPreferences: ${_user?.u_email}');
-        notifyListeners(); // Add this to trigger rebuild
-      }
-    } catch (e) {
-      _user = null;
-      print('Failed to load user: $e');
-    }
-    _isSplashComplete = true;
-    notifyListeners(); // This will trigger the Consumer rebuild
+  AuthManager() : _authService = AuthService() {
+    _initializeAuthListener();
   }
 
-Future<bool> login({
-    required String uEmail,
-    required String uPass,
-  }) async {
-    try {
-      final response = await _authService.login(uEmail: uEmail, uPass: uPass);
-      final json = jsonDecode(response.body);
-
-      if (json['status'] != 'success') {
-        throw Exception(json['message'] ?? 'Login failed');
-      }
-
-      _user = User.fromJson(json['data']['data']);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user', jsonEncode(_user!.toJson()));
-
-      // Ensure these are the last operations before return
+  void _initializeAuthListener() {
+    _authService.onAuthChange = (User? user) {
+      _loggedInUser = user;
       notifyListeners();
-      print('🔴notifyListeners called');
-      return true;
-    } catch (e) {
-      print('🔴AuthManager error: $e');
+    };
+  }
+
+  User? get loggedInUser => _loggedInUser;
+  bool get isAuth => _loggedInUser != null;
+  bool get isInitialized => _isInitialized;
+  bool get isSplashComplete => _isSplashComplete;
+  
+
+  Future<void> initialize() async {
+    print('🔴 Starting initialization');
+    await Future.wait([
+      tryAutoLogin(),
+      Future.delayed(const Duration(seconds: 5)),
+    ]);
+    _isInitialized = true;
+    _isSplashComplete = true;
+    notifyListeners();
+    print('✅ Initialization complete: isAuth=$isAuth');
+  }
+
+  Future<void> tryAutoLogin() async {
+    print('🔴 Starting tryAutoLogin()');
+    try {
+      final user = await _authService.getUserFromStore();
+      print(
+          '✅ getUserFromStore completed: user = ${user != null ? 'exists (ID: ${user.u_email})' : 'null'}');
+      if (user != null) {
+        _loggedInUser = user;
+        notifyListeners(); // Thông báo khi có người dùng
+      } else {
+        _loggedInUser = null;
+      }
+      print('✅ tryAutoLogin completed successfully');
+    } catch (error) {
+      print('❌ Auto login error: $error');
+      _loggedInUser = null;
+    }
+  }
+
+  Future<void> signup(
+      String uName, String uEmail, String uPass, String uAddress, String uBirthday) async {
+    try {
+      print('🔴 AuthManager: Starting signup process');
+      final user = await _authService.signup(uName, uEmail, uPass, uAddress, uBirthday);
+      _loggedInUser = user;
+      notifyListeners();
+      print('✅ AuthManager: Signup completed successfully');
+    } catch (error) {
+      print('❌ Signup error in manager: $error');
       rethrow;
     }
   }
 
-  Future<void> register({
-    required String uName,
-    required String uEmail,
-    required String uPass,
-    required String uAddress,
-    required String uBirthday,
-  }) async {
+  Future<void> login(String uEmail, String uPass) async {
     try {
-      final response = await _authService.registerUser(
-        uName: uName,
-        uEmail: uEmail,
-        uPass: uPass,
-        uAddress: uAddress,
-        uBirthday: uBirthday,
-      );
-
-      final json = jsonDecode(response.body);
-      if (json['status'] != 'success') {
-        throw Exception(json['message'] ?? 'Registration failed');
-      }
-
-      final userData = json['data']['user'];
-      if (userData['is_verified'] == 0) {
-        throw EmailVerificationRequiredException(
-          'Registration successful! Please verify your email to continue.',
-        );
-      }
-
-      _user = User.fromJson(userData);
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user', jsonEncode(_user!.toJson()));
+      final user = await _authService.login(uEmail, uPass);
+      _loggedInUser = user;
       notifyListeners();
-    } catch (e) {
-      print('Registration error: $e');
+      print(
+          '✅ Login successful: isAuth=$isAuth}');
+    } catch (error) {
+      print('❌ Login error in manager: $error');
       rethrow;
     }
   }
 
   Future<void> logout() async {
-    _user = null;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('user');
+    await _authService.logout();
+    _loggedInUser = null;
     notifyListeners();
   }
 }
