@@ -1,0 +1,98 @@
+{
+    "status": "success",
+    "data": [
+        {
+            "process_id": "Process_174917473016",
+            "name": "alla",
+            "steps": [
+                {
+                    "step_id": "Activity_1bwjers",
+                    "process_id": "Process_174917473016",
+                    "name": null,
+                    "type": "task"
+                },
+                {
+                    "step_id": "Event_04ypdzx",
+                    "process_id": "Process_174917473016",
+                    "name": null,
+                    "type": "endEvent"
+                },
+                {
+                    "step_id": "Event_05b347c",
+                    "process_id": "Process_174917473016",
+                    "name": null,
+                    "type": "startEvent"
+                }
+            ],
+            "flows": [
+                {
+                    "flow_id": "Flow_0nofpd7",
+                    "process_id": "Process_174917473016",
+                    "source_ref": "Event_05b347c",
+                    "target_ref": "Activity_1bwjers",
+                    "type": "sequenceFlow"
+                },
+                {
+                    "flow_id": "Flow_1jq1vr4",
+                    "process_id": "Process_174917473016",
+                    "source_ref": "Activity_1bwjers",
+                    "target_ref": "Event_04ypdzx",
+                    "type": "sequenceFlow"
+                }
+            ]
+        },
+        {
+            "process_id": "Process_1749449975796",
+            "name": "alo",
+            "steps": [
+                {
+                    "step_id": "Activity_1nfqfta",
+                    "process_id": "Process_1749449975796",
+                    "name": null,
+                    "type": "task"
+                },
+                {
+                    "step_id": "Activity_1rmobev",
+                    "process_id": "Process_1749449975796",
+                    "name": null,
+                    "type": "task"
+                },
+                {
+                    "step_id": "Event_07tddhz",
+                    "process_id": "Process_1749449975796",
+                    "name": null,
+                    "type": "endEvent"
+                },
+                {
+                    "step_id": "Event_0m5ml82",
+                    "process_id": "Process_1749449975796",
+                    "name": null,
+                    "type": "startEvent"
+                }
+            ],
+            "flows": [
+                {
+                    "flow_id": "Flow_0f4jmei",
+                    "process_id": "Process_1749449975796",
+                    "source_ref": "Activity_1nfqfta",
+                    "target_ref": "Event_07tddhz",
+                    "type": "sequenceFlow"
+                },
+                {
+                    "flow_id": "Flow_117vel8",
+                    "process_id": "Process_1749449975796",
+                    "source_ref": "Event_0m5ml82",
+                    "target_ref": "Activity_1rmobev",
+                    "type": "sequenceFlow"
+                },
+                {
+                    "flow_id": "Flow_1n17bpw",
+                    "process_id": "Process_1749449975796",
+                    "source_ref": "Activity_1rmobev",
+                    "target_ref": "Activity_1nfqfta",
+                    "type": "sequenceFlow"
+                }
+            ]
+        }
+    ]
+}
