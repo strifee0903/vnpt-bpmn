@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'auth_card.dart';
-// import '../../components/paths.dart';
-import '../../components/colors.dart';
-
 class AuthScreen extends StatelessWidget {
   static const routeName = '/auth';
 

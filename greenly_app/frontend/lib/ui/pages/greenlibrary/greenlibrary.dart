@@ -1,6 +1,5 @@
 import 'dart:convert'; // Thêm để sử dụng jsonDecode
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import '../../../components/colors.dart'; // Import colors.dart
 import '../../../services/process_service.dart'; // Import ProcessService
 import 'package:greenly_app/models/process.dart'; // Import file model Process

@@ -15,7 +15,7 @@ USE greenly_db;
 -- DROP TABLE IF EXISTS media;
 -- DROP TABLE IF EXISTS moment;
 -- DROP TABLE IF EXISTS accounts;
--- DROP TABLE IF EXISTS users;
+DROP TABLE IF EXISTS users;
 -- DROP TABLE IF EXISTS roles;
 -- DROP TABLE IF EXISTS category;
 
