@@ -261,6 +261,8 @@ const update = async () => {
 
     const result = await response.json() // Parse JSON response per Swagger spec
     console.log('BPMN process saved successfully:', result)
+    fetchProcesses() // Refresh the process list
+
     notify('Quy trình đã được cập nhật thành công: ' + processName)
   } catch (err) {
     console.error('Export failed:', err)
