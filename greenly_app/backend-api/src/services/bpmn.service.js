@@ -6,9 +6,10 @@ require("dotenv").config();
 
 const createBpmn = async (process) => {
   const { process_id, name, xml_content } = process;
-
+  console.log(xml_content);
   const parser = new XMLParser({ ignoreAttributes: false, attributeNamePrefix: "" });
   const json = parser.parse(xml_content);
+  console.log(json);
 
   const definitions = json["bpmn:definitions"];
   const proc = definitions["bpmn:process"];
@@ -216,7 +217,7 @@ const updateProcess = async (process_id, name, xml_content) => {
           .delete();
 
         // Step 2: Delete flows with the given process_id (for completeness)
-        await trx("flows").where({ process_id }).delete();
+        //await trx("flows").where({ process_id }).delete();
 
         // Step 3: Delete steps with the given process_id
         await trx("steps").where({ process_id }).delete();
@@ -225,10 +226,13 @@ const updateProcess = async (process_id, name, xml_content) => {
         await trx("processes").where({ process_id }).delete();
 
         // Step 5: Recreate the process with createBpmn
-        console.log(`Recreating process ${process_id}...`);
-        await createBpmn({ process_id, name, xml_content }, { trx });
+        console.log(`Deleted old process ${process_id}`);
+        
+        
       });
 
+      console.log(`Recreating process ${process_id}...`);
+      await createBpmn({ process_id, name, xml_content });
       console.log(`Process ${process_id} updated successfully.`);
     } else {
       await createBpmn({ process_id, name, xml_content });
@@ -242,6 +246,8 @@ const updateProcess = async (process_id, name, xml_content) => {
     throw error; // Re-throw to let the caller handle it
   }
 };
+
+
 
 module.exports = {
   createBpmn: createBpmn,
