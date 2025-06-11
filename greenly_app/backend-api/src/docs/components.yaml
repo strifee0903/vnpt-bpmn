@@ -1,5 +1,26 @@
 # Common references
 components:
+  schemas:
+    Users:
+      type: object
+      properties:
+        u_name:
+          type: string
+          description: Name
+        u_birthday:
+          type: string
+          format: date
+          description: userbirthday
+        u_address:
+          type: string
+          description: useraddress
+        u_avt:
+          type: string
+          format: binary
+          writeOnly: true 
+          description: Đường dẫn ảnh đại diện người dùng
+        
+
   responses:
     200NoData:
       content:

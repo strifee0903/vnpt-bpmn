@@ -38,7 +38,7 @@ module.exports.setup = (app) => {
      *                 type: string
      *                 format: password
      *                 description: Password of the user
-     *               u_avt:
+     *               u_avtFile:
      *                 type: string
      *                 format: binary
      *                 description: User avatar file
@@ -154,5 +154,127 @@ module.exports.setup = (app) => {
      */
     router.post('/logout/', userController.logout);
     router.get('/admin-check-session/', userController.checkAdminSession);
+
+    /** 
+     * @swagger
+     * /api/users/info/:
+     *   get:
+     *     summary: Get user by ID
+     *     description: Get user by ID
+     *     tags:
+     *       - users
+     *     responses:
+     *       200:
+     *         description: A user
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   description: The response status
+     *                   enum: [success]
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     contact:
+     *                       $ref: '#/components/schemas/User'
+     *       404:
+     *         description: Not Found - Resource not found
+     *         $ref: '#/components/responses/404'
+     *       500:
+     *         description: Internal Server Error - Unexpected error on the server
+     *         $ref: '#/components/responses/500'
+     */
+    router.get('/info/', userController.getUser);
+    /**
+     * @swagger
+     * /api/users/updateProfile/:
+     *   put:
+     *     summary: Update user by ID 
+     *     description: Update user by ID
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         multipart/form-data:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               u_name:
+     *                 type: string
+     *                 description: name
+     *               u_birthday:
+     *                 type: integer
+     *                 format: date
+     *                 description: birthday
+     *               u_address:
+     *                 type: string
+     *                 description: address
+     *               u_avt:
+     *                 type: string
+     *                 readOnly: true
+     *                 description: avatar
+     *               u_avtFile:
+     *                 type: string
+     *                 format: binary
+     *                 writeOnly: true
+     *                 description: new avatar
+     *     tags:
+     *       - users
+     *     responses:
+     *       200:
+     *         description: An updated user
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   description: The response status
+     *                   enum:
+     *                     - success
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     contact:
+     *                       $ref: '#/components/schemas/User'
+     *         $ref: '#/components/responses/200NoData'
+     *       400:
+     *         description: Bad Request - Invalid input or missing parameters
+     *         $ref: '#/components/responses/400'
+     *       404:
+     *         description: Not Found - Resource not found
+     *         $ref: '#/components/responses/404'
+     *       500:
+     *         description: Internal Server Error - Unexpected error on the server
+     *         $ref: '#/components/responses/500'
+     */
+    router.put('/updateProfile/', avatarUpload, userController.updateUser);
+
+    /**
+     * @swagger
+     * /api/users/deleteAccount/:
+     *   delete:
+     *     summary: Delete user by ID
+     *     description: Delete user by ID
+     *     tags:
+     *       - users
+     *     responses:
+     *       200:
+     *         description: User deleted
+     *         $ref: '#/components/responses/200NoData'
+     *       404:
+     *         description: Not Found - Resource not found
+     *         $ref: '#/components/responses/404'
+     *       500:
+     *         description: Internal Server Error - Unexpected error on the server
+     *         $ref: '#/components/responses/500'
+     * 
+     */
+    router.delete('/deleteAccount/', avatarUpload, userController.deleteUser);
+    router.all('/:id', methodNotAllowed);
+
     router.all('/', methodNotAllowed);
 };

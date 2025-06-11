@@ -109,7 +109,7 @@ CREATE TABLE vote (
     vote_state BOOLEAN, -- true: like, false: dislike
     u_id INT,
     FOREIGN KEY (moment_id) REFERENCES moment(moment_id),
-     FOREIGN KEY (u_id) REFERENCES users(u_id),
+	FOREIGN KEY (u_id) REFERENCES users(u_id),
     primary key(moment_id, u_id)
 );
 
@@ -139,9 +139,10 @@ CREATE TABLE contribution (
 CREATE TABLE diary (
     diary_id INT PRIMARY KEY AUTO_INCREMENT,
     u_id INT,
-    diary_category VARCHAR(100), -- ví dụ: "phân loại rác", "không dùng nhựa"
+    category_id INT, 
     state ENUM('not started', 'in progress', 'completed'), 
-	FOREIGN KEY (u_id) REFERENCES users(u_id)
+	FOREIGN KEY (u_id) REFERENCES users(u_id),
+    FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 
 -- ========================================
