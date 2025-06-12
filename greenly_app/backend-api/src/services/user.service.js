@@ -41,11 +41,27 @@ function readUser(payload) {
     return user;
 }
 
-// function sanitizeUser(user) {
-//     if (!user) return user;
-//     const { u_pass, token, ...safeUser } = user;
-//     return safeUser;
-// }
+async function checkRole(u_id) {
+    try {
+        const user = await userRepository()
+            .where('u_id', u_id)
+            .select('role_id')
+            .first();
+
+        if (!user) {
+            throw new ApiError(404, 'User not found');
+        }
+
+        const role = await roleRepository()
+            .where('role_id', user.role_id)
+            .first();
+        console.log('role: ', role);
+        return role ? role.role_id : null;
+    } catch (error) {
+        console.error('Error checking user role:', error);
+        throw error;
+    }
+};
 
 // Check if email already exists
 const checkExistEmail = async (email) => {
@@ -265,6 +281,7 @@ async function deleteUser(id) {
     return deleteUser;
 }
 module.exports = {
+    checkRole,
     registerUser,
     checkExistEmail,
     verifyUserEmail,

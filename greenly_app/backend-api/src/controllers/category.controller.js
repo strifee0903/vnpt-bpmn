@@ -1,10 +1,18 @@
 const categoriesService = require('../services/category.service');
+const userService = require ('../services/user.service');
 const ApiError = require('../api-error');
 const JSend = require('../jsend');
 
 async function createCategory(req, res, next) {
     if (!req.session.user) {
         return next(new ApiError(401, 'Please log in to perform this task!'));
+    }
+    const userId = req.session.user.u_id;
+    const userRole = await userService.checkRole(userId);
+
+    if (userRole !== 1) { // Assuming role 1 is admin
+        console.log("admin id: ", userId)
+        return next(new ApiError(403, 'Forbidden:  You do not have permission to edit this information!'));
     }
     try {
         if (!req.body.category_name) {
@@ -27,7 +35,13 @@ async function deleteCategory(req, res, next) {
     if (!req.session.user) {
         return next(new ApiError(401, 'Please log in to perform this task!'));
     }
+    const userId = req.session.user.u_id;
+    const userRole = await userService.checkRole(userId);
 
+    if (userRole !== 1) { // Assuming role 1 is admin
+        console.log("admin id: ", userId)
+        return next(new ApiError(403, 'Forbidden:  You do not have permission to edit this information!'));
+    }
     try {
         const id = req.params.id;
         const deleted = await categoriesService.deleteCategory(id);
