@@ -13,6 +13,7 @@ const router = createRouter({
       meta: {
         title: 'BPMN Editor',
         layout: 'default',
+        requiresAuth: true,
       },
     },
     {
@@ -31,9 +32,20 @@ const router = createRouter({
       meta: {
         title: 'Quy trình',
         layout: 'default',
+        requiresAuth: true,
       },
-    }
+    },
   ],
 })
+import { useAuthStore } from '@/stores/auth'
 
+router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+
+  if (to.meta.requiresAuth && !auth.isLoggedIn) {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
+})
 export default router

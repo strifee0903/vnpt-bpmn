@@ -1,5 +1,19 @@
-<script setup lang="ts">
-
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+const auth = useAuthStore()
+const router = useRouter()
+const showDropdown = ref(false)
+const user = ref(null)
+function handleLogout() {
+  auth.logout()
+  router.push('/login')
+}
+const username = computed(() => auth.user?.username || 'Admin')
+user.value = localStorage.getItem('user')
+  ? JSON.parse(localStorage.getItem('user')).u_email
+  : 'Admin'
 </script>
 
 <template>
@@ -18,15 +32,43 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
+      <ul class="navbar-nav me-auto" style="cursor: pointer">
         <li class="nav-item">
-          <router-link class="nav-link" to="/">Trang chủ</router-link>
+          <router-link custom v-slot="{ isActive, navigate }" to="/"
+            ><a class="nav-link" :class="{ active: isActive }" @click="navigate"
+              >Quản lý quy trình</a
+            ></router-link
+          >
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/quytrinh">Quản lý quy trình</router-link>
+          <router-link to="/quytrinh" custom v-slot="{ isActive, navigate }">
+            <a class="nav-link" :class="{ active: isActive }" @click="navigate"
+              >Quản lý quy trình động</a
+            >
+          </router-link>
         </li>
       </ul>
-      <span class="navbar-text">Admin</span>
+
+      <!-- User Dropdown -->
+      <div class="dropdown" @mouseenter="showDropdown = true" @mouseleave="showDropdown = false">
+        <button class="btn btn-outline-success dropdown-toggle" type="button">
+          {{ username }}
+        </button>
+        <ul class="dropdown-menu custom-dropdown" :class="{ show: showDropdown }">
+          <li><a class="dropdown-item" href="#">Thông tin</a></li>
+          <li>
+            <a class="dropdown-item" style="cursor: pointer" @click="handleLogout">Đăng xuất</a>
+          </li>
+        </ul>
+      </div>
     </div>
   </nav>
 </template>
+
+<style scoped>
+.custom-dropdown {
+  right: 0;
+  left: auto;
+  position: absolute;
+}
+</style>

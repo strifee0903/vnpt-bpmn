@@ -11,9 +11,7 @@ import DefaultLayout from './layouts/DefaultLayout.vue'
 import EmptyLayout from './layouts/NoNavLayout.vue'
 
 const route = useRoute()
-const layout = computed(() =>
-  route.meta.layout === 'none' ? EmptyLayout : DefaultLayout
-)
+const layout = computed(() => (route.meta.layout === 'none' ? EmptyLayout : DefaultLayout))
 </script>
 <style>
 /* html,
