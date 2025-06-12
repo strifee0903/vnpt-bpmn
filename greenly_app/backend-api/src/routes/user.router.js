@@ -265,15 +265,17 @@ module.exports.setup = (app) => {
      *       200:
      *         description: User deleted
      *         $ref: '#/components/responses/200NoData'
+     *       401:
+     *         description: Unauthorized - User not logged in
+     *         $ref: '#/components/responses/401'
      *       404:
      *         description: Not Found - Resource not found
      *         $ref: '#/components/responses/404'
      *       500:
      *         description: Internal Server Error - Unexpected error on the server
      *         $ref: '#/components/responses/500'
-     * 
      */
-    router.delete('/deleteAccount/', avatarUpload, userController.deleteUser);
+    router.delete('/deleteAccount/', userController.deleteUser);
     router.all('/:id', methodNotAllowed);
 
     router.all('/', methodNotAllowed);

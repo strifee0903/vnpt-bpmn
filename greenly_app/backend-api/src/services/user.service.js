@@ -194,21 +194,23 @@ async function getUserById(id) {
 };
 
 async function updateUser(id, payload) {
-    const updatedUser = await userRepository()
+    const existingUser = await userRepository()
         .where({ u_id: id })
         .select('*')
         .first();
-    if (!updatedUser) {
+
+    if (!existingUser) {
         return null;
     }
-    // Create update object without knex functions
+
+    // Create update object for database
     const update = {
         u_name: payload.u_name,
         u_birthday: payload.u_birthday,
         u_address: payload.u_address,
         u_email: payload.u_email,
         u_avt: payload.u_avt,
-        updated_at: knex.fn.now(), // This will be used for DB update only
+        updated_at: knex.fn.now(),
     };
 
     // Remove undefined/null values
@@ -221,32 +223,45 @@ async function updateUser(id, payload) {
     if (!update.u_avt) {
         delete update.u_avt;
     }
+
+    // Update database
     await userRepository().where({ u_id: id }).update(update);
+
+    // Handle old avatar deletion
     if (
-        update.u_avt &&
-        updatedUser.u_avt &&
-        update.u_avt !== updatedUser.u_avt &&
-        updatedUser.u_avt.startsWith('/public/uploads')
+        payload.u_avt &&
+        existingUser.u_avt &&
+        payload.u_avt !== existingUser.u_avt &&
+        existingUser.u_avt.startsWith('/public/uploads')
     ) {
-        unlink(`.${updatedUser.u_avt}`, (err) => { });
+        unlink(`.${existingUser.u_avt}`, (err) => { });
     }
-    return { ...JSON.parse(JSON.stringify(updatedUser)), ...update };
-    
-    // return { ...updatedUser, ...update };
+
+    // Fetch and return the updated user from database
+    const updatedUser = await userRepository()
+        .where({ u_id: id })
+        .select('*')
+        .first();
+
+    return updatedUser;
 };
+
 async function deleteUser(id) {
     const deleteUser = await userRepository()
         .where({ u_id: id })
-        .select({ u_avt })
+        .select('u_avt') // Fixed: removed object destructuring
         .first();
+
     if (!deleteUser) {
         return null;
     }
+
     await userRepository().where({ u_id: id }).del();
-    if (deleteUser.u_avt &&
-        deleteUser.u_avt.startsWith('/public/uploads')) {
+
+    if (deleteUser.u_avt && deleteUser.u_avt.startsWith('/public/uploads')) {
         unlink(`.${deleteUser.u_avt}`, () => { });
     }
+
     return deleteUser;
 }
 module.exports = {

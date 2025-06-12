@@ -150,19 +150,6 @@ async function getUser(req, res, next) {
     return res.json(JSend.success({ message: 'User data', data: user }));
 }
 
-function safeStringify(obj) {
-    const seen = new WeakSet();
-    return JSON.stringify(obj, (key, value) => {
-        if (typeof value === 'object' && value !== null) {
-            if (seen.has(value)) {
-                return '[Circular]';
-            }
-            seen.add(value);
-        }
-        return value;
-    });
-}
-
 
 async function updateUser(req, res, next) {
     if (Object.keys(req.body).length === 0 && !req.file) {
@@ -181,12 +168,8 @@ async function updateUser(req, res, next) {
         if (!updated) {
             return next(new ApiError(400, `Unable to update the information of the user with the code ${id}`));
         }
-        // return res.json(JSend.success({ message: 'Updated successfully!', data: updated }));
-        const { u_id, u_name, u_email, u_address, u_birthday, u_avt } = updated; // ví dụ
-        return res.json(JSend.success({
-            message: 'Updated successfully!',
-            data: { u_id, u_name, u_email, u_address, u_birthday, u_avt }
-        }));
+        return res.json(JSend.success({ message: 'Updated successfully!', data: updated }));
+
         
     } catch (error) {
         console.log(error);
@@ -198,14 +181,25 @@ async function deleteUser(req, res, next) {
     if (!req.session.user) {
         return next(new ApiError(401, 'Please log in to perform this task!'));
     }
+
     try {
         const id = req.session.user.u_id;
         const deleted = await usersService.deleteUser(id);
+
         if (!deleted) {
             return next(new ApiError(404, 'Cannot delete user.'));
         }
-        return res.json(JSend.success(`Successfully deleted user ${id}`));
+
+        // Clear session after successful deletion
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Session destruction error:', err);
+            }
+        });
+
+        return res.json(JSend.success({ message: `Successfully deleted user ${id}` }));
     } catch (error) {
+        console.error('Delete user error:', error); // Add logging to see the actual error
         return next(new ApiError(500, 'System error, please try again later.'));
     }
 }
@@ -217,7 +211,6 @@ module.exports = {
     logout,
     checkAdminSession,
     getUser,
-    safeStringify,
     updateUser,
     deleteUser,
 };
