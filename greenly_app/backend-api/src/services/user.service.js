@@ -41,11 +41,11 @@ function readUser(payload) {
     return user;
 }
 
-function sanitizeUser(user) {
-    if (!user) return user;
-    const { u_pass, token, ...safeUser } = user;
-    return safeUser;
-}
+// function sanitizeUser(user) {
+//     if (!user) return user;
+//     const { u_pass, token, ...safeUser } = user;
+//     return safeUser;
+// }
 
 // Check if email already exists
 const checkExistEmail = async (email) => {
@@ -265,7 +265,6 @@ async function deleteUser(id) {
     return deleteUser;
 }
 module.exports = {
-    sanitizeUser,
     registerUser,
     checkExistEmail,
     verifyUserEmail,

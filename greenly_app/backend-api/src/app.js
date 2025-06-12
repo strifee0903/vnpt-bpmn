@@ -46,10 +46,12 @@ app.use("/public", express.static("public"));
 const usersRouter = require('./routes/user.router')
 const bpmnRouter = require("./routes/bpmn.router");
 const webRouter = require('./routes/verification.router')
+const categoriesRouter = require('./routes/category.router');
 
 usersRouter.setup(app);
 bpmnRouter.setup(app);
 webRouter.setup(app);
+categoriesRouter.setup(app)
 
 // Handle 404 response
 app.use(resourceNotFound);

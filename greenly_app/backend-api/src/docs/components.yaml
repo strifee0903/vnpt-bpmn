@@ -19,6 +19,16 @@ components:
           format: binary
           writeOnly: true 
           description: Đường dẫn ảnh đại diện người dùng
+
+    category:
+      type: object
+      properties:
+        category_id:
+          type: integer
+          readOnly: true
+        category_name:
+          type: string
+          description: name
         
 
   responses:
