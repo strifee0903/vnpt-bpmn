@@ -13,6 +13,30 @@
             Cập nhật
           </button>
         </div>
+        <div class="mb-3 position-relative">
+          <input
+            v-model="searchInput"
+            @input="searchProcesses"
+            @blur="((searchResults = []), (searchInput = ''))"
+            placeholder="Tìm kiếm quy trình..."
+            class="form-control"
+          />
+          <ul
+            v-if="searchResults.length > 0"
+            class="list-group position-absolute w-100 shadow mb-3"
+            style="z-index: 10"
+          >
+            <li
+              v-for="(proc, index) in searchResults"
+              :key="index"
+              class="list-group-item list-group-item-action"
+              @click="selectProcess(proc)"
+              style="cursor: pointer"
+            >
+              {{ proc.name }}
+            </li>
+          </ul>
+        </div>
         <ul class="list-group">
           <li
             class="list-group-item"
@@ -82,6 +106,8 @@ const newProcess = ref(null)
 const processName = ref('')
 const showToast = ref(false)
 const toastMsg = ref('')
+const searchInput = ref('')
+const searchResults = ref([])
 
 onMounted(async () => {
   modeler.value = new BpmnModeler({
@@ -111,7 +137,21 @@ const notify = (msg) => {
 
   toastMsg.value = msg
 }
+const searchProcesses = () => {
+  const keyword = searchInput.value.trim().toLowerCase()
+  if (!keyword) {
+    searchResults.value = []
+    return
+  }
 
+  searchResults.value = processes.value.filter((proc) => proc.name.toLowerCase().includes(keyword))
+}
+
+const selectProcess = (proc) => {
+  // processName.value = proc.name
+  searchResults.value = []
+  loadProcess(proc.process_id) // Gọi hàm loadProcess có sẵn
+}
 const fetchProcesses = async () => {
   try {
     const res = await axios.get('/api/v1/bpmn/allxml')

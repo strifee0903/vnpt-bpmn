@@ -32,12 +32,20 @@ user.value = localStorage.getItem('user')
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto">
+      <ul class="navbar-nav me-auto" style="cursor: pointer">
         <li class="nav-item">
-          <router-link class="nav-link" to="/">Quản lý quy trình</router-link>
+          <router-link custom v-slot="{ isActive, navigate }" to="/"
+            ><a class="nav-link" :class="{ active: isActive }" @click="navigate"
+              >Quản lý quy trình</a
+            ></router-link
+          >
         </li>
         <li class="nav-item">
-          <router-link class="nav-link" to="/quytrinh">Quản lý quy trình động</router-link>
+          <router-link to="/quytrinh" custom v-slot="{ isActive, navigate }">
+            <a class="nav-link" :class="{ active: isActive }" @click="navigate"
+              >Quản lý quy trình động</a
+            >
+          </router-link>
         </li>
       </ul>
 
