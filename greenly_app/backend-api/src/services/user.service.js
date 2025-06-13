@@ -64,16 +64,11 @@ async function checkRole(u_id) {
 };
 
 // Check if email already exists
-const checkExistEmail = async (email) => {
+async function checkExistEmail (email) {
     const user = await userRepository().where({ u_email: email }).first();
     return user;
 };
 
-// Check if role_id exists
-const checkExistRole = async (role_id) => {
-    const role = await roleRepository().where({ role_id }).first();
-    return role;
-};
 
 // Register a new user
 async function registerUser(payload) {
@@ -83,12 +78,6 @@ async function registerUser(payload) {
     const existingEmail = await checkExistEmail(user.u_email);
     if (existingEmail) {
         throw new Error('This email has been registered with us!');
-    }
-
-    // Validate role_id
-    const existingRole = await checkExistRole(user.role_id);
-    if (!existingRole) {
-        throw new Error(`Role with ID ${user.role_id} does not exist!`);
     }
 
     // Hash password
@@ -133,7 +122,7 @@ async function login(email, password) {
         throw new ApiError(404, "You don't have an account yet. Please click register.");
     }
 
-    if (user.is_verified !== 0) {
+    if (user.is_verified !== 1) {
         throw new ApiError(403, 'Please verify your email to continue.');
     }
 

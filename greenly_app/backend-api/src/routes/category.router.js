@@ -3,6 +3,7 @@ const router = express.Router();
 const categoryController = require('../controllers/category.controller');
 const { methodNotAllowed } = require('../controllers/errors.controller');
 const multer = require('multer');
+const upload = multer(); // Create multer instance
 const imgUpload = require('../middlewares/img-upload.middleware');
 
 module.exports.setup = (app) => {
@@ -23,7 +24,7 @@ module.exports.setup = (app) => {
      *       - category
      *     responses:
      *       201:
-     *         description: A new table
+     *         description: A new category has been created successfully
      *         content:
      *           application/json:
      *             schema:
@@ -70,6 +71,161 @@ module.exports.setup = (app) => {
      *         description: Internal Server Error
      */
     router.delete('/deleteCategory/:id', categoryController.deleteCategory);
+
+    /**
+     * @swagger
+     * /api/category/all:
+     *   get:
+     *     summary: Get all
+     *     description: Retrieve all categories with optional filters
+     *     parameters:
+     *       - in: query
+     *         name: category_name
+     *         required: false
+     *         schema:
+     *           type: string
+     *         description: Filter by category name
+     *       - $ref: '#/components/parameters/limitParam'
+     *       - $ref: '#/components/parameters/pageParam'
+     *     tags:
+     *       - category
+     *     responses:
+     *       200:
+     *         description: Successfully retrieved categories
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   description: The response status
+     *                   enum: [success]
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     categories:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         properties:
+     *                           category_id:
+     *                             type: integer
+     *                             readOnly: true
+     *                           category_name:
+     *                             type: string
+     *                             description: Name of the category
+     *                     metadata:
+     *                       $ref: '#/components/schemas/PaginationMetadata'
+     *       400:
+     *         description: Invalid request, missing or invalid fields
+     *       404:
+     *         description: Not Found
+     *       500:
+     *         description: Internal server error
+     */
+
+    router.get('/all', categoryController.getAllCategories)
+
+    /**
+     * @swagger
+     * /api/category/get/{category_id}:
+     *   get:
+     *     summary: get category by id
+     *     description: Retrieve a category by its ID
+     *     parameters:
+     *       - in: path
+     *         name: category_id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *         description: The ID of the category to retrieve
+     *     tags:
+     *       - category
+     *     responses:
+     *       200:
+     *         description: Successfully retrieved category
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   description: The response status
+     *                   enum: [success]
+     *                 data:
+     *                   $ref: '#/components/schemas/category'
+     *       400:
+     *         description: Invalid request, missing or invalid fields
+     *       404:
+     *         description: Not Found
+     *       500:
+     *         description: Internal server error
+     */
+    router.get('/get/:category_id', categoryController.getCategoryById);
+
+    /**
+     * @swagger
+     * /api/category/update/{category_id}:
+     *   patch:
+     *     tags:
+     *       - category
+     *     summary: Update category by ID
+     *     description: Update the name of a category using its ID. Only admin users are allowed to perform this operation.
+     *     parameters:
+     *       - in: path
+     *         name: category_id
+     *         required: true
+     *         schema:
+     *           type: integer
+     *         description: The ID of the category to retrieve
+     *     requestBody:
+     *       required: true
+     *       content:
+     *         multipart/form-data:
+     *           schema:
+     *             type: object
+     *             properties:
+     *               category_name:
+     *                 type: string
+     *                 description: The new name for the category    
+     *     responses:
+     *       200:
+     *         description: Category updated successfully
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   example: success
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     category:
+     *                       type: object
+     *                       properties:
+     *                         category_id:
+     *                           type: integer
+     *                           example: 3
+     *                         category_name:
+     *                           type: string
+     *                           example: "New Category Name"
+     *       400:
+     *         description: Bad request - Missing or invalid data / Duplicate category name
+     *       401:
+     *         description: Unauthorized - Please log in
+     *       403:
+     *         description: Forbidden - Only admins can update categories
+     *       404:
+     *         description: Category not found
+     *       500:
+     *         description: Internal server error
+     */
+    router.patch('/update/:category_id', upload.none() ,categoryController.updateCategory);
+
 
     router.all('/:id', methodNotAllowed);
     router.all('/', methodNotAllowed);

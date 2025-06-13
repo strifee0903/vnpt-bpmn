@@ -1,9 +1,10 @@
 const knex = require('../database/knex');
-const ApiError = require('../api-error');
+const Paginator = require('./paginator');
+
 
 function categoryRepository() {
     return knex('category');
-}
+};
 
 function readCategory(payload) {
     const category = {
@@ -16,7 +17,7 @@ function readCategory(payload) {
         }
     });
     return category;
-}
+};
 
 async function createCategory(payload) {
     const category = readCategory(payload);
@@ -47,7 +48,71 @@ async function deleteCategory(id) {
     return deleteCategory;
 };
 
+async function getCategoryById(category_id) {
+    return categoryRepository().where('category_id', category_id).select('*').first();
+};
+
+async function getCategoryByName(category_name) {
+    return categoryRepository().where('category_name', category_name).select('*').first();
+};
+
+async function getAllCategories(query) {
+    const { category_name, page = 1, limit = 5 } = query;
+    const paginator = new Paginator(page, limit);
+
+    let results = await categoryRepository()
+        .where((builder) => {
+            if (category_name) {
+                builder.where('category_name', 'like', `%${category_name}%`);
+            }
+        })
+        .select(
+            knex.raw('count(category_id) OVER() AS recordCount'),
+            'category_id',
+            'category_name',
+        )
+        .limit(paginator.limit)
+        .offset(paginator.offset);
+
+    let totalRecords = 0;
+    results = results.map((result) => {
+        totalRecords = result.recordCount;
+        delete result.recordCount;
+        return result;
+    });
+
+    return {
+        metadata: paginator.getMetadata(totalRecords),
+        categories: results,
+    };
+};
+
+async function updateCategory(category_id, payload) {
+    const old = await categoryRepository()
+        .where('category_id', category_id)
+        .select("*")
+        .first();
+    if (!old) {
+        return null;
+    }
+
+    const newCategory = readCategory(payload);
+
+    // Add this debug log:
+    console.log('Updating category:', { category_id, old, newCategory });
+
+    await categoryRepository()
+        .where('category_id', category_id)
+        .update(newCategory);
+
+    return { ...old, ...newCategory };
+};
+
 module.exports = {
     createCategory,
     deleteCategory,
+    getAllCategories,
+    getCategoryById,
+    getCategoryByName,
+    updateCategory
 };

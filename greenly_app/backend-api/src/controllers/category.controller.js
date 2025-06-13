@@ -29,7 +29,7 @@ async function createCategory(req, res, next) {
         }
         return next(new ApiError(500, 'System error, please try again later.'));
     }
-}
+};
 
 async function deleteCategory(req, res, next) {
     if (!req.session.user) {
@@ -55,9 +55,129 @@ async function deleteCategory(req, res, next) {
         console.error('Delete category error:', error);
         return next(new ApiError(500, 'System error, please try again later.'));
     }
+};
+
+async function getCategoryById(req, res, next) {
+    if (!req.session.user) {
+        return next(new ApiError(401, 'Please log in to perform this task!'));
+    }
+    const userId = req.session.user.u_id;
+    const userRole = await userService.checkRole(userId);
+
+    if (userRole !== 1) { // Assuming role 1 is admin
+        console.log("admin id: ", userId)
+        return next(new ApiError(403, 'Forbidden:  You do not have permission to edit this information!'));
+    }
+    const category_id = req.params.category_id; 
+    if (!category_id) {
+        return next(new ApiError(400, 'Category id is required'));
+    }
+
+    try {
+        const category = await categoriesService.getCategoryById(category_id);
+        if (!category) {
+            return next(new ApiError(404, 'No category found!'));
+        }
+        return res.json(JSend.success({ category_info: category }));
+    } catch (error) {
+        console.error(error);
+        return next(new ApiError(500, 'System error, please try again later.'));
+    }
+};
+
+async function getAllCategories(req, res, next) {
+    if (!req.session.user) {
+        return next(new ApiError(401, 'Please log in to perform this task!'));
+    }
+    const userId = req.session.user.u_id;
+    const userRole = await userService.checkRole(userId);
+
+    if (userRole !== 1) { // Assuming role 1 is admin
+        console.log("admin id: ", userId)
+        return next(new ApiError(403, 'Forbidden:  You do not have permission to edit this information!'));
+    }
+    let result = {
+        categories: [],
+        metadata: {
+            totalRecords: 0,
+            firstPage: 1,
+            lastPage: 1,
+            page: 1,
+            limit: 5,
+        }
+    };
+
+    try {
+        result = await categoriesService.getAllCategories(req.query);
+    } catch (error) {
+        console.error(error);
+        return next(new ApiError(500, 'System error, please try again later.'));
+    }
+
+    return res.json(
+        JSend.success({
+            categories: result.categories,
+            metadata: result.metadata,
+        })
+    );
+};
+
+async function updateCategory(req, res, next) {
+    if (!req.session.user) {
+        return next(new ApiError(401, 'Please log in to perform this task!'));
+    }
+
+    const userId = req.session.user.u_id;
+    const userRole = await userService.checkRole(userId);
+
+    if (userRole !== 1) {
+        return next(new ApiError(403, 'Forbidden: You do not have permission to edit this information!'));
+    }
+
+    try {
+        // Better check for req.body existence
+        if (!req.body || Object.keys(req.body).length === 0) {
+            return next(new ApiError(400, 'Data to update cannot be empty'));
+        }
+
+        const category_id = req.params.category_id;
+        if (!category_id) {
+            return next(new ApiError(400, 'Category ID is required'));
+        }
+
+        // Debug logs
+        console.log('Request body:', req.body);
+        console.log('Category ID to update:', category_id);
+
+        const currentCategory = await categoriesService.getCategoryById(category_id);
+        if (!currentCategory) {
+            return next(new ApiError(404, 'Category not found'));
+        }
+
+        // Check if category_name exists in body and is different
+        if (req.body.category_name && req.body.category_name !== currentCategory.category_name) {
+            const existingCategory = await categoriesService.getCategoryByName(req.body.category_name);
+            if (existingCategory) {
+                return next(new ApiError(400, 'Category name already exists'));
+            }
+        }
+
+        const updatedCategory = await categoriesService.updateCategory(category_id, req.body);
+        if (!updatedCategory) {
+            return next(new ApiError(404, 'Category not found'));
+        }
+
+        return res.json(JSend.success({ category: updatedCategory }));
+    } catch (error) {
+        console.error('Update category error:', error);
+        return next(new ApiError(500, 'Error updating category'));
+    }
 }
 
 module.exports = {
     createCategory,
     deleteCategory,
+    getCategoryById,
+    getAllCategories,
+    updateCategory
 };

@@ -17,7 +17,7 @@ USE greenly_db;
 -- DROP TABLE IF EXISTS accounts;
 DROP TABLE IF EXISTS users;
 -- DROP TABLE IF EXISTS roles;
--- DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS category;
 
 -- ========================================
 -- BẢNG roles: Lưu vai trò người dùng (admin, user, moderator)
@@ -53,6 +53,8 @@ CREATE TABLE users (
 
 select * from users;
 
+update users set role_id=1 where u_email = 'ngothuythanhtam1509203@gmail.com';
+
 -- ========================================
 -- BẢNG accounts: Thông tin đăng nhập tài khoản
 -- ========================================
@@ -69,9 +71,9 @@ select * from users;
 -- ========================================
 CREATE TABLE category (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
-    category_name VARCHAR(100)
+    category_name VARCHAR(100) unique
 );
-
+select * from category;
 -- ========================================
 -- BẢNG moment: Bài đăng hành động vì môi trường của người dùng
 -- Một moment là một bài đăng có thể đính kèm nhiều ảnh hoặc video.
