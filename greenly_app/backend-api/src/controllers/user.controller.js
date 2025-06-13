@@ -4,9 +4,6 @@ const JSend = require('../jsend');
 const { validationResult } = require('express-validator');
 const sendMail = require('../middlewares/sendMail');
 
-const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = process.env;
-
 async function register(req, res, next) {
     console.log('Request Body:', req.body); // Log form data (excluding file)
     console.log('Uploaded File (Controller):', req.file); // Log file details in controller

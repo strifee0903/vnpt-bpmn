@@ -195,7 +195,14 @@ async function checkAdminSessionTimeout(session) {
 };
 
 async function getUserById(id) {
-    return userRepository().where({u_id: id}).select('*').first();
+    const user = await userRepository()
+        .where({ u_id: id })
+        .select('*')
+        .first();
+
+    if (user) {delete user.u_pass;}
+
+    return user;
 };
 
 async function updateUser(id, payload) {

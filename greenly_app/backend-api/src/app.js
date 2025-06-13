@@ -47,11 +47,13 @@ const usersRouter = require('./routes/user.router')
 const bpmnRouter = require("./routes/bpmn.router");
 const webRouter = require('./routes/verification.router')
 const categoriesRouter = require('./routes/category.router');
+const moment = require('./routes/moment.router');
 
 usersRouter.setup(app);
 bpmnRouter.setup(app);
 webRouter.setup(app);
-categoriesRouter.setup(app)
+categoriesRouter.setup(app);
+moment.setup(app);
 
 // Handle 404 response
 app.use(resourceNotFound);

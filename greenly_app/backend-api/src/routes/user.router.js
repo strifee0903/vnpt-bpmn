@@ -179,7 +179,7 @@ module.exports.setup = (app) => {
      *                   type: object
      *                   properties:
      *                     contact:
-     *                       $ref: '#/components/schemas/User'
+     *                       $ref: '#/components/schemas/Users'
      *       404:
      *         description: Not Found - Resource not found
      *         $ref: '#/components/responses/404'

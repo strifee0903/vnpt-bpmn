@@ -61,18 +61,10 @@ async function getCategoryById(req, res, next) {
     if (!req.session.user) {
         return next(new ApiError(401, 'Please log in to perform this task!'));
     }
-    const userId = req.session.user.u_id;
-    const userRole = await userService.checkRole(userId);
-
-    if (userRole !== 1) { // Assuming role 1 is admin
-        console.log("admin id: ", userId)
-        return next(new ApiError(403, 'Forbidden:  You do not have permission to edit this information!'));
-    }
     const category_id = req.params.category_id; 
     if (!category_id) {
         return next(new ApiError(400, 'Category id is required'));
     }
-
     try {
         const category = await categoriesService.getCategoryById(category_id);
         if (!category) {
@@ -88,13 +80,6 @@ async function getCategoryById(req, res, next) {
 async function getAllCategories(req, res, next) {
     if (!req.session.user) {
         return next(new ApiError(401, 'Please log in to perform this task!'));
-    }
-    const userId = req.session.user.u_id;
-    const userRole = await userService.checkRole(userId);
-
-    if (userRole !== 1) { // Assuming role 1 is admin
-        console.log("admin id: ", userId)
-        return next(new ApiError(403, 'Forbidden:  You do not have permission to edit this information!'));
     }
     let result = {
         categories: [],

@@ -5,18 +5,8 @@ USE greenly_db;
 -- ========================================
 -- XÓA CÁC BẢNG NẾU ĐÃ TỒN TẠI
 -- ========================================
--- DROP TABLE IF EXISTS notification;
--- DROP TABLE IF EXISTS participation;
--- DROP TABLE IF EXISTS campaign;
--- DROP TABLE IF EXISTS diary;
--- DROP TABLE IF EXISTS contribution;
--- DROP TABLE IF EXISTS times;
--- DROP TABLE IF EXISTS vote;
--- DROP TABLE IF EXISTS media;
--- DROP TABLE IF EXISTS moment;
--- DROP TABLE IF EXISTS accounts;
+DROP TABLE IF EXISTS moment;
 DROP TABLE IF EXISTS users;
--- DROP TABLE IF EXISTS roles;
 DROP TABLE IF EXISTS category;
 
 -- ========================================
@@ -29,7 +19,6 @@ CREATE TABLE roles (
 INSERT INTO roles (role_name) VALUES 
 ('admin'), ('user'), ('moderator');
 select * from roles;
-
 
 -- ========================================
 -- BẢNG users: Thông tin cá nhân người dùng
@@ -50,21 +39,9 @@ CREATE TABLE users (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (role_id) REFERENCES roles(role_id)
 );
-
+CREATE INDEX idx_users_email ON users(u_email);
 select * from users;
-
 update users set role_id=1 where u_email = 'ngothuythanhtam1509203@gmail.com';
-
--- ========================================
--- BẢNG accounts: Thông tin đăng nhập tài khoản
--- ========================================
--- CREATE TABLE accounts (
---     acc_id INT PRIMARY KEY AUTO_INCREMENT,
---     u_id INT,
---     acc_name VARCHAR(100) UNIQUE,
---     acc_pass VARCHAR(255),
---     FOREIGN KEY (u_id) REFERENCES users(u_id)
--- );
 
 -- ========================================
 -- BẢNG category: Phân loại các hành động vì môi trường
@@ -74,6 +51,7 @@ CREATE TABLE category (
     category_name VARCHAR(100) unique
 );
 select * from category;
+
 -- ========================================
 -- BẢNG moment: Bài đăng hành động vì môi trường của người dùng
 -- Một moment là một bài đăng có thể đính kèm nhiều ảnh hoặc video.
@@ -82,14 +60,35 @@ select * from category;
 -- ========================================
 CREATE TABLE moment (
     moment_id INT PRIMARY KEY AUTO_INCREMENT,
-    u_id INT, -- tài khoản đăng bài
-    moment_content TEXT, -- nội dung chia sẻ hành động
-    moment_img VARCHAR(255), -- ảnh đại diện chính của bài (tuỳ chọn)
-    moment_address VARCHAR(255), -- địa điểm thực hiện hành động
-    category_id INT, -- loại hành động (vd: nhặt rác, trồng cây, v.v.)
+    u_id INT,
+    moment_content TEXT,
+    moment_address VARCHAR(255) DEFAULT NULL, -- địa điểm theo tên (optional)
+    latitude DOUBLE DEFAULT NULL,   -- tọa độ vĩ độ
+    longitude DOUBLE DEFAULT NULL,  -- tọa độ kinh độ
+	moment_type ENUM('diary', 'event', 'report') DEFAULT 'diary',
+    is_public BOOLEAN DEFAULT TRUE, -- true: công khai; false: riêng tư
+    category_id INT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (u_id) REFERENCES users(u_id),
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
+select * from moment;
+-- Truy vấn moment theo user
+CREATE INDEX idx_moment_uid ON moment(u_id);
+
+-- Truy vấn moment theo category (đếm, lọc)
+CREATE INDEX idx_moment_category ON moment(category_id);
+
+-- Tìm theo vị trí địa lý (latitude/longitude)
+CREATE INDEX idx_moment_location ON moment(latitude, longitude);
+
+-- Truy vấn nhanh bài công khai
+CREATE INDEX idx_moment_public ON moment(is_public);
+
+-- Truy vấn moment theo thời gian
+CREATE INDEX idx_moment_created ON moment(created_at);
+
 
 -- ========================================
 -- BẢNG media: Ảnh hoặc video đính kèm bài đăng moment
@@ -110,18 +109,37 @@ CREATE TABLE vote (
     moment_id INT,
     vote_state BOOLEAN, -- true: like, false: dislike
     u_id INT,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (moment_id) REFERENCES moment(moment_id),
 	FOREIGN KEY (u_id) REFERENCES users(u_id),
     primary key(moment_id, u_id)
 );
+-- Đếm/truy vấn vote theo moment
+CREATE INDEX idx_vote_moment ON vote(moment_id);
+
+-- Đếm vote của user (nếu cần)
+CREATE INDEX idx_vote_uid ON vote(u_id);
 
 -- ========================================
--- BẢNG times: Quản lý thời gian đóng góp để chấm điểm
+-- BẢNG comment: Bình luận cho moment
 -- ========================================
-CREATE TABLE times (
-    time_id INT PRIMARY KEY AUTO_INCREMENT,
-    date DATE
+CREATE TABLE comment (
+    comment_id INT PRIMARY KEY AUTO_INCREMENT,
+    moment_id INT,
+    u_id INT,
+    content TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (moment_id) REFERENCES moment(moment_id),
+    FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
+
+-- Tăng tốc truy vấn comment theo moment
+CREATE INDEX idx_comment_moment ON comment(moment_id);
+
+-- Tăng tốc truy vấn comment theo user (nếu cần)
+CREATE INDEX idx_comment_uid ON comment(u_id);
 
 -- ========================================
 -- BẢNG contribution: Ghi nhận điểm đóng góp người dùng theo ngày
@@ -134,18 +152,30 @@ CREATE TABLE contribution (
     FOREIGN KEY (time_id) REFERENCES times(time_id),
 	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
+-- ======= TABLE: contribution =======
+-- Tìm contribution theo user hoặc ngày
+CREATE INDEX idx_contribution_uid ON contribution(u_id);
+CREATE INDEX idx_contribution_time ON contribution(time_id);
 
+-- ======= TABLE: campaign =======
+-- Tìm campaign theo user
+CREATE INDEX idx_campaign_uid ON campaign(u_id);
+
+-- ======= TABLE: participation =======
+-- Tìm người tham gia theo campaign hoặc user
+CREATE INDEX idx_participation_campaign ON participation(campaign_id);
+CREATE INDEX idx_participation_uid ON participation(u_id);
 -- ========================================
 -- BẢNG diary: Nhật ký hoạt động phân loại rác / hành động vì môi trường
 -- ========================================
-CREATE TABLE diary (
-    diary_id INT PRIMARY KEY AUTO_INCREMENT,
-    u_id INT,
-    category_id INT, 
-    state ENUM('not started', 'in progress', 'completed'), 
-	FOREIGN KEY (u_id) REFERENCES users(u_id),
-    FOREIGN KEY (category_id) REFERENCES category(category_id)
-);
+-- CREATE TABLE diary (
+--     diary_id INT PRIMARY KEY AUTO_INCREMENT,
+--     u_id INT,
+--     category_id INT, 
+--     state ENUM('not started', 'in progress', 'completed'), 
+-- 	FOREIGN KEY (u_id) REFERENCES users(u_id),
+--     FOREIGN KEY (category_id) REFERENCES category(category_id)
+-- );
 
 -- ========================================
 -- BẢNG campaign: Quản lý chiến dịch môi trường lớn
