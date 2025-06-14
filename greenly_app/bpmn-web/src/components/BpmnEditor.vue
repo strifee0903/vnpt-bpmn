@@ -12,6 +12,13 @@
           <button v-if="selectedProcessId" class="btn btn-primary mb-3" @click="update">
             Cập nhật
           </button>
+          <button
+            v-if="selectedProcessId"
+            class="btn btn-primary mb-3 del-bnt"
+            @click="deleteProcess"
+          >
+            Xóa
+          </button>
         </div>
         <div class="mb-3 position-relative">
           <input
@@ -309,6 +316,30 @@ const update = async () => {
     notify('Lỗi khi cập nhật quy trình: ' + err.message)
   }
 }
+const deleteProcess = () => {
+  if (!selectedProcessId.value) {
+    notify('Vui lòng chọn quy trình để xóa')
+    return
+  }
+
+  if (!confirm('Bạn có chắc chắn muốn xóa quy trình này?')) {
+    return
+  }
+
+  axios
+    .delete(`/api/v1/bpmn/${selectedProcessId.value}`)
+    .then(() => {
+      notify('Quy trình đã được xóa thành công')
+      fetchProcesses() // Refresh the process list
+      selectedProcessId.value = null
+      processName.value = ''
+      modeler.value.clear()
+    })
+    .catch((err) => {
+      notify('Lỗi khi xóa quy trình: ' + err.message)
+      console.error('Lỗi khi xóa quy trình:', err)
+    })
+}
 </script>
 
 <style scoped>
@@ -318,12 +349,12 @@ const update = async () => {
   .container-fluid {
     height: 100%;
   } */
-/* .update-bnt {
+.del-bnt {
   position: absolute;
   width: 100px;
   height: 40px;
   bottom: 10px;
   right: 10px;
   z-index: 1000;
-} */
+}
 </style>
