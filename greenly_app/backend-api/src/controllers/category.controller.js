@@ -18,7 +18,10 @@ async function createCategory(req, res, next) {
         if (!req.body.category_name) {
             return next(new ApiError(400, 'Please fill in all information.'));
         }
-        const result = await categoriesService.createCategory(req.body);
+        const result = await categoriesService.createCategory({
+            ...req.body,
+            category_image: req.file ? `/public/uploads/categories/${req.file.filename}` : '/public/uploads/categories/',
+        });
         return res
             .status(201)
             .json(JSend.success({ result, message: 'Category created successfully!' }));

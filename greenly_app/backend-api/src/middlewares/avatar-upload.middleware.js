@@ -5,7 +5,7 @@ const ApiError = require('../api-error');
 // Cấu hình lưu file nếu có
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-        cb(null, './public/uploads/');
+        cb(null, './public/uploads/avatars');
     },
     filename: function (req, file, cb) {
         const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1e9);

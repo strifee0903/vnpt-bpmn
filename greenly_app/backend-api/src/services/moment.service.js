@@ -3,7 +3,11 @@ const Paginator = require('./paginator');
 
 function momentRepository() {
     return knex('moment');
-}
+};
+
+function mediaRepository() {
+    return knex('media');
+};
 
 function readMoment(payload) {
     const moment = {
@@ -28,7 +32,23 @@ function readMoment(payload) {
     });
 
     return moment;
-}
+};
+
+function readMedia(payload){
+    const media = {
+        media_id: payload.media_id,
+        moment_id: payload.moment_id,
+        media_url: payload.media_url,
+    };
+    // Remove undefined/null values
+    Object.keys(media).forEach(key => {
+        if (media[key] === undefined || media[key] === null) {
+            delete media[key];
+        }
+    });
+
+    return media;
+};
 
 async function createMoment(payload, files = []) {
     const moment = readMoment(payload);
@@ -66,7 +86,7 @@ async function createMoment(payload, files = []) {
     });
 }
 
-async function getMomentById(momentId) {
+async function getMomentByMomentId(momentId) {
     try {
         const moment = await knex('moment')
             .where('moment_id', momentId)
@@ -89,10 +109,10 @@ async function getMomentById(momentId) {
         console.error('Get moment error:', error);
         throw error;
     }
-}
+};
 
 module.exports = {
     createMoment,
-    getMomentById,
+    getMomentByMomentId,
     momentRepository
 };

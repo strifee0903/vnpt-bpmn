@@ -10,6 +10,7 @@ function readCategory(payload) {
     const category = {
         category_id: payload.category_id,
         category_name: payload.category_name,
+        category_image: payload.category_image,
     };
     Object.keys(category).forEach(key => {
         if (category[key] === undefined || category[key] === null) {
@@ -98,6 +99,10 @@ async function updateCategory(category_id, payload) {
 
     const newCategory = readCategory(payload);
 
+    if(!old.category_image){
+        delete newCategory.category_image; // Ensure category_image is not updated if it was not provided
+    }
+
     // Add this debug log:
     console.log('Updating category:', { category_id, old, newCategory });
 
@@ -105,7 +110,22 @@ async function updateCategory(category_id, payload) {
         .where('category_id', category_id)
         .update(newCategory);
 
-    return { ...old, ...newCategory };
+    if(
+        payload.category_image &&
+        old.category_image &&
+        payload.category_image !== old.category_image &&
+        old.category_image.startsWith('/public/uploads/categories')
+    ){
+        unlink(`.${old.category_image}`, (err) => { });
+    }
+
+    const updatedCategory = await categoryRepository()
+        .where('category_id', category_id)
+        .select('*')
+        .first();
+
+    // return { ...old, ...newCategory };
+    return updatedCategory;
 };
 
 module.exports = {

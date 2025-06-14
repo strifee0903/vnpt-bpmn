@@ -244,7 +244,7 @@ async function updateUser(id, payload) {
         payload.u_avt &&
         existingUser.u_avt &&
         payload.u_avt !== existingUser.u_avt &&
-        existingUser.u_avt.startsWith('/public/uploads')
+        existingUser.u_avt.startsWith('/public/uploads/avatars')
     ) {
         unlink(`.${existingUser.u_avt}`, (err) => { });
     }

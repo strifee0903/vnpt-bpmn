@@ -29,6 +29,10 @@ components:
         category_name:
           type: string
           description: name
+        categoryImage:
+          type: string
+          format: binary
+          description: category image
 
     PaginationMetadata:
       type: object

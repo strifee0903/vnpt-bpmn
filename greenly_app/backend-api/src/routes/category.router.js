@@ -2,9 +2,7 @@ const express = require("express");
 const router = express.Router();
 const categoryController = require('../controllers/category.controller');
 const { methodNotAllowed } = require('../controllers/errors.controller');
-const multer = require('multer');
-const upload = multer(); // Create multer instance
-const imgUpload = require('../middlewares/img-upload.middleware');
+const { categoryUpload } = require('../middlewares/img-upload.middleware'); 
 
 module.exports.setup = (app) => {
     app.use('/api/category', router);
@@ -19,7 +17,25 @@ module.exports.setup = (app) => {
      *       content:
      *         multipart/form-data:
      *           schema:
-     *             $ref: '#/components/schemas/category'
+      *             type: object
+     *             properties:
+     *               category_id:
+     *                 type: integer
+     *                 readOnly: true
+     *                 description: name
+     *               category_name:
+     *                 type: string
+     *                 description: name of the category
+     *               category_image:
+     *                 type: string
+     *                 readOnly: true
+     *                 description: image of the category
+     *               categoryImage:
+     *                 type: string
+     *                 format: binary
+     *                 writeOnly: true
+     *                 description: The image file for the category (optional)
+     * 
      *     tags:
      *       - category
      *     responses:
@@ -44,7 +60,7 @@ module.exports.setup = (app) => {
      *       500:
      *         description: Internal Server Error
      */
-    router.post('/createCategory', imgUpload, categoryController.createCategory);
+    router.post('/createCategory', categoryUpload, categoryController.createCategory);
 
     /**
      * @swagger
@@ -189,7 +205,16 @@ module.exports.setup = (app) => {
      *             properties:
      *               category_name:
      *                 type: string
-     *                 description: The new name for the category    
+     *                 description: The new name for the category 
+     *               category_image:
+     *                 type: string
+     *                 readOnly: true
+     *                 description: image of the category
+     *               categoryImage:
+     *                 type: string
+     *                 format: binary
+     *                 writeOnly: true
+     *                 description: The new image for the category (optional)
      *     responses:
      *       200:
      *         description: Category updated successfully
@@ -224,7 +249,7 @@ module.exports.setup = (app) => {
      *       500:
      *         description: Internal server error
      */
-    router.patch('/update/:category_id', upload.none() ,categoryController.updateCategory);
+    router.patch('/update/:category_id', categoryUpload ,categoryController.updateCategory);
 
 
     router.all('/:id', methodNotAllowed);

@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const momentController = require('../controllers/moment.controller');
 const { methodNotAllowed } = require('../controllers/errors.controller');
-const imgUpload = require('../middlewares/img-upload.middleware');
+const { momentUpload } = require('../middlewares/img-upload.middleware'); 
+
 module.exports.setup = (app) => {
     app.use('/api/moment', router);
 /**
@@ -82,6 +83,6 @@ module.exports.setup = (app) => {
  *       500:
  *         description: Internal Server Error
  */
-    router.post('/new', imgUpload, momentController.createMoment);
+    router.post('/new', momentUpload, momentController.createMoment);
 
 };

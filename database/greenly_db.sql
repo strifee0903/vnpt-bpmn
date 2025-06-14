@@ -76,6 +76,25 @@ CREATE TABLE moment (
     FOREIGN KEY (category_id) REFERENCES category(category_id)
 );
 select * from moment;
+create view view_moments as 
+	select 
+		u.u_name, 
+		m.moment_id, 
+		m.moment_content,
+        m.moment_address,
+        m.latitude,
+        m.longitude, 
+		m.moment_type,
+        m.is_public,
+        m.created_at,
+        m.updated_at,
+        media.media_url
+	from moment as m 
+	join category as c on m.category_id = c.category_id
+    join users as u on m.u_id = u.u_id
+    join media on m.moment_id = media.moment_id;
+    
+select * from view_moments;
 -- Truy vấn moment theo user
 CREATE INDEX idx_moment_uid ON moment(u_id);
 
@@ -148,9 +167,10 @@ CREATE INDEX idx_comment_uid ON comment(u_id);
 -- ========================================
 CREATE TABLE contribution (
     contr_id INT PRIMARY KEY AUTO_INCREMENT,
-    time_id INT,
     u_id INT,
     eco_point INT,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (time_id) REFERENCES times(time_id),
 	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
