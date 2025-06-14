@@ -34,22 +34,6 @@ function readMoment(payload) {
     return moment;
 };
 
-function readMedia(payload){
-    const media = {
-        media_id: payload.media_id,
-        moment_id: payload.moment_id,
-        media_url: payload.media_url,
-    };
-    // Remove undefined/null values
-    Object.keys(media).forEach(key => {
-        if (media[key] === undefined || media[key] === null) {
-            delete media[key];
-        }
-    });
-
-    return media;
-};
-
 async function createMoment(payload, files = []) {
     const moment = readMoment(payload);
 
@@ -86,6 +70,117 @@ async function createMoment(payload, files = []) {
     });
 };
 
+/**hàm để khi vào trang cá nhân của người khác thì có thể xem hết tất cả bài viết ở trạng thái public của người đó.*/
+async function getPublicMomentsByUserId(u_id) {
+    try {
+        // 1. Lấy tất cả moments công khai của người dùng
+        const moments = await momentRepository()
+            .where({ u_id, is_public: true })
+            .orderBy('created_at', 'desc'); // optional: sắp xếp mới nhất trước
+
+        // 2. Với mỗi moment, lấy media tương ứng
+        const result = await Promise.all(moments.map(async (moment) => {
+            const media = await mediaRepository()
+                .where('moment_id', moment.moment_id)
+                .select('media_url');
+
+            return {
+                ...moment,
+                media_urls: media.map(m => m.media_url),
+            };
+        }));
+
+        return result;
+    } catch (error) {
+        console.error('Error fetching public moments:', error);
+        throw error;
+    }
+};
+
+async function getAllPublicMoments(query) {
+    const { page = 1, limit = 5 } = query;
+    const paginator = new Paginator(page, limit);
+    try {
+        // 1. Lấy moments công khai có phân trang
+        const moments = await momentRepository()
+            .where('is_public', true)
+            .orderBy('created_at', 'desc')
+            .limit(paginator.limit)
+            .offset(paginator.offset);
+
+        let totalRecords = await momentRepository()
+            .where('is_public', true)
+            .count('moment_id as count')
+            .first();
+
+        totalRecords = totalRecords?.count || 0;
+
+        // 2. Gắn ảnh cho mỗi moment
+        const result = await Promise.all(
+            moments.map(async (moment) => {
+                const media = await mediaRepository()
+                    .where('moment_id', moment.moment_id)
+                    .select('media_url');
+
+                return {
+                    ...moment,
+                    media_urls: media.map(m => m.media_url)
+                };
+            })
+        );
+
+        return {
+            metadata: paginator.getMetadata(totalRecords),
+            moments: result
+        };
+    } catch (error) {
+        console.error('Error fetching public moments:', error);
+        throw error;
+    }
+};
+
+async function getAllMyMoments(query) {
+    const { u_id, page = 1, limit = 5 } = query;
+    const paginator = new Paginator(page, limit);
+    try {
+        // 1. Lấy tất cả bài viết (không phân biệt public/private)
+        const moments = await momentRepository()
+            .where('u_id', u_id)
+            .orderBy('created_at', 'desc')
+            .limit(paginator.limit)
+            .offset(paginator.offset);
+
+        let totalRecords = await momentRepository()
+            .where('u_id', u_id)
+            .count('moment_id as count')
+            .first();
+
+        totalRecords = totalRecords?.count || 0;
+
+        // 2. Gắn ảnh cho mỗi moment
+        const result = await Promise.all(
+            moments.map(async (moment) => {
+                const media = await mediaRepository()
+                    .where('moment_id', moment.moment_id)
+                    .select('media_url');
+
+                return {
+                    ...moment,
+                    media_urls: media.map(m => m.media_url)
+                };
+            })
+        );
+
+        return {
+            metadata: paginator.getMetadata(totalRecords),
+            moments: result
+        };
+    } catch (error) {
+        console.error('Error fetching personal moments:', error);
+        throw error;
+    }
+};
+
 async function getMomentByMomentId(momentId) {
     try {
         const moment = await knex('moment')
@@ -114,5 +209,7 @@ async function getMomentByMomentId(momentId) {
 module.exports = {
     createMoment,
     getMomentByMomentId,
-    momentRepository
+    getPublicMomentsByUserId,
+    getAllPublicMoments,
+    getAllMyMoments,
 };

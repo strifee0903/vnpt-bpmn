@@ -150,7 +150,10 @@ async function updateCategory(req, res, next) {
             }
         }
 
-        const updatedCategory = await categoriesService.updateCategory(category_id, req.body);
+        const updatedCategory = await categoriesService.updateCategory(category_id, {
+            ...req.body,
+            category_image: req.file ? `/public/uploads/categories/${req.file.filename}` : currentCategory.category_image,
+        });
         if (!updatedCategory) {
             return next(new ApiError(404, 'Category not found'));
         }

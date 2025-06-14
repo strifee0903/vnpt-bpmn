@@ -257,13 +257,15 @@ module.exports.setup = (app) => {
      *                           category_id:
      *                             type: integer
      *                             readOnly: true
-     *                           category_name:
-     *                             type: string
-     *                             description: Name of the category
      *                           category_image:
      *                             type: string
      *                             readOnly: true
      *                             description: image of the category
+     *                           categoryImage:
+     *                             type: string
+     *                             format: binary
+     *                             writeOnly: true
+     *                             description: The image file for the category (optional)
      *       400:
      *         description: Bad request - Missing or invalid data / Duplicate category name
      *       401:

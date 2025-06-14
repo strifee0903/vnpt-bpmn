@@ -98,9 +98,12 @@ async function updateCategory(category_id, payload) {
         return null;
     }
 
-    const newCategory = readCategory(payload);
+    const newCategory = {
+        category_name: payload.category_name,
+        category_image: payload.category_image,
+    };
 
-    if(!old.category_image){
+    if (!newCategory.category_image){
         delete newCategory.category_image; // Ensure category_image is not updated if it was not provided
     }
 
@@ -108,7 +111,7 @@ async function updateCategory(category_id, payload) {
     console.log('Updating category:', { category_id, old, newCategory });
 
     await categoryRepository()
-        .where('category_id', category_id)
+        .where({category_id: category_id})
         .update(newCategory);
 
     if(
