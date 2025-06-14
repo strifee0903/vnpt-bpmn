@@ -39,7 +39,7 @@ CREATE TABLE users (
     last_login TIMESTAMP NULL DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (role_id) REFERENCES roles(role_id)
+    FOREIGN KEY (role_id) REFERENCES roles(role_id) on delete cascade
 );
 CREATE INDEX idx_users_email ON users(u_email);
 select * from users;
@@ -74,8 +74,8 @@ CREATE TABLE moment (
     category_id INT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (u_id) REFERENCES users(u_id),
-    FOREIGN KEY (category_id) REFERENCES category(category_id)
+    FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade,
+    FOREIGN KEY (category_id) REFERENCES category(category_id) on delete cascade
 );
 select * from moment;
 create view view_moments as 
@@ -122,7 +122,7 @@ CREATE TABLE media (
     media_id INT PRIMARY KEY AUTO_INCREMENT,
     moment_id INT, -- bài đăng mà media này thuộc về
     media_url VARCHAR(255), -- đường dẫn tới file ảnh/video
-    FOREIGN KEY (moment_id) REFERENCES moment(moment_id)
+    FOREIGN KEY (moment_id) REFERENCES moment(moment_id) on delete cascade
 );
 select * from media;
 -- ========================================
@@ -134,8 +134,8 @@ CREATE TABLE vote (
     u_id INT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (moment_id) REFERENCES moment(moment_id),
-	FOREIGN KEY (u_id) REFERENCES users(u_id),
+    FOREIGN KEY (moment_id) REFERENCES moment(moment_id) on delete cascade,
+	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade,
     primary key(moment_id, u_id)
 );
 -- Đếm/truy vấn vote theo moment
@@ -154,8 +154,8 @@ CREATE TABLE comment (
     content TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (moment_id) REFERENCES moment(moment_id),
-    FOREIGN KEY (u_id) REFERENCES users(u_id)
+    FOREIGN KEY (moment_id) REFERENCES moment(moment_id) on delete cascade,
+    FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
 );
 
 -- Tăng tốc truy vấn comment theo moment
@@ -173,8 +173,8 @@ CREATE TABLE contribution (
     eco_point INT,
 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (time_id) REFERENCES times(time_id),
-	FOREIGN KEY (u_id) REFERENCES users(u_id)
+    FOREIGN KEY (time_id) REFERENCES times(time_id) on delete cascade,
+	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
 );
 -- ======= TABLE: contribution =======
 -- Tìm contribution theo user hoặc ngày
@@ -213,7 +213,7 @@ CREATE TABLE campaign (
     start_date DATE,
     end_date DATE,
     status ENUM('not started', 'in progress', 'completed'), 
-	FOREIGN KEY (u_id) REFERENCES users(u_id)
+	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
 );
 
 -- ========================================
