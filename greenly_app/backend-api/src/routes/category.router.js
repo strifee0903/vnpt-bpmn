@@ -131,6 +131,10 @@ module.exports.setup = (app) => {
      *                           category_name:
      *                             type: string
      *                             description: Name of the category
+     *                           category_image:
+     *                             type: string
+     *                             readOnly: true
+     *                             description: image of the category
      *                     metadata:
      *                       $ref: '#/components/schemas/PaginationMetadata'
      *       400:
@@ -171,7 +175,23 @@ module.exports.setup = (app) => {
      *                   description: The response status
      *                   enum: [success]
      *                 data:
-     *                   $ref: '#/components/schemas/category'
+     *                   type: object
+     *                   properties:
+     *                     categories:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         properties:
+     *                           category_id:
+     *                             type: integer
+     *                             readOnly: true
+     *                           category_name:
+     *                             type: string
+     *                             description: Name of the category
+     *                           category_image:
+     *                             type: string
+     *                             readOnly: true
+     *                             description: image of the category
      *       400:
      *         description: Invalid request, missing or invalid fields
      *       404:
@@ -229,15 +249,21 @@ module.exports.setup = (app) => {
      *                 data:
      *                   type: object
      *                   properties:
-     *                     category:
-     *                       type: object
-     *                       properties:
-     *                         category_id:
-     *                           type: integer
-     *                           example: 3
-     *                         category_name:
-     *                           type: string
-     *                           example: "New Category Name"
+     *                     categories:
+     *                       type: array
+     *                       items:
+     *                         type: object
+     *                         properties:
+     *                           category_id:
+     *                             type: integer
+     *                             readOnly: true
+     *                           category_name:
+     *                             type: string
+     *                             description: Name of the category
+     *                           category_image:
+     *                             type: string
+     *                             readOnly: true
+     *                             description: image of the category
      *       400:
      *         description: Bad request - Missing or invalid data / Duplicate category name
      *       401:

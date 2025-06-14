@@ -71,6 +71,7 @@ async function getAllCategories(query) {
             knex.raw('count(category_id) OVER() AS recordCount'),
             'category_id',
             'category_name',
+            'category_image'
         )
         .limit(paginator.limit)
         .offset(paginator.offset);

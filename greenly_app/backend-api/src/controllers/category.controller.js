@@ -20,7 +20,7 @@ async function createCategory(req, res, next) {
         }
         const result = await categoriesService.createCategory({
             ...req.body,
-            category_image: req.file ? `/public/uploads/categories/${req.file.filename}` : '/public/uploads/categories/',
+            category_image: req.file ? `/public/uploads/categories/${req.file.filename}` : '/public/images/default_category_img.jpg',
         });
         return res
             .status(201)

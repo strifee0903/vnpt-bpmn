@@ -84,7 +84,7 @@ async function createMoment(payload, files = []) {
             throw error; // Re-throw to trigger transaction rollback
         }
     });
-}
+};
 
 async function getMomentByMomentId(momentId) {
     try {
