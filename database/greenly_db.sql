@@ -43,16 +43,18 @@ CREATE TABLE users (
 );
 CREATE INDEX idx_users_email ON users(u_email);
 select * from users;
-update users set role_id=1 where u_email = 'ngothuythanhtam1509203@gmail.com';
+update users set role_id=1 where u_email = 'ntthanhtamforwork@gmail.com';
 
 -- ========================================
 -- BẢNG category: Phân loại các hành động vì môi trường
 -- ========================================
 CREATE TABLE category (
     category_id INT PRIMARY KEY AUTO_INCREMENT,
-    category_name VARCHAR(100) unique
+    category_name VARCHAR(100) unique,
+    category_image VARCHAR(255)
 );
 select * from category;
+
 
 -- ========================================
 -- BẢNG moment: Bài đăng hành động vì môi trường của người dùng
