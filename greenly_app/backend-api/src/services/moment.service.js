@@ -139,22 +139,26 @@ async function getAllPublicMoments(query) {
     }
 };
 
-async function getAllMyMoments(query) {
-    const { u_id, page = 1, limit = 5 } = query;
+async function getAllMyMoments(u_id, query) {
+    const { page = 1, limit = 5, is_public } = query;
     const paginator = new Paginator(page, limit);
+
     try {
-        // 1. Lấy tất cả bài viết (không phân biệt public/private)
-        const moments = await momentRepository()
-            .where('u_id', u_id)
-            .orderBy('created_at', 'desc')
+        // 1. Build query
+        const baseQuery = momentRepository().where('u_id', u_id);
+
+        // Nếu có lọc is_public thì thêm điều kiện
+        if (is_public !== undefined) {
+            baseQuery.andWhere('is_public', is_public === 'true' || is_public === true);
+        }
+
+        const moments = await baseQuery
+            .clone()
             .limit(paginator.limit)
             .offset(paginator.offset);
 
-        let totalRecords = await momentRepository()
-            .where('u_id', u_id)
-            .count('moment_id as count')
-            .first();
-
+        const totalRecordsQuery = baseQuery.clone().count('moment_id as count').first();
+        let totalRecords = await totalRecordsQuery;
         totalRecords = totalRecords?.count || 0;
 
         // 2. Gắn ảnh cho mỗi moment
@@ -162,11 +166,11 @@ async function getAllMyMoments(query) {
             moments.map(async (moment) => {
                 const media = await mediaRepository()
                     .where('moment_id', moment.moment_id)
-                    .select('media_url');
+                    .select('media_id','media_url');
 
                 return {
                     ...moment,
-                    media_urls: media.map(m => m.media_url)
+                    media
                 };
             })
         );
@@ -181,35 +185,143 @@ async function getAllMyMoments(query) {
     }
 };
 
-async function getMomentByMomentId(momentId) {
+async function getMomentDetailById(moment_id) {
     try {
-        const moment = await knex('moment')
-            .where('moment_id', momentId)
+        const moment = await momentRepository()
+            .where('moment_id', moment_id)
             .first();
 
-        if (!moment) {
-            return null;
-        }
+        if (!moment) return null;
 
-        // Get associated media
-        const media = await knex('media')
-            .where('moment_id', momentId)
-            .select('media_url');
+        const media = await mediaRepository()
+            .where('moment_id', moment_id)
+            .select('media_id','media_url');
+
+        const user = await knex('users')
+            .where('u_id', moment.u_id)
+            .select('u_id', 'u_name', 'u_avt')
+            .first();
+
+        const category = await knex('category')
+            .where('category_id', moment.category_id)
+            .select('category_id', 'category_name')
+            .first();
 
         return {
             ...moment,
-            media_urls: media.map(m => m.media_url)
+            media,
+            author: user || null,
+            category: category || null
         };
     } catch (error) {
-        console.error('Get moment error:', error);
+        console.error('Error fetching moment detail:', error);
         throw error;
     }
 };
 
+async function updateMoment(moment_id, user_id, data, files = []) {
+    return await knex.transaction(async trx => {
+        const existing = await trx('moment').where({ moment_id, u_id: user_id }).first();
+        if (!existing) return null;
+
+        const updated = {
+            moment_content: data.moment_content,
+            moment_type: data.moment_type,
+            is_public: data.is_public,
+            category_id: data.category_id,
+            moment_address: data.moment_address,
+            latitude: data.latitude,
+            longitude: data.longitude,
+            updated_at: knex.fn.now(),
+        };
+
+        Object.keys(updated).forEach((key) => {
+            if (updated[key] === undefined || updated[key] === null) {
+                delete updated[key];
+            }
+        });
+
+        await trx('moment').where({ moment_id }).update(updated);
+
+        // 1. Delete old media by media_id if provided
+        const mediaIdsToDelete = data.media_ids_to_delete;
+        let normalizedDeleteList = [];
+
+        if (mediaIdsToDelete) {
+            if (Array.isArray(mediaIdsToDelete)) {
+                normalizedDeleteList = mediaIdsToDelete.map(id => parseInt(id)).filter(id => !isNaN(id));
+            } else if (typeof mediaIdsToDelete === 'string') {
+                const parsed = parseInt(mediaIdsToDelete);
+                if (!isNaN(parsed)) {
+                    normalizedDeleteList = [parsed];
+                }
+            } else if (typeof mediaIdsToDelete === 'number') {
+                normalizedDeleteList = [mediaIdsToDelete];
+            }
+        }
+
+        console.log('Media IDs to delete:', normalizedDeleteList); // Debug log
+
+        if (normalizedDeleteList.length > 0) {
+            // First, check what media exists for this moment (for security)
+            const existingMedia = await trx('media')
+                .where({ moment_id })
+                .whereIn('media_id', normalizedDeleteList)
+                .select('media_id', 'media_url');
+
+            console.log('Existing media to delete:', existingMedia); // Debug log
+
+            // Delete the media by media_id
+            const deleteResult = await trx('media')
+                .where({ moment_id }) // Ensure we only delete media from this moment
+                .whereIn('media_id', normalizedDeleteList)
+                .del();
+
+            console.log('Delete result:', deleteResult, 'rows deleted'); // Debug log
+        }
+
+        // 2. Add new images if any
+        if (files && files.length > 0) {
+            const mediaRecords = files.map(file => ({
+                moment_id,
+                media_url: `/public/uploads/moments/${file.filename}`,
+            }));
+            await trx('media').insert(mediaRecords);
+        }
+
+        // 3. Return updated data with media_urls and media_ids
+        const updatedMedia = await trx('media')
+            .where({ moment_id })
+            .select('media_id', 'media_url');
+
+        delete updated.updated_at;
+
+        return {
+            moment_id,
+            ...updated,
+            media_urls: updatedMedia.map(m => m.media_url),
+            media: updatedMedia // Include both media_id and media_url for frontend
+        };
+    });
+};
+
+async function deleteMoment(moment_id, user_id) {
+    const moment = await momentRepository().where({ moment_id, u_id: user_id }).first();
+
+    if (!moment) return null;
+
+    await mediaRepository().where({ moment_id }).del();
+    await momentRepository().where({ moment_id }).del();
+
+    return moment;
+};
+
 module.exports = {
     createMoment,
-    getMomentByMomentId,
+    getMomentDetailById,
     getPublicMomentsByUserId,
     getAllPublicMoments,
     getAllMyMoments,
+    updateMoment,
+    deleteMoment
 };

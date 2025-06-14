@@ -149,11 +149,11 @@ async function getUser(req, res, next) {
 
 
 async function updateUser(req, res, next) {
-    if (Object.keys(req.body).length === 0 && !req.file) {
-        return next(new ApiError(400, 'Invalid update information.'));
-    }
     if (!req.session.user) {
         return res.json(JSend.success('Please log in to perform this task!'));
+    }
+    if (Object.keys(req.body).length === 0 && !req.file) {
+        return next(new ApiError(400, 'Invalid update information.'));
     }
     const id = req.session.user.u_id;
     try {
