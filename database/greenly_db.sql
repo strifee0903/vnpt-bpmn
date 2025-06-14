@@ -8,6 +8,8 @@ USE greenly_db;
 DROP TABLE IF EXISTS moment;
 DROP TABLE IF EXISTS users;
 DROP TABLE IF EXISTS category;
+DROP TABLE IF EXISTS moment;
+DROP TABLE IF EXISTS media;
 
 -- ========================================
 -- BẢNG roles: Lưu vai trò người dùng (admin, user, moderator)
@@ -101,7 +103,7 @@ CREATE TABLE media (
     media_url VARCHAR(255), -- đường dẫn tới file ảnh/video
     FOREIGN KEY (moment_id) REFERENCES moment(moment_id)
 );
-
+select * from media;
 -- ========================================
 -- BẢNG vote: Lượt đánh giá (like/dislike) cho moment
 -- ========================================
@@ -270,18 +272,6 @@ INSERT INTO users (role_id, u_name, u_birthday, u_address) VALUES
 (2, 'Ivy Vo', '1993-11-11', '606 Solar Blvd, Vung Tau'),
 (3, 'Jacky Ngo', '1997-04-04', '707 Wind Rd, Bien Hoa');
 
--- INSERT INTO accounts (u_id, acc_name, acc_pass) VALUES
--- (1, 'alice123', 'passAlice'),
--- (2, 'bobtran', 'bobpass'),
--- (3, 'cle1990', 'charliepass'),
--- (4, 'duyen01', 'duyenpass'),
--- (5, 'emilydao', 'emilypass'),
--- (6, 'fvu92', 'frankpass'),
--- (7, 'g_ho', 'giangpass'),
--- (8, 'hbui', 'helenpass'),
--- (9, 'ivyvo', 'ivypass'),
--- (10, 'jackyn', 'jackypass');
-
 INSERT INTO category (category_name) VALUES
 ('Nhặt rác'),
 ('Trồng cây'),
@@ -293,18 +283,6 @@ INSERT INTO category (category_name) VALUES
 ('Sử dụng năng lượng mặt trời'),
 ('Sống xanh'),
 ('Làm sạch bãi biển');
-
-INSERT INTO moment (acc_id, moment_content, moment_img, moment_address, category_id) VALUES
-(1, 'Tôi vừa hoàn thành việc nhặt rác tại công viên.', 'img1.jpg', 'Công viên Lê Văn Tám', 1),
-(2, 'Chúng tôi đã trồng 5 cây xanh ở sân trường.', 'img2.jpg', 'Trường Đại học Cần Thơ', 2),
-(3, 'Tái chế chai nhựa thành chậu cây.', 'img3.jpg', 'Nhà riêng', 3),
-(4, 'Hạn chế sử dụng máy lạnh để tiết kiệm điện.', NULL, 'Văn phòng', 4),
-(5, 'Sử dụng bình nước cá nhân thay vì chai nhựa.', 'img4.jpg', 'Ký túc xá', 5),
-(6, 'Chia sẻ thông tin về phân loại rác.', NULL, 'Online', 6),
-(7, 'Đi xe đạp đi làm thay vì dùng xe máy.', 'img5.jpg', 'Đường Nguyễn Văn Cừ', 7),
-(8, 'Lắp đặt pin mặt trời trên mái nhà.', 'img6.jpg', 'Thủ Đức', 8),
-(9, 'Sống xanh bằng cách trồng rau sạch.', NULL, 'Ban công nhà', 9),
-(10, 'Tham gia làm sạch bãi biển cùng nhóm tình nguyện.', 'img7.jpg', 'Bãi biển Cần Giờ', 10);
 
 INSERT INTO vote (moment_id, vote_state, acc_id) VALUES
 (1, TRUE, 2),
