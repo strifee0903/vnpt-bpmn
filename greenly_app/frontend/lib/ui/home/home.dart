@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../shared/appbar.dart'; // Import the custom AppBar
 import '../../components/colors.dart';
-import '../auth/auth_manager.dart'; // Import colors.dart
+import '../auth/auth_manager.dart';
+import '../../shared/main_layout.dart'; // Import MainLayout
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.green,
         useMaterial3: true,
       ),
-      home: const HomePage(),
+      home: const MainLayout(), // Sử dụng MainLayout làm trang chính
     );
   }
 }
@@ -30,62 +30,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _currentIndex = 0; // Track the selected tab
-
-  void _onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index; // Update the selected index
-    });
-    // Add navigation logic here if needed
-  }
-
   @override
   Widget build(BuildContext context) {
     final authManager = Provider.of<AuthManager>(context);
     return Scaffold(
-      backgroundColor: background, // Đặt màu nền toàn bộ Scaffold là background
+      backgroundColor: background, // Đặt màu nền là background
       body: SafeArea(
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Header with Farm Name and Weather Info
-              Padding(
-                padding: const EdgeInsets.all(12.0),
-                child: Row(
-                  children: [
-                    const Icon(Icons.location_on, color: Colors.red),
-                    const SizedBox(width: 8),
-                    const Text(
-                      'Can Tho',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontFamily: 'Oktah',
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                    const Spacer(),
-                    // const Icon(Icons.more_vert),
-                    PopupMenuButton<String>(
-                      icon: const Icon(Icons.more_vert),
-                      onSelected: (value) {
-                        if (value == 'logout') {
-                          authManager.logout(); // Gọi logout
-                        }
-                      },
-                      itemBuilder: (BuildContext context) => const [
-                        PopupMenuItem<String>(
-                          value: 'logout',
-                          child: Text('Log out'),
-                        ),
-                      ],
-                    ),
+              // Header with Farm Name and Weather Info (không có trong code hiện tại)
 
-                  ],
-                ),
-              ),
               // Greenly App Section with Overlay Box and Add Post
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                padding: const EdgeInsets.all(15),
                 child: Stack(
                   alignment: Alignment.center,
                   clipBehavior: Clip.none, // Allow overlay to extend
@@ -152,7 +110,8 @@ class _HomePageState extends State<HomePage> {
                               scale: 0.8,
                               child: FloatingActionButton(
                                 onPressed: () {
-                                  _onTabTapped(2);
+                                  Navigator.pushNamed(context,
+                                      '/moments'); // Điều hướng trực tiếp đến Moments
                                 },
                                 backgroundColor: button,
                                 elevation: 0,
@@ -227,11 +186,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      // Custom Bottom AppBar
-      bottomNavigationBar: CustomBottomAppBar(
-        currentIndex: _currentIndex,
-        onTap: _onTabTapped,
-      ),
     );
   }
 
@@ -242,7 +196,7 @@ class _HomePageState extends State<HomePage> {
       child: Card(
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(25),
         ),
         color: backgroundColor,
         child: InkWell(
@@ -251,6 +205,8 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushNamed(context, '/myDiary');
             } else if (title == 'Green Library') {
               Navigator.pushNamed(context, '/greenLibrary');
+            } else if (title == 'Campaign') {
+              Navigator.pushNamed(context, '/campaign');
             }
           },
           child: Stack(

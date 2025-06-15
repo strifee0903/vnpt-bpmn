@@ -8,6 +8,11 @@ import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
 import 'ui/slpash_screen.dart';
+import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
+import 'ui/pages/mydiary/mydiary.dart'; // Import MyDiary
+import 'ui/pages/campaign/campaign.dart'; // Import Campaign
+import 'ui/moments/moments.dart'; // Import MomentsPage
+import 'shared/main_layout.dart';
 
 class SlideUpRoute extends PageRouteBuilder {
   final Widget page;
@@ -261,7 +266,7 @@ class _MyAppState extends State<MyApp> {
                   } else if (!authManager.isAuth) {
                     homeScreen = const AuthScreen();
                   } else {
-                    homeScreen = const HomePage();
+                    homeScreen = const MainLayout();
                   }
 
                   return MaterialApp(
@@ -273,13 +278,24 @@ class _MyAppState extends State<MyApp> {
                       AuthScreen.routeName: (ctx) =>
                           const SafeArea(child: AuthScreen()),
                       HomePage.routeName: (ctx) =>
-                          const SafeArea(child: HomePage()),
+                          const SafeArea(child: MainLayout()),
+                      '/myDiary': (ctx) => const SafeArea(child: MyDiary()),
+                      '/greenLibrary': (ctx) =>
+                          const SafeArea(child: GreenLibrary()),
+                      '/campaign': (ctx) => const SafeArea(child: Campaign()),
+                      '/moments': (ctx) => const SafeArea(child: MomentsPage()),
                     },
                     onGenerateRoute: (settings) {
                       print('🔴 Navigating to route: ${settings.name}');
                       switch (settings.name) {
                         case HomePage.routeName:
-                          return SlideUpRoute(page: const HomePage());
+                          return SlideUpRoute(page: const MainLayout());
+                        case '/myDiary':
+                          return SlideRightRoute(page: const MyDiary());
+                        case '/greenLibrary':
+                          return FadeSlideRoute(page: const GreenLibrary());
+                        case '/moments':
+                          return ScaleRoute(page: const MomentsPage());
                         default:
                           print('🔴 Unknown route: ${settings.name}');
                           return SlideUpRoute(page: const NotFoundScreen());

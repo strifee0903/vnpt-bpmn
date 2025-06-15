@@ -55,6 +55,7 @@ flutter:
     - assets/images/contribution.png
     - assets/images/greenlibrary.jpg
     - assets/images/campaign.jpg
+    - assets/images/background.jpg
     - assets/images/cleanriver.jpg
     - assets/images/mydiary.png
     - assets/images/we.png
@@ -62,6 +63,7 @@ flutter:
     - assets/images/planting.png
     - assets/images/post1.jpg
     - assets/images/post2.jpg
+    - assets/images/pcampaign.jpg
     - assets/
     - assets/images/
     - .env

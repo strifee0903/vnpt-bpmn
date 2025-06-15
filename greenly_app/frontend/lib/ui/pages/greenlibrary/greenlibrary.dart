@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../components/colors.dart'; // Import colors.dart
 import '../../../services/process_service.dart'; // Import ProcessService
 import 'package:greenly_app/models/process.dart'; // Import file model Process
+import '../greenlibrary/process_card.dart'; // Import ProcessCard
 
 class GreenLibrary extends StatefulWidget {
   const GreenLibrary({super.key});
@@ -31,122 +32,84 @@ class _GreenLibraryState extends State<GreenLibrary> {
   // Biến để lưu thông tin process khi nhấn View Details
   Process? _selectedProcess;
 
-  // Hàm hiển thị dialog với thông tin process
+  // Hàm hiển thị dialog với thông tin process (lấy từ /api/v1/bpmn/all)
   Future<void> _showProcessDialog(String processId) async {
     try {
-      final response = await ProcessService().getProcessDetails(processId);
+      final response =
+          await ProcessService().getAllProcesses(); // Sử dụng /api/v1/bpmn/all
       print('Response Status: ${response.statusCode}');
       print('Response Body: ${response.body}'); // Debug dữ liệu thô
       print('BASE_URL: ${ProcessService.baseUrl}'); // Debug BASE_URL
 
       if (response.statusCode == 200) {
         final jsonData = jsonDecode(response.body); // Giải mã JSON
-        // Xử lý trường hợp JSON có key 'data'
+        print('Decoded JSON: $jsonData'); // Debug JSON đã giải mã
+
+        // Kiểm tra cấu trúc JSON và lấy process đầu tiên
         if (jsonData is Map<String, dynamic> && jsonData['data'] != null) {
-          final processData = (jsonData['data'] as List<dynamic>).firstWhere(
-            (item) => item['process_id'] == processId,
-            orElse: () =>
-                throw Exception('Process not found with ID: $processId'),
-          );
-          if (processData is! Map<String, dynamic>) {
-            throw Exception('Invalid process data format');
+          final processList = jsonData['data'] as List<dynamic>;
+          if (processList.isNotEmpty) {
+            final processData =
+                processList[0]; // Lấy process đầu tiên (chỉ có 1 process)
+            if (processData is! Map<String, dynamic>) {
+              throw Exception('Invalid process data format: $processData');
+            }
+            final process = Process.fromJson(processData);
+
+            setState(() {
+              _selectedProcess = process;
+            });
+
+            // Hiển thị dialog bằng ProcessCard
+            showDialog(
+              context: context,
+              builder: (context) => ProcessCard(
+                  processData: _selectedProcess), // Sử dụng processData
+            );
+          } else {
+            throw Exception('No processes found in the response');
           }
-          final process = Process.fromJson(processData);
-
-          setState(() {
-            _selectedProcess = process;
-          });
-
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text(
-                'Process Details',
-                style:
-                    TextStyle(fontFamily: 'Oktah', fontWeight: FontWeight.w900),
-              ),
-              content: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text('Process ID: ${_selectedProcess?.processId ?? 'N/A'}',
-                        style: const TextStyle(fontFamily: 'Oktah')),
-                    Text('Name: ${_selectedProcess?.name ?? 'N/A'}',
-                        style: const TextStyle(fontFamily: 'Oktah')),
-                    const SizedBox(height: 10),
-                    const Text('Steps:',
-                        style: TextStyle(
-                            fontFamily: 'Oktah', fontWeight: FontWeight.bold)),
-                    ..._selectedProcess?.steps.map((step) => Text(
-                              '- ${step.stepId} (${step.type})',
-                              style: const TextStyle(fontFamily: 'Oktah'),
-                            )) ??
-                        [
-                          const Text('No steps available',
-                              style: TextStyle(fontFamily: 'Oktah'))
-                        ],
-                    const SizedBox(height: 10),
-                    const Text('Flows:',
-                        style: TextStyle(
-                            fontFamily: 'Oktah', fontWeight: FontWeight.bold)),
-                    ..._selectedProcess?.flows.map((flow) => Text(
-                              '- ${flow.flowId} (${flow.sourceRef} -> ${flow.targetRef})',
-                              style: const TextStyle(fontFamily: 'Oktah'),
-                            )) ??
-                        [
-                          const Text('No flows available',
-                              style: TextStyle(fontFamily: 'Oktah'))
-                        ],
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Đóng dialog
-                  },
-                  child: const Text('Close',
-                      style:
-                          TextStyle(fontFamily: 'Oktah', color: Colors.green)),
-                ),
-              ],
-            ),
-          );
         } else {
           throw Exception('Unexpected JSON structure: $jsonData');
         }
       } else {
-        throw Exception('Failed to load process: ${response.body}');
+        throw Exception('Failed to load processes: ${response.body}');
       }
     } catch (e) {
       print('Error in _showProcessDialog: $e'); // Debug lỗi chi tiết
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Error',
-              style:
-                  TextStyle(fontFamily: 'Oktah', fontWeight: FontWeight.w900)),
-          content: Text('Failed to load process: $e',
-              style: const TextStyle(fontFamily: 'Oktah')),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop(); // Đóng dialog
-              },
-              child: const Text('Close',
-                  style: TextStyle(fontFamily: 'Oktah', color: Colors.green)),
-            ),
-          ],
-        ),
-      );
+      _showErrorDialog(e.toString());
     }
+  }
+
+  // Hàm hiển thị dialog lỗi
+  void _showErrorDialog(String errorMessage) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Error',
+            style: TextStyle(fontFamily: 'Oktah', fontWeight: FontWeight.w900)),
+        content: Text('Failed to load process: $errorMessage',
+            style: const TextStyle(fontFamily: 'Oktah')),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Đóng dialog
+            },
+            child: const Text('Close',
+                style: TextStyle(fontFamily: 'Oktah', color: Colors.green)),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: background,
       appBar: AppBar(
+        backgroundColor: background,
+        elevation: 0, // Không có bóng đổ
         title: const Text(
           'Green Library',
           style: TextStyle(
@@ -163,7 +126,8 @@ class _GreenLibraryState extends State<GreenLibrary> {
             final campaign = campaigns[index];
             return GestureDetector(
               onTap: () {
-                _showProcessDialog(campaign['processId']);
+                _showProcessDialog(campaign[
+                    'processId']); // Gọi với processId nhưng lấy từ /api/v1/bpmn/all
               },
               child: Container(
                 margin: const EdgeInsets.only(bottom: 20.0),

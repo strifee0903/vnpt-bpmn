@@ -1,14 +1,17 @@
+import 'dart:convert';
+
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const process_url = 'http://192.168.1.141:3000/api/v1/bpmn';
+const process_url = 'http://192.168.1.91:3000/api';
 
 class ProcessService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? process_url;
 
-  // Lấy thông tin chi tiết của một quy trình dựa trên process_id
+  // Lấy thông tin chi tiết của một quy trình dựa trên processId
   Future<http.Response> getProcessDetails(String processId) async {
-    final uri = Uri.parse('$baseUrl/v1/bpmn/all');
+    final uri = Uri.parse(
+        '$baseUrl/processes/$processId'); // Sửa endpoint để lấy theo processId
     print('😵‍💫😵‍💫😵‍💫Fetching process details from: ${uri.toString()}');
     final response = await http.get(uri);
 
@@ -19,9 +22,11 @@ class ProcessService {
     return response;
   }
 
-  // Lấy danh sách tất cả các quy trình
+  // Lấy danh sách tất cả các quy trình (sử dụng /api/v1/bpmn/all)
   Future<http.Response> getAllProcesses() async {
-    final uri = Uri.parse('$baseUrl/processes/');
+    final uri = Uri.parse(
+        '$baseUrl/v1/bpmn/all'); // Sửa endpoint thành /api/v1/bpmn/all
+    print('😵‍💫😵‍💫😵‍💫Fetching all processes from: ${uri.toString()}');
     final response = await http.get(uri);
 
     if (response.statusCode != 200) {

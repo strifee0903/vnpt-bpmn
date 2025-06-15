@@ -36,7 +36,12 @@ class MyDiary extends StatelessWidget {
     ];
 
     return Scaffold(
+      backgroundColor: background,
+      // Đặt màu nền toàn trang là background
       appBar: AppBar(
+        backgroundColor: background,
+        elevation: 0, // White background
+        // Black text color
         title: const Text(
           'My Diary',
           style: TextStyle(
@@ -112,14 +117,15 @@ class MyDiary extends StatelessWidget {
                   return Container(
                     margin: const EdgeInsets.only(bottom: 16.0),
                     decoration: BoxDecoration(
-                      color: background, // Unique background color
+                      color: colors[
+                          'background'], // Sử dụng màu nền từ entryColors
                       borderRadius: BorderRadius.circular(25),
                       boxShadow: [
                         BoxShadow(
                           color: const Color.fromARGB(255, 1, 15, 1)
                               .withAlpha((0.1 * 255).toInt()),
-                          blurRadius: 5,
-                          offset: const Offset(0, 2),
+                          blurRadius: 30,
+                          offset: const Offset(0, 12),
                         ),
                       ],
                     ),

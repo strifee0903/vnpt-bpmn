@@ -51,25 +51,7 @@ class CustomBottomAppBar extends StatelessWidget {
 
     return GestureDetector(
       onTap: () {
-        onTap(index); // Gọi callback để cập nhật currentIndex ở HomePage
-        // Điều hướng đến các trang tương ứng
-        switch (index) {
-          case 0:
-            // Trang Home: Pop đến trang gốc (nếu cần) hoặc không làm gì
-            Navigator.popUntil(context, (route) => route.isFirst);
-            break;
-          case 1:
-            Navigator.pushNamed(context, '/moments'); // Chuyển đến MomentsPage
-            break;
-          case 2:
-            Navigator.pushNamed(
-                context, '/maps'); // Chuyển đến Maps (cần tạo nếu chưa có)
-            break;
-          case 3:
-            Navigator.pushNamed(context,
-                '/profile'); // Chuyển đến Profile (cần tạo nếu chưa có)
-            break;
-        }
+        onTap(index); // Gọi callback để cập nhật currentIndex ở MainLayout
       },
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 300),

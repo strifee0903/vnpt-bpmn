@@ -27,14 +27,26 @@ class Process {
 
   factory Process.fromJson(Map<String, dynamic> json) {
     return Process(
-      processId: json['process_id'].toString(),
+      processId: json['process_id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
       steps: (json['steps'] as List<dynamic>?)
-              ?.map((stepJson) => Step.fromJson(stepJson))
+              ?.map((stepJson) {
+                if (stepJson is Map<String, dynamic>) {
+                  return Step.fromJson(stepJson);
+                }
+                return null;
+              })
+              .whereType<Step>()
               .toList() ??
           [],
       flows: (json['flows'] as List<dynamic>?)
-              ?.map((flowJson) => Flow.fromJson(flowJson))
+              ?.map((flowJson) {
+                if (flowJson is Map<String, dynamic>) {
+                  return Flow.fromJson(flowJson);
+                }
+                return null;
+              })
+              .whereType<Flow>()
               .toList() ??
           [],
     );
@@ -79,10 +91,10 @@ class Step {
 
   factory Step.fromJson(Map<String, dynamic> json) {
     return Step(
-      stepId: json['step_id'].toString(),
-      processId: json['process_id'].toString(),
+      stepId: json['step_id']?.toString() ?? '',
+      processId: json['process_id']?.toString() ?? '',
       name: json['name']?.toString(),
-      type: json['type'].toString(),
+      type: json['type']?.toString() ?? '',
     );
   }
 
@@ -129,11 +141,11 @@ class Flow {
 
   factory Flow.fromJson(Map<String, dynamic> json) {
     return Flow(
-      flowId: json['flow_id'].toString(),
-      processId: json['process_id'].toString(),
-      sourceRef: json['source_ref'].toString(),
-      targetRef: json['target_ref'].toString(),
-      type: json['type'].toString(),
+      flowId: json['flow_id']?.toString() ?? '',
+      processId: json['process_id']?.toString() ?? '',
+      sourceRef: json['source_ref']?.toString() ?? '',
+      targetRef: json['target_ref']?.toString() ?? '',
+      type: json['type']?.toString() ?? '',
     );
   }
 
