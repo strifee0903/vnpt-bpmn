@@ -113,4 +113,6 @@ module.exports.setup = (app) => {
  *         description: Internal server error, failed to create BPMN process 
  */  
   router.put("/:process_id", bpmnController.updateBpmn);
+
+  router.get("/details/:process_id", bpmnController.getProcessDetails);
 };

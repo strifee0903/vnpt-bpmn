@@ -35,6 +35,8 @@ const getAllProcessesWithDetails = async (req, res) => {
     }
 }
 
+
+
 const getProcessXml = async (req, res) => {
     const { process_id } = req.params;
     try {
@@ -77,6 +79,19 @@ const updateBpmn = async (req, res) => {
 };
 
 
+const getProcessDetails = async (req, res) => {
+    const process_id = req.params.process_id;
+    try {
+      const process = await service.getProcessDetails(process_id);
+      if (!process) {
+        return res.status(404).json({ error: "Process not found" }); // Assuming JSend.error is { error: message }
+      }
+      return res.status(200).json({ data: process }); // Send the process data
+    } catch (error) {
+      console.error("Error fetching process details:", error);
+      return res.status(500).json({ error: "Failed to fetch process details" });
+    }
+  };
 module.exports = {
     postProcess: postProcess,
     getProcessXml: getProcessXml,
@@ -84,6 +99,7 @@ module.exports = {
 
     updateBpmn: updateBpmn,
 
-    getAllProcessesWithDetails: getAllProcessesWithDetails
+    getAllProcessesWithDetails: getAllProcessesWithDetails,
+    getProcessDetails: getProcessDetails
 
 };
