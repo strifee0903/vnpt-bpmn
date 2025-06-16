@@ -158,6 +158,8 @@ const createBpmn = async (process) => {
 //   return process.build(json);
 // };
 
+
+
 const getAllProcessesWithDetails = async () => {
   const processes = await knex("processes");
   const result = [];
@@ -257,6 +259,39 @@ const updateProcess = async (process_id, name, xml_content) => {
   }
 };
 
+const getProcessDetails = async (process_id) => {
+  try {
+    const process = await knex("processes").where({ process_id }).first();
+    if (!process) throw new Error("Process not found")
+      else console.log(`Process ${process_id} found.`);
+
+    const steps = await knex("steps").where({ process_id });
+    if (!steps || steps.length === 0) {
+      console.warn(`No steps found for process ${process_id}`);
+    } else {
+      console.log(`Found ${steps.length} steps for process ${process_id}`);
+    }
+
+    const flows = await knex("flows").where({ process_id });
+    if (!flows || flows.length === 0) {
+      console.warn(`No flows found for process ${process_id}`);
+    } else {
+      console.log(`Found ${flows.length} flows for process ${process_id}`);
+    }
+
+    return {
+      process_id: process.process_id,
+      name: process.name,
+      steps: steps || [],
+      flows: flows || [],
+    };
+  }
+  catch (error) {
+    console.error(`Error fetching process details for ${process_id}:`, error);
+    throw error;
+  }
+};
+
 module.exports = {
   createBpmn: createBpmn,
   // buildAllProcessesXml: buildAllProcessesXml,
@@ -267,4 +302,5 @@ module.exports = {
   updateProcess: updateProcess,
 
   getAllProcessesWithDetails: getAllProcessesWithDetails,
+  getProcessDetails: getProcessDetails,
 };
