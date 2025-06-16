@@ -132,21 +132,35 @@ async function checkAdminSession(req, res, next) {
 };
 
 async function getUser(req, res, next) {
-    if (!req.session.user) {
-        return next(new ApiError(401, 'Please log in to see your information!'));
-    }
-    const id = req.session.user.u_id;
-    console.log(id);
-    if (!id) {
-        return next(new ApiError(401, 'You need to log in to view user information.'));
-    }
-    const user = await usersService.getUserById(id);
-    if (!user) {
-        return next(new ApiError(404, 'User not found.'));
-    }
-    return res.json(JSend.success({ message: 'User data', data: user }));
-}
+    try {
+        const sessionUser = req.session.user;
+        const requestedId = req.params?.u_id || sessionUser?.u_id;
 
+        if (!sessionUser) {
+            return next(new ApiError(401, 'Please log in to see user information.'));
+        }
+
+        if (!requestedId) {
+            return next(new ApiError(400, 'User ID is required.'));
+        }
+
+        const user = await usersService.getUserById(requestedId);
+        if (!user) {
+            return next(new ApiError(404, 'User not found.'));
+        }
+
+        const isMe = sessionUser.u_id === parseInt(requestedId);
+
+        return res.json(JSend.success({
+            message: isMe ? 'Your profile' : 'User profile',
+            data: user,
+            isMe
+        }));
+    } catch (error) {
+        console.error('Get user error:', error);
+        return next(new ApiError(500, 'System error while retrieving user.'));
+    }
+};
 
 async function updateUser(req, res, next) {
     if (!req.session.user) {

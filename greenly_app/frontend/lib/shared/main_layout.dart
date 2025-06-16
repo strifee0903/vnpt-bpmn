@@ -5,7 +5,7 @@ import '../components/colors.dart';
 import '../shared/appbar.dart'; // CustomBottomAppBar
 import '../ui/home/home.dart'; // HomePage
 import '../ui/moments/moments.dart'; // MomentsPage
-
+import '../ui/user/userScreen.dart';
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -34,7 +34,7 @@ class _MainLayoutState extends State<MainLayout> {
             HomePage(),
             MomentsPage(),
             Center(child: Text('Maps Page')),
-            Center(child: Text('Profile Page')),
+            UserScreen(), // Assuming UserScreen is defined in your project
           ],
         ),
       ),

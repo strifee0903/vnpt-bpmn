@@ -138,6 +138,8 @@ CREATE TABLE vote (
 	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade,
     primary key(moment_id, u_id)
 );
+
+select * from vote;
 -- Đếm/truy vấn vote theo moment
 CREATE INDEX idx_vote_moment ON vote(moment_id);
 

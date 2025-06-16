@@ -3,8 +3,10 @@ const router = express.Router();
 const { signUpValidation, logInValidation } = require('../middlewares/validation');
 const userController = require('../controllers/user.controller');
 const { avatarUpload } = require('../middlewares/img-upload.middleware'); 
-
 const { methodNotAllowed } = require('../controllers/errors.controller');
+const multer = require('multer');
+const upload = multer();
+
 module.exports.setup = (app) => {
     app.use('/api/users', router);
 
@@ -119,7 +121,7 @@ module.exports.setup = (app) => {
      *         description: Bad Request - Invalid input or missing parameters
      *         $ref: '#/components/responses/400' 
      */
-    router.post('/login/', avatarUpload, logInValidation, userController.login);
+    router.post('/login/', upload.none(), logInValidation, userController.login);
 
     /**
      * @swagger
@@ -153,10 +155,10 @@ module.exports.setup = (app) => {
 
     /** 
      * @swagger
-     * /api/users/info/:
+     * /api/users/myInfo/:
      *   get:
-     *     summary: Get user by ID
-     *     description: Get user by ID
+     *     summary: Returns your user profile
+     *     description: Returns your user profile
      *     tags:
      *       - users
      *     responses:
@@ -183,11 +185,53 @@ module.exports.setup = (app) => {
      *         description: Internal Server Error - Unexpected error on the server
      *         $ref: '#/components/responses/500'
      */
-    router.get('/info/', userController.getUser);
+    router.get('/myInfo/', userController.getUser);
+
+    /** 
+     * @swagger
+     * /api/users/info/{u_id}:
+     *   get:
+     *     summary: Get user profile by ID
+     *     description: Get user profile by ID
+     *     tags:
+     *       - users
+     *     parameters:
+     *       - in: path
+     *         name: u_id
+     *         schema:
+     *           type: integer
+     *         required: true
+     *         description: User ID
+     *     responses:
+     *       200:
+     *         description: A user
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 status:
+     *                   type: string
+     *                   description: The response status
+     *                   enum: [success]
+     *                 data:
+     *                   type: object
+     *                   properties:
+     *                     contact:
+     *                       $ref: '#/components/schemas/Users'
+     *       404:
+     *         description: Not Found - Resource not found
+     *         $ref: '#/components/responses/404'
+     *       500:
+     *         description: Internal Server Error - Unexpected error on the server
+     *         $ref: '#/components/responses/500'
+     */
+    router.get('/info/:u_id', userController.getUser);
+
     /**
      * @swagger
      * /api/users/updateProfile/:
-     *   put:
+     *   patch:
      *     summary: Update user by ID 
      *     description: Update user by ID
      *     requestBody:
@@ -247,7 +291,7 @@ module.exports.setup = (app) => {
      *         description: Internal Server Error - Unexpected error on the server
      *         $ref: '#/components/responses/500'
      */
-    router.put('/updateProfile/', avatarUpload, userController.updateUser);
+    router.patch('/updateProfile/', avatarUpload, userController.updateUser);
 
     /**
      * @swagger

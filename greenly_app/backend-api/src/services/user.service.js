@@ -210,7 +210,6 @@ async function updateUser(id, payload) {
         .where({ u_id: id })
         .select('*')
         .first();
-
     if (!existingUser) {
         return null;
     }
@@ -254,7 +253,7 @@ async function updateUser(id, payload) {
         .where({ u_id: id })
         .select('*')
         .first();
-
+    if (updatedUser) { delete user.u_pass; }
     return updatedUser;
 };
 

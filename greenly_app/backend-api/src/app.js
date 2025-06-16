@@ -48,12 +48,16 @@ const bpmnRouter = require("./routes/bpmn.router");
 const webRouter = require('./routes/verification.router')
 const categoriesRouter = require('./routes/category.router');
 const moment = require('./routes/moment.router');
+const voteRouter = require('./routes/vote.router');
+const campaignRouter = require('./routes/campaign.router');
 
 usersRouter.setup(app);
 bpmnRouter.setup(app);
 webRouter.setup(app);
 categoriesRouter.setup(app);
 moment.setup(app);
+voteRouter.setup(app);
+campaignRouter.setup(app);
 
 // Handle 404 response
 app.use(resourceNotFound);
