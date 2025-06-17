@@ -103,67 +103,41 @@ class ProcessService {
   Future<(List<model.Step>, List<model.Flow>)> fetchProcess() async {
     try {
       final jsonString = {
-        "process_id": "Process_174917473016",
-        "name": "alla",
+        "process_id": "Process_17501703319112",
+        "name": "Quy trình tạo chiến dịch",
         "steps": [
           {
-            "step_id": "Activity_1bwjers",
-            "process_id": "Process_174917473016",
+            "step_id": "Activity_188mawf",
+            "process_id": "Process_17501703319112",
             "name": "Bước 1",
-            "type": "task"
+            "type": "userTask"
           },
           {
-            "step_id": "Activity_1bwjers2",
-            "process_id": "Process_174917473016",
-            "name": "Bước 2",
-            "type": "task"
-          },
-          {
-            "step_id": "Activity_1bwjers3",
-            "process_id": "Process_174917473016",
-            "name": "Bước 3",
-            "type": "task"
-          },
-          {
-            "step_id": "Event_04ypdzx",
-            "process_id": "Process_174917473016",
-            "name": null,
-            "type": "endEvent"
-          },
-          {
-            "step_id": "Event_05b347c",
-            "process_id": "Process_174917473016",
-            "name": null,
+            "step_id": "Event_0kl0q76",
+            "process_id": "Process_17501703319112",
+            "name": "Bắt đầu",
             "type": "startEvent"
+          },
+          {
+            "step_id": "Event_1kk9eqf",
+            "process_id": "Process_17501703319112",
+            "name": "Kết thúc",
+            "type": "endEvent"
           }
         ],
         "flows": [
           {
-            "flow_id": "Flow_0nofpd7",
-            "process_id": "Process_174917473016",
-            "source_ref": "Event_05b347c",
-            "target_ref": "Activity_1bwjers",
+            "flow_id": "Flow_07hfvld",
+            "process_id": "Process_17501703319112",
+            "source_ref": "Event_0kl0q76",
+            "target_ref": "Activity_188mawf",
             "type": "sequenceFlow"
           },
           {
-            "flow_id": "Flow_0nofpd72",
-            "process_id": "Process_174917473016",
-            "source_ref": "Activity_1bwjers",
-            "target_ref": "Activity_1bwjers2",
-            "type": "sequenceFlow"
-          },
-          {
-            "flow_id": "Flow_0nofpd73",
-            "process_id": "Process_174917473016",
-            "source_ref": "Activity_1bwjers2",
-            "target_ref": "Activity_1bwjers3",
-            "type": "sequenceFlow"
-          },
-          {
-            "flow_id": "Flow_1jq1vr4",
-            "process_id": "Process_174917473016",
-            "source_ref": "Activity_1bwjers3",
-            "target_ref": "Event_04ypdzx",
+            "flow_id": "Flow_1m8wbms",
+            "process_id": "Process_17501703319112",
+            "source_ref": "Activity_188mawf",
+            "target_ref": "Event_1kk9eqf",
             "type": "sequenceFlow"
           }
         ]

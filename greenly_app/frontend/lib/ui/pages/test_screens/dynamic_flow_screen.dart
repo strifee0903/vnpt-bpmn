@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:greenly_app/models/process.dart' as model;
 import 'package:greenly_app/services/process_service.dart';
-import 'screenRegister.dart';
+import 'screen_register.dart';
 
 class DynamicFlowPage extends StatefulWidget {
   const DynamicFlowPage({super.key});
@@ -67,7 +67,7 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
         current = nextFlow.targetRef;
 
         final nextStep = steps.firstWhere(
-          (s) => s.stepId == current && s.type == 'task',
+          (s) => s.stepId == current && s.type == 'userTask',
           orElse: () => model.Step(
             stepId: '',
             processId: '',
