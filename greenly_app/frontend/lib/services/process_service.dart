@@ -1,5 +1,8 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:greenly_app/models/process.dart' as model;
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -95,5 +98,85 @@ class ProcessService {
     }
 
     return response;
+  }
+
+  Future<(List<model.Step>, List<model.Flow>)> fetchProcess() async {
+    try {
+      final jsonString = {
+        "process_id": "Process_174917473016",
+        "name": "alla",
+        "steps": [
+          {
+            "step_id": "Activity_1bwjers",
+            "process_id": "Process_174917473016",
+            "name": "Bước 1",
+            "type": "task"
+          },
+          {
+            "step_id": "Activity_1bwjers2",
+            "process_id": "Process_174917473016",
+            "name": "Bước 2",
+            "type": "task"
+          },
+          {
+            "step_id": "Activity_1bwjers3",
+            "process_id": "Process_174917473016",
+            "name": "Bước 3",
+            "type": "task"
+          },
+          {
+            "step_id": "Event_04ypdzx",
+            "process_id": "Process_174917473016",
+            "name": null,
+            "type": "endEvent"
+          },
+          {
+            "step_id": "Event_05b347c",
+            "process_id": "Process_174917473016",
+            "name": null,
+            "type": "startEvent"
+          }
+        ],
+        "flows": [
+          {
+            "flow_id": "Flow_0nofpd7",
+            "process_id": "Process_174917473016",
+            "source_ref": "Event_05b347c",
+            "target_ref": "Activity_1bwjers",
+            "type": "sequenceFlow"
+          },
+          {
+            "flow_id": "Flow_0nofpd72",
+            "process_id": "Process_174917473016",
+            "source_ref": "Activity_1bwjers",
+            "target_ref": "Activity_1bwjers2",
+            "type": "sequenceFlow"
+          },
+          {
+            "flow_id": "Flow_0nofpd73",
+            "process_id": "Process_174917473016",
+            "source_ref": "Activity_1bwjers2",
+            "target_ref": "Activity_1bwjers3",
+            "type": "sequenceFlow"
+          },
+          {
+            "flow_id": "Flow_1jq1vr4",
+            "process_id": "Process_174917473016",
+            "source_ref": "Activity_1bwjers3",
+            "target_ref": "Event_04ypdzx",
+            "type": "sequenceFlow"
+          }
+        ]
+      };
+      final data = json.decode(jsonEncode(jsonString));
+      final steps =
+          (data['steps'] as List).map((e) => model.Step.fromJson(e)).toList();
+      final flows =
+          (data['flows'] as List).map((e) => model.Flow.fromJson(e)).toList();
+      return (steps, flows);
+    } catch (e) {
+      print('Error fetching process: $e');
+      return (<model.Step>[], <model.Flow>[]);
+    }
   }
 }
