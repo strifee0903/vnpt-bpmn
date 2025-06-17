@@ -22,7 +22,9 @@ const createBpmn = async (process) => {
     "bpmn:startEvent",
     "bpmn:endEvent",
     "bpmn:task",
-    "bpmn:exclusiveGateway",
+    "bpmn:userTask",
+    "bpmn:subProcess",
+    "bpmn:callActivity",
   ];
   const steps = [];
 
@@ -158,8 +160,6 @@ const createBpmn = async (process) => {
 //   return process.build(json);
 // };
 
-
-
 const getAllProcessesWithDetails = async () => {
   const processes = await knex("processes");
   const result = [];
@@ -262,8 +262,8 @@ const updateProcess = async (process_id, name, xml_content) => {
 const getProcessDetails = async (process_id) => {
   try {
     const process = await knex("processes").where({ process_id }).first();
-    if (!process) throw new Error("Process not found")
-      else console.log(`Process ${process_id} found.`);
+    if (!process) throw new Error("Process not found");
+    else console.log(`Process ${process_id} found.`);
 
     const steps = await knex("steps").where({ process_id });
     if (!steps || steps.length === 0) {
@@ -285,8 +285,7 @@ const getProcessDetails = async (process_id) => {
       steps: steps || [],
       flows: flows || [],
     };
-  }
-  catch (error) {
+  } catch (error) {
     console.error(`Error fetching process details for ${process_id}:`, error);
     throw error;
   }
