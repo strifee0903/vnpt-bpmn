@@ -11,9 +11,15 @@ CustomPaletteProvider.$inject = ['create', 'elementFactory', 'palette', 'transla
 CustomPaletteProvider.prototype.getPaletteEntries = function () {
   const { _create: create, _elementFactory: elementFactory, _translate: t } = this
 
-  function createElement(type, options = {}) {
+  function createElement(type, options = {}, defaultName = '') {
     return function (event) {
-      const shape = elementFactory.createShape({ type, ...options })
+      const shape = elementFactory.createShape({
+        type,
+        businessObject: {
+          name: defaultName,
+        },
+        ...options,
+      })
       create.start(event, shape)
     }
   }
@@ -24,8 +30,8 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
       className: 'bpmn-icon-start-event-none',
       title: t('Bắt đầu'),
       action: {
-        dragstart: createElement('bpmn:StartEvent'),
-        click: createElement('bpmn:StartEvent'),
+        dragstart: createElement('bpmn:StartEvent', {}, 'Bắt đầu'),
+        click: createElement('bpmn:StartEvent', {}, 'Bắt đầu'),
       },
     },
     'create.end-event': {
@@ -33,17 +39,17 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
       className: 'bpmn-icon-end-event-none',
       title: t('Kết thúc'),
       action: {
-        dragstart: createElement('bpmn:EndEvent'),
-        click: createElement('bpmn:EndEvent'),
+        dragstart: createElement('bpmn:EndEvent', 'Kết thúc'),
+        click: createElement('bpmn:EndEvent', 'Kết thúc'),
       },
     },
     'create.user-task': {
       group: 'activity',
       className: 'bpmn-icon-user-task',
-      title: t('User Task'),
+      title: t('Bước 1'),
       action: {
-        dragstart: createElement('bpmn:UserTask'),
-        click: createElement('bpmn:UserTask'),
+        dragstart: createElement('bpmn:UserTask', 'Bước 1'),
+        click: createElement('bpmn:UserTask', 'Bước 1'),
       },
     },
     'create.gateway': {
