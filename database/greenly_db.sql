@@ -208,16 +208,19 @@ CREATE INDEX idx_participation_uid ON participation(u_id);
 -- ========================================
 CREATE TABLE campaign (
     campaign_id INT PRIMARY KEY AUTO_INCREMENT,
+    category_id INT,
     u_id INT, -- người khởi tạo chiến dịch
     title VARCHAR(255),
     description TEXT,
     location VARCHAR(255),
     start_date DATE,
     end_date DATE,
-    status ENUM('not started', 'in progress', 'completed'), 
-	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    status ENUM('not started', 'in progress', 'completed') default null, 
+	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade,
+    FOREIGN KEY (category_id) REFERENCES category(category_id) on delete cascade
 );
-
+select * from campaign;
 -- ========================================
 -- BẢNG participation: Theo dõi người dùng tham gia chiến dịch
 -- ========================================
@@ -226,9 +229,11 @@ CREATE TABLE participation (
     campaign_id INT,       -- ID chiến dịch
     u_id INT,            -- ID tài khoản người tham gia
     joined_at DATETIME,    -- Thời điểm tham gia
+    status BOOLEAN DEFAULT 0,
     FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id),
 	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
+select * from participation;
 
 -- ========================================
 -- BẢNG notification: Gửi thông báo cho người dùng (ví dụ: được cộng điểm, nhắc nhở tham gia chiến dịch)

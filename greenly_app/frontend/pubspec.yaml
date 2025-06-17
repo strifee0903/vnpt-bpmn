@@ -71,6 +71,7 @@ flutter:
     - assets/images/post1.jpg
     - assets/images/post2.jpg
     - assets/images/pcampaign.jpg
+    - assets/images/default_category_img.jpg
     - assets/
     - assets/images/
     - .env

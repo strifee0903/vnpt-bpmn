@@ -46,21 +46,62 @@ class User {
   }
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      u_id: int.parse(json['u_id'].toString()),
-      u_email: json['u_email'].toString(),
-      u_name: json['u_name'].toString(),
-      role_id: json['role_id'] != null
-          ? int.tryParse(json['role_id'].toString())
-          : null,
-      u_address: json['u_address'].toString(),
-      u_birthday: json['u_birthday']?.toString(),
-      u_avt: json['u_avt']?.toString(),
-      is_verified: json['is_verified'] != null
-          ? json['is_verified'].toString() == '1'
-          : null,
-      last_login: json['last_login']?.toString(),
-    );
+    print('👤 DEBUG - Parsing user JSON: $json');
+
+    try {
+      // Safe parsing for u_id (required field)
+      final uId = json['u_id'];
+      print('👤 DEBUG - u_id value: $uId (${uId.runtimeType})');
+
+      // Safe parsing for role_id (optional field)
+      final roleId = json['role_id'];
+      print('👤 DEBUG - role_id value: $roleId (${roleId.runtimeType})');
+
+      return User(
+        u_id: _parseIntSafe(uId, 'u_id'),
+        u_email: json['u_email']?.toString() ?? '',
+        u_name: json['u_name']?.toString() ?? '',
+        role_id: roleId != null
+            ? _parseIntSafe(roleId, 'role_id', allowNull: true)
+            : null,
+        u_address: json['u_address']?.toString() ?? '',
+        u_birthday: json['u_birthday']?.toString(),
+        u_avt: json['u_avt']?.toString(),
+        is_verified: json['is_verified'] != null
+            ? (json['is_verified'].toString() == '1' ||
+                json['is_verified'] == true)
+            : null,
+        last_login: json['last_login']?.toString(),
+      );
+    } catch (e, stackTrace) {
+      print('❌ DEBUG - Error parsing User JSON: $e');
+      print('❌ DEBUG - StackTrace: $stackTrace');
+      print('❌ DEBUG - JSON data: $json');
+      rethrow;
+    }
+  }
+
+  // Helper method for safe integer parsing
+  static int _parseIntSafe(dynamic value, String fieldName,
+      {bool allowNull = false}) {
+    if (value == null) {
+      if (allowNull) return 0; // or throw error if required
+      throw FormatException('Required field $fieldName is null');
+    }
+
+    if (value is int) return value;
+
+    if (value is String) {
+      if (value.isEmpty && allowNull) return 0;
+      return int.parse(value);
+    }
+
+    // Try to convert other types to string first
+    try {
+      return int.parse(value.toString());
+    } catch (e) {
+      throw FormatException('Cannot parse $fieldName value "$value" to int');
+    }
   }
 
   Map<String, dynamic> toJson() {

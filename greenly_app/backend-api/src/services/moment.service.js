@@ -47,7 +47,7 @@ async function createMoment(payload, files = []) {
             if (files && files.length > 0) {
                 const mediaRecords = files.map(file => ({
                     moment_id: moment_id,
-                    media_url: `/public/uploads/moments/${file.filename}`
+                    media_url: `/public/uploads/${file.filename}`
                 }));
 
                 await trx('media').insert(mediaRecords);
@@ -100,34 +100,45 @@ async function getPublicMomentsByUserId(u_id) {
 async function getAllPublicMoments(query) {
     const { page = 1, limit = 5 } = query;
     const paginator = new Paginator(page, limit);
+
     try {
-        // 1. Lấy moments công khai có phân trang
         const moments = await momentRepository()
             .where('is_public', true)
             .orderBy('created_at', 'desc')
             .limit(paginator.limit)
             .offset(paginator.offset);
 
-        let totalRecords = await momentRepository()
+        const totalRecords = (await momentRepository()
             .where('is_public', true)
             .count('moment_id as count')
-            .first();
+            .first())?.count || 0;
 
-        totalRecords = totalRecords?.count || 0;
+        const result = await Promise.all(moments.map(async (moment) => {
+            const media = await mediaRepository()
+                .where('moment_id', moment.moment_id)
+                .select('media_url');
 
-        // 2. Gắn ảnh cho mỗi moment
-        const result = await Promise.all(
-            moments.map(async (moment) => {
-                const media = await mediaRepository()
-                    .where('moment_id', moment.moment_id)
-                    .select('media_url');
+            const category = await knex('category')
+                .where('category_id', moment.category_id)
+                .select('category_id', 'category_name')
+                .first();
 
-                return {
-                    ...moment,
-                    media_urls: media.map(m => m.media_url)
-                };
-            })
-        );
+            const user = await knex('users')
+                .where('u_id', moment.u_id)
+                .select('u_id', 'u_name', 'u_avt')
+                .first();
+
+            return {
+                moment_id: moment.moment_id,
+                moment_content: moment.moment_content,
+                moment_address: moment.moment_address,
+                created_at: moment.created_at,
+                moment_type: moment.moment_type,
+                category: category || null,
+                user: user || null,
+                media: media
+            };
+        }));
 
         return {
             metadata: paginator.getMetadata(totalRecords),
@@ -137,7 +148,8 @@ async function getAllPublicMoments(query) {
         console.error('Error fetching public moments:', error);
         throw error;
     }
-};
+}
+
 
 async function getAllMyMoments(u_id, query) {
     const { page = 1, limit = 5, is_public } = query;
@@ -284,7 +296,7 @@ async function updateMoment(moment_id, user_id, data, files = []) {
         if (files && files.length > 0) {
             const mediaRecords = files.map(file => ({
                 moment_id,
-                media_url: `/public/uploads/moments/${file.filename}`,
+                media_url: `/public/uploads/${file.filename}`,
             }));
             await trx('media').insert(mediaRecords);
         }

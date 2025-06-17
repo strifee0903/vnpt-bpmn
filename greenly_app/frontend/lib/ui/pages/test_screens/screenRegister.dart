@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:greenly_app/ui/pages/screens/screen1.dart';
-import 'package:greenly_app/ui/pages/screens/screen2.dart';
-import 'package:greenly_app/ui/pages/screens/screen3.dart';
+import 'screen1.dart';
+import 'screen2.dart';
+import 'screen3.dart';
 
 final Map<String, Widget Function()> screenRegistry = {
   'Bước 1': () => Screen1(),

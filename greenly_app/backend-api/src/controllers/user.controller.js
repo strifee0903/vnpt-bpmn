@@ -19,7 +19,7 @@ async function register(req, res, next) {
         console.log('Constructed User Data:', userData); // Log the final user data
         const result = await usersService.registerUser({
             ...req.body,
-            u_avt: req.file ? `/public/uploads/avatars/${req.file.filename}` : '/public/images/blank_avt.jpg',
+            u_avt: req.file ? `/public/uploads/${req.file.filename}` : '/public/images/blank_avt.jpg',
         });
 
         // Send verification email

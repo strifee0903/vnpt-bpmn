@@ -86,15 +86,15 @@ async function getNewsFeed(req, res, next) {
         const { page, limit } = req.query;
         const result = await momentService.getAllPublicMoments({ page, limit });
 
-        return res.json(
-            JSend.success({
-                ...result
-            })
-        );
+        return res.json(JSend.success({
+            moments: result.moments,
+            metadata: result.metadata
+        }));
     } catch (error) {
         return next(new ApiError(500, 'Error fetching public feed.'));
     }
-};
+}
+
 
 async function getMyMoments(req, res, next) {
     if (!req.session.user) {

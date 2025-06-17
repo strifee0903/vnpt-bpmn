@@ -77,7 +77,7 @@ module.exports.setup = (app) => {
  *                           type: array
  *                           items:
  *                             type: string
- *                             example: /public/uploads/moments/example.jpg
+ *                             example: /public/uploads/example.jpg
  *       401:
  *         description: Unauthorized - User not logged in
  *       500:
@@ -125,7 +125,7 @@ module.exports.setup = (app) => {
      *                           type: array
      *                           items:
      *                             type: string
-     *                             example: /public/uploads/moments/example.jpg
+     *                             example: /public/uploads/example.jpg
      *       401:
      *         description: Unauthorized - User not logged in
      *       500:
