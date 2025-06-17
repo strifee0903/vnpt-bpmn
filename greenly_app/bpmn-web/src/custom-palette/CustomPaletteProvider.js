@@ -15,16 +15,15 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
     return function (event) {
       const shape = elementFactory.createShape({
         type,
-        businessObject: {
-          name: defaultName,
-        },
         ...options,
       })
+      if (defaultName) {
+        shape.businessObject.name = defaultName
+      }
       create.start(event, shape)
     }
   }
-
-  return {
+  const entries = {
     'create.start-event': {
       group: 'event',
       className: 'bpmn-icon-start-event-none',
@@ -39,36 +38,34 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
       className: 'bpmn-icon-end-event-none',
       title: t('Kết thúc'),
       action: {
-        dragstart: createElement('bpmn:EndEvent', 'Kết thúc'),
-        click: createElement('bpmn:EndEvent', 'Kết thúc'),
+        dragstart: createElement('bpmn:EndEvent', {}, 'Kết thúc'),
+        click: createElement('bpmn:EndEvent', {}, 'Kết thúc'),
       },
     },
-    'create.user-task': {
+  }
+  const customSteps = ['Bước 1', 'Bước 2', 'Bước 3']
+  customSteps.forEach((step, index) => {
+    const id = `create.user-task-${index + 1}`
+    entries[id] = {
       group: 'activity',
       className: 'bpmn-icon-user-task',
-      title: t('Bước 1'),
+      title: t(step),
       action: {
-        dragstart: createElement('bpmn:UserTask', 'Bước 1'),
-        click: createElement('bpmn:UserTask', 'Bước 1'),
+        dragstart: createElement('bpmn:UserTask', {}, step),
+        click: createElement('bpmn:UserTask', {}, step),
       },
-    },
-    'create.gateway': {
-      group: 'gateway',
-      className: 'bpmn-icon-gateway-xor',
-      title: t('Exclusive Gateway'),
-      action: {
-        dragstart: createElement('bpmn:ExclusiveGateway'),
-        click: createElement('bpmn:ExclusiveGateway'),
-      },
-    },
-    'create.subprocess': {
-      group: 'activity',
-      className: 'bpmn-icon-subprocess-expanded',
-      title: t('Subprocess'),
-      action: {
-        dragstart: createElement('bpmn:SubProcess', { isExpanded: true }),
-        click: createElement('bpmn:SubProcess', { isExpanded: true }),
-      },
-    },
+    }
+  })
+  return {
+    ...entries,
+    // 'create.sequence-flow': {
+    //   group: 'connect',
+    //   className: 'bpmn-icon-connection-multi',
+    //   title: t('Kết nối'),
+    //   action: {
+    //     dragstart: createElement('bpmn:SequenceFlow'),
+    //     click: createElement('bpmn:SequenceFlow'),
+    //   },
+    // },
   }
 }

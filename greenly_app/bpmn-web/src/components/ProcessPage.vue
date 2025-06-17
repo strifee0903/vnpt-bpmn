@@ -130,8 +130,9 @@ onMounted(async () => {
     },
   })
 
-  await fetchProcesses()
+  // await fetchProcesses()
 })
+
 const notify = (msg) => {
   showToast.value = true
 
@@ -154,7 +155,7 @@ const selectProcess = (proc) => {
 }
 const fetchProcesses = async () => {
   try {
-    const res = await axios.get('/api/v1/bpmn/processes')
+    const res = await axios.get('/api/v1/bpmn/processesss')
     processes.value = res.data.data // [{ process_id, xml_content }]
     console.log('Danh sách quy trình:', res.data.data)
     console.log('Danh sách quy trình:', processes.value)
@@ -212,6 +213,56 @@ const loadProcess = async (id) => {
 
 const exportXML = async () => {
   try {
+    const elements = modeler.value.get('elementRegistry').getAll()
+    const hasStart = elements.some((el) => el.type === 'bpmn:StartEvent')
+    const hasEnd = elements.some((el) => el.type === 'bpmn:EndEvent')
+
+    if (!hasStart || !hasEnd) {
+      notify('Quy trình cần có ít nhất một sự kiện bắt đầu và một kết thúc.')
+      return
+    }
+
+    const flowNodes = elements.filter(
+      (el) => el.type.startsWith('bpmn:') && el.businessObject.$instanceOf('bpmn:FlowNode'),
+    )
+    console.log('Flow nodes:', flowNodes)
+
+    if (flowNodes.length === 0) {
+      notify('Quy trình cần có ít nhất một bước công việc.')
+      return
+    }
+
+    const disconnected = flowNodes.filter((node) => {
+      const incoming = node.incoming || []
+      const outgoing = node.outgoing || []
+
+      if (node.type === 'bpmn:StartEvent') {
+        return outgoing.length === 0
+      } else if (node.type === 'bpmn:EndEvent') {
+        return incoming.length === 0
+      } else {
+        return incoming.length === 0 || outgoing.length === 0
+      }
+    })
+
+    console.log('Disconnected nodes:', disconnected)
+
+    if (disconnected.length > 0) {
+      notify('Tồn tại bước chưa được kết nối hợp lệ trong quy trình.')
+      console.warn('Các node bị ngắt:', disconnected)
+      return
+    }
+
+    const requiredNames = ['Bắt đầu', 'Kết thúc', 'Bước 1', 'Bước 2', 'Bước 3']
+
+    for (const name of requiredNames) {
+      const used = elements.filter((el) => el.name === name)
+      if (used.length > 1) {
+        notify(`Công cụ "${name}" chỉ được sử dụng 1 lần.`)
+        return
+      }
+    }
+
     const { xml } = await modeler.value.saveXML({ format: true })
     console.log('Exported XML:', xml)
 
@@ -253,7 +304,7 @@ const exportXML = async () => {
 
     console.log('BPMN process saved successfully:', result)
     notify('Quy trình đã được lưu thành công: ' + processName)
-    fetchProcesses() // Refresh the process list
+    // fetchProcesses() // Refresh the process list
     return result
   } catch (err) {
     notify('Lỗi khi lưu quy trình: ' + err.message)
