@@ -130,7 +130,7 @@ onMounted(async () => {
     },
   })
 
-  // await fetchProcesses()
+  await fetchProcesses()
 })
 
 const notify = (msg) => {
@@ -155,7 +155,7 @@ const selectProcess = (proc) => {
 }
 const fetchProcesses = async () => {
   try {
-    const res = await axios.get('/api/v1/bpmn/processesss')
+    const res = await axios.get('/api/v1/bpmn/allxml')
     processes.value = res.data.data // [{ process_id, xml_content }]
     console.log('Danh sách quy trình:', res.data.data)
     console.log('Danh sách quy trình:', processes.value)
@@ -304,7 +304,7 @@ const exportXML = async () => {
 
     console.log('BPMN process saved successfully:', result)
     notify('Quy trình đã được lưu thành công: ' + processName)
-    // fetchProcesses() // Refresh the process list
+    fetchProcesses() // Refresh the process list
     return result
   } catch (err) {
     notify('Lỗi khi lưu quy trình: ' + err.message)

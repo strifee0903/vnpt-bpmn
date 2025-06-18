@@ -1,12 +1,9 @@
 import 'dart:convert';
-
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:greenly_app/models/process.dart' as model;
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const process_url = 'http://192.168.1.91:3000/api';
+const process_url = 'http://10.0.2.2:3000/api';
 
 class ProcessService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? process_url;
@@ -102,47 +99,59 @@ class ProcessService {
 
   Future<(List<model.Step>, List<model.Flow>)> fetchProcess() async {
     try {
-      final jsonString = {
-        "process_id": "Process_17501703319112",
-        "name": "Quy trình tạo chiến dịch",
-        "steps": [
-          {
-            "step_id": "Activity_188mawf",
-            "process_id": "Process_17501703319112",
-            "name": "Bước 1",
-            "type": "userTask"
-          },
-          {
-            "step_id": "Event_0kl0q76",
-            "process_id": "Process_17501703319112",
-            "name": "Bắt đầu",
-            "type": "startEvent"
-          },
-          {
-            "step_id": "Event_1kk9eqf",
-            "process_id": "Process_17501703319112",
-            "name": "Kết thúc",
-            "type": "endEvent"
-          }
-        ],
-        "flows": [
-          {
-            "flow_id": "Flow_07hfvld",
-            "process_id": "Process_17501703319112",
-            "source_ref": "Event_0kl0q76",
-            "target_ref": "Activity_188mawf",
-            "type": "sequenceFlow"
-          },
-          {
-            "flow_id": "Flow_1m8wbms",
-            "process_id": "Process_17501703319112",
-            "source_ref": "Activity_188mawf",
-            "target_ref": "Event_1kk9eqf",
-            "type": "sequenceFlow"
-          }
-        ]
-      };
-      final data = json.decode(jsonEncode(jsonString));
+      final uri = Uri.parse(
+          '$baseUrl/v1/bpmn/details/Process_17501703319112'); // Sửa endpoint để lấy theo processId
+      print('😵‍💫😵‍💫😵‍💫Fetching process details from: ${uri.toString()}');
+      final response = await http.get(uri);
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load process details: ${response.body}');
+      }
+      print('😵‍💫😵‍💫😵‍💫Response received successfully: ${response.body}');
+
+      final Map<String, dynamic> jsonResponse =
+          jsonDecode(response.body)['data'];
+      // {
+      //   "process_id": "Process_17501703319112",
+      //   "name": "Quy trình tạo chiến dịch",
+      //   "steps": [
+      //     {
+      //       "step_id": "Activity_188mawf",
+      //       "process_id": "Process_17501703319112",
+      //       "name": "Bước 1",
+      //       "type": "userTask"
+      //     },
+      //     {
+      //       "step_id": "Event_0kl0q76",
+      //       "process_id": "Process_17501703319112",
+      //       "name": "Bắt đầu",
+      //       "type": "startEvent"
+      //     },
+      //     {
+      //       "step_id": "Event_1kk9eqf",
+      //       "process_id": "Process_17501703319112",
+      //       "name": "Kết thúc",
+      //       "type": "endEvent"
+      //     }
+      //   ],
+      //   "flows": [
+      //     {
+      //       "flow_id": "Flow_07hfvld",
+      //       "process_id": "Process_17501703319112",
+      //       "source_ref": "Event_0kl0q76",
+      //       "target_ref": "Activity_188mawf",
+      //       "type": "sequenceFlow"
+      //     },
+      //     {
+      //       "flow_id": "Flow_1m8wbms",
+      //       "process_id": "Process_17501703319112",
+      //       "source_ref": "Activity_188mawf",
+      //       "target_ref": "Event_1kk9eqf",
+      //       "type": "sequenceFlow"
+      //     }
+      //   ]
+      // };
+      final data = jsonResponse;
       final steps =
           (data['steps'] as List).map((e) => model.Step.fromJson(e)).toList();
       final flows =
