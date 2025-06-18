@@ -7,6 +7,8 @@ class Moment {
   final String content;
   final String address;
   final String type;
+  final double? latitude; 
+  final double? longitude; 
   final DateTime createdAt;
   final User user;
   final Category category;
@@ -16,6 +18,8 @@ class Moment {
     required this.id,
     required this.content,
     required this.address,
+    this.latitude,
+    this.longitude,
     required this.type,
     required this.createdAt,
     required this.user,
@@ -50,6 +54,8 @@ class Moment {
         id: _parseIntSafe(momentId, 'moment_id'),
         content: json['moment_content']?.toString() ?? '',
         address: json['moment_address']?.toString() ?? '',
+        latitude: json['latitude']?.toDouble(),
+        longitude: json['longitude']?.toDouble(),
         type: json['moment_type']?.toString() ?? '',
         createdAt: DateTime.parse(createdAtStr.toString()),
         user: User.fromJson(userData),

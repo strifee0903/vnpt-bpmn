@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MomentCard extends StatelessWidget {
   final String username;
@@ -7,6 +6,9 @@ class MomentCard extends StatelessWidget {
   final String status;
   final List<String>? images; // Changed from String? to List<String>?
   final String location;
+  final double? latitude; // Add these new fields
+  final double? longitude;
+
   final String time;
   final String type;
   final String category;
@@ -18,6 +20,8 @@ class MomentCard extends StatelessWidget {
     required this.status,
     this.images,
     required this.location,
+    this.latitude,
+    this.longitude,
     required this.time,
     required this.type,
     required this.category,
@@ -203,13 +207,16 @@ class MomentCard extends StatelessWidget {
             ),
           ),
 
-        // Additional information
+        // In the additional information section, modify to show coordinates:
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("📍 $location"),
+              if (latitude != null && longitude != null)
+                Text(
+                    "🌍 Coordinates: ${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}"),
               Text("🕒 $time"),
               Text("📝 $type  |  📂 $category"),
             ],

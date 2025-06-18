@@ -110,7 +110,7 @@ class _MomentsPageState extends State<MomentsPage> {
                 print('   - Media URL: $mediaUrl');
               }
 
-              // Inside the ListView.builder's itemBuilder:
+              // In moments.dart, inside the ListView.builder's itemBuilder:
               return MomentCard(
                 username: moment.user.u_name,
                 avatar: avatarUrl,
@@ -124,6 +124,8 @@ class _MomentsPageState extends State<MomentsPage> {
                 time: DateFormat('yyyy-MM-dd HH:mm').format(moment.createdAt),
                 type: moment.type,
                 category: moment.category.category_name,
+                latitude: moment.latitude,
+                longitude: moment.longitude,
               );
             },
           );

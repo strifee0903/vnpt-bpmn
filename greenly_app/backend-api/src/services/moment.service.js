@@ -132,6 +132,8 @@ async function getAllPublicMoments(query) {
                 moment_id: moment.moment_id,
                 moment_content: moment.moment_content,
                 moment_address: moment.moment_address,
+                latitude: moment.latitude,
+                longitude: moment.longitude,
                 created_at: moment.created_at,
                 moment_type: moment.moment_type,
                 category: category || null,
