@@ -2,13 +2,12 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/moment.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-const defaultUrl = 'http://10.0.2.2:3000/api/moment';
 
-
+const defaultUrl = 'http://10.0.2.2:3000/api';
 
 class MomentService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? defaultUrl;
-  
+
   // Static method to get the image base URL (without /api)
   static String get imageBaseUrl {
     final envUrl = dotenv.env['BASE_URL'];

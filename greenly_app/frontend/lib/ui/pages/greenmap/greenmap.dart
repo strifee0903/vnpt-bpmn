@@ -7,6 +7,44 @@ import 'package:geojson_vi/geojson_vi.dart';
 import 'dart:convert';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
+import 'package:greenly_app/services/moment_service.dart';
+import 'package:greenly_app/ui/moments/moments_card.dart';
+import 'package:greenly_app/models/moment.dart';
+import 'package:intl/intl.dart';
+
+String fullImageUrl(String? relativePath) {
+  // Get the correct base URL for images (without /api)
+  final imageBaseUrl = MomentService.imageBaseUrl;
+
+  print('🖼️ DEBUG - Image base URL: $imageBaseUrl');
+  print('🖼️ DEBUG - Relative path: $relativePath');
+
+  if (relativePath == null || relativePath.isEmpty) {
+    final defaultUrl = '$imageBaseUrl/public/images/blank_avt.jpg';
+    print('🖼️ DEBUG - Using default avatar: $defaultUrl');
+    return defaultUrl;
+  }
+
+  if (relativePath.startsWith('http')) {
+    print('🖼️ DEBUG - Path is absolute URL: $relativePath');
+    return relativePath;
+  }
+
+  String fullUrl;
+  // Handle paths that start with /public
+  if (relativePath.startsWith('/public')) {
+    fullUrl = '$imageBaseUrl$relativePath';
+  }
+  // Handle paths that don't start with /
+  else if (!relativePath.startsWith('/')) {
+    fullUrl = '$imageBaseUrl/$relativePath';
+  } else {
+    fullUrl = '$imageBaseUrl$relativePath';
+  }
+
+  print('🖼️ DEBUG - Final image URL: $fullUrl');
+  return fullUrl;
+}
 
 class GreenMap extends StatefulWidget {
   const GreenMap({super.key});
@@ -18,6 +56,8 @@ class GreenMap extends StatefulWidget {
 class _GreenMapState extends State<GreenMap> {
   LatLng? currentLocation;
   List<List<LatLng>> vietnamPolygons = [];
+  final MomentService _momentService = MomentService();
+  late Future<List<Moment>> _momentsFuture;
   // PersistentBottomSheetController? _bottomSheetController;
 
   final List<LatLng> defaultMarkers = [
@@ -29,62 +69,35 @@ class _GreenMapState extends State<GreenMap> {
   LatLng? selectedMarker;
   OverlayEntry? panelOverlay;
 
-  final List<Marker> markers = [
-    Marker(
-      point: LatLng(21.0285, 105.8542), // Hà Nội
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.location_on, color: Colors.red, size: 35),
-    ),
-    Marker(
-      point: LatLng(21.03, 105.85), // gần Hà Nội
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.location_on, color: Colors.green, size: 35),
-    ),
-    Marker(
-      point: LatLng(10.763, 106.661), // Sài Gòn
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.location_on, color: Colors.blue, size: 35),
-    ),
-    Marker(
-      point: LatLng(10.762622, 106.660172), // Sài Gòn
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.location_on, color: Colors.blue, size: 35),
-    ),
-    Marker(
-      point: LatLng(10.76325, 106.66125), // Sài Gòn
-      width: 40,
-      height: 40,
-      child: const Icon(Icons.location_on, color: Colors.blue, size: 35),
-    ),
-  ];
+  final List<Marker> _markers = [];
+  final Map<String, List<Moment>> _markerMomentMap = {};
 
-  // void _showPanel(BuildContext context, LatLng point) {
-  //   _removePanel(); // remove cũ nếu có
-  //   panelOverlay = OverlayEntry(
-  //     builder: (_) => Positioned(
-  //       bottom: 20,
-  //       left: 20,
-  //       right: 20,
-  //       child: Material(
-  //         borderRadius: BorderRadius.circular(12),
-  //         elevation: 8,
-  //         child: Container(
-  //           padding: const EdgeInsets.all(16),
-  //           decoration: BoxDecoration(
-  //             color: Colors.white,
-  //             borderRadius: BorderRadius.circular(12),
-  //           ),
-  //           child: Text('Marker tại: ${point.latitude}, ${point.longitude}'),
-  //         ),
-  //       ),
-  //     ),
-  //   );
-  //   Overlay.of(context).insert(panelOverlay!);
-  // }
+  Future<List<Moment>> fetchMoments() async {
+    print('📞 DEBUG - Fetching moments...');
+    try {
+      final moments = await _momentService.getNewsFeedMoments();
+      print('✅ DEBUG - Successfully fetched ${moments.length} moments');
+      for (var moment in moments) {
+        final LatLng point = LatLng(moment.latitude!, moment.longitude!);
+
+        _markers.add(
+          Marker(
+            point: point,
+            width: 40,
+            height: 40,
+            child: const Icon(Icons.location_on, color: Colors.blue, size: 35),
+          ),
+        );
+
+        _markerMomentMap.putIfAbsent(point.toString(), () => []).add(moment);
+      }
+      print('📊 DEBUG - Total markers created: ${_markers.length}');
+      return moments;
+    } catch (e) {
+      print('❌ DEBUG - Error fetching moments: $e');
+      rethrow;
+    }
+  }
 
   void _removePanel() {
     panelOverlay?.remove();
@@ -95,6 +108,7 @@ class _GreenMapState extends State<GreenMap> {
   @override
   void initState() {
     super.initState();
+    _momentsFuture = fetchMoments();
     _getLocation();
     _loadPolygon();
   }
@@ -155,7 +169,7 @@ class _GreenMapState extends State<GreenMap> {
     });
   }
 
-  void _showMarkerInfo(BuildContext context, LatLng point) async {
+  void _showMarkerInfo(BuildContext context, Marker point) async {
     await showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -163,25 +177,57 @@ class _GreenMapState extends State<GreenMap> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
+        final markerMoments = _markerMomentMap[point.point.toString()] ?? [];
+
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text('🏷️ Thông tin Marker',
-                  style: Theme.of(context).textTheme.titleLarge),
-              const SizedBox(height: 8),
-              Text('📍 Latitude: ${point.latitude.toStringAsFixed(5)}'),
-              Text('📍 Longitude: ${point.longitude.toStringAsFixed(5)}'),
-              const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Đóng'),
+              const Text('📍 Các bài viết ở địa điểm xanh',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: markerMoments.length,
+                  itemBuilder: (context, index) {
+                    final moment = markerMoments[index];
+                    final avatarUrl = fullImageUrl(moment.user.u_avt);
+                    String? mediaUrl;
+
+                    if (moment.media.isNotEmpty) {
+                      mediaUrl = fullImageUrl(moment.media.first.media_url);
+                      print('   - Media URL: $mediaUrl');
+                    }
+
+                    return MomentCard(
+                      username: moment.user.u_name,
+                      avatar: avatarUrl,
+                      status: moment.content,
+                      images: moment.media.isNotEmpty
+                          ? moment.media
+                              .map((m) => fullImageUrl(m.media_url))
+                              .toList()
+                              .cast<String>()
+                          : null,
+                      location: moment.address,
+                      time: DateFormat('yyyy-MM-dd HH:mm')
+                          .format(moment.createdAt),
+                      type: moment.type,
+                      category: moment.category.category_name,
+                      latitude: moment.latitude,
+                      longitude: moment.longitude,
+                    );
+                  },
                 ),
-              )
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng'),
+              ),
             ],
           ),
         );
@@ -197,28 +243,60 @@ class _GreenMapState extends State<GreenMap> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
+        // Lọc các marker có chứa moment
+        final markerMoments = cluster.markers
+            .expand((m) => _markerMomentMap[m.point.toString()] ?? [])
+            .toList();
+
+        print(
+            '📊 DEBUG - Cluster contains ${markerMoments.length} moments, ${cluster.markers.first}');
         return Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              ...cluster.markers.map((marker) {
-                return ListTile(
-                  leading: const Icon(Icons.location_on),
-                  title: Text(
-                    'Marker tại: ${marker.point.latitude.toStringAsFixed(5)}, ${marker.point.longitude.toStringAsFixed(5)}',
-                  ),
-                  // onTap: () => _showMarkerInfo(context, marker.point),
-                );
-              }),
-              Align(
-                alignment: Alignment.center,
-                child: ElevatedButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Đóng'),
+              const Text('📍 Các bài viết trong khu vực',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              const SizedBox(height: 12),
+              Flexible(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: markerMoments.length,
+                  itemBuilder: (context, index) {
+                    final moment = markerMoments[index];
+                    final avatarUrl = fullImageUrl(moment.user.u_avt);
+                    String? mediaUrl;
+
+                    if (moment.media.isNotEmpty) {
+                      mediaUrl = fullImageUrl(moment.media.first.media_url);
+                      print('   - Media URL: $mediaUrl');
+                    }
+
+                    return MomentCard(
+                      username: moment.user.u_name,
+                      avatar: avatarUrl,
+                      status: moment.content,
+                      images: moment.media.isNotEmpty
+                          ? moment.media
+                              .map((m) => fullImageUrl(m.media_url))
+                              .toList()
+                              .cast<String>()
+                          : null,
+                      location: moment.address,
+                      time: DateFormat('yyyy-MM-dd HH:mm')
+                          .format(moment.createdAt),
+                      type: moment.type,
+                      category: moment.category.category_name,
+                      latitude: moment.latitude,
+                      longitude: moment.longitude,
+                    );
+                  },
                 ),
-              )
+              ),
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Đóng'),
+              ),
             ],
           ),
         );
@@ -235,57 +313,60 @@ class _GreenMapState extends State<GreenMap> {
     return Scaffold(
       body: GestureDetector(
         onTap: _removePanel,
-        child: FlutterMap(
-          mapController: _mapController,
-          options: MapOptions(
-            center: LatLng(16.047079, 108.206230),
-            zoom: 6,
-            onTap: (_, __) => _removePanel(),
-          ),
-          children: [
-            TileLayer(
-              urlTemplate:
-                  'https://api.mapbox.com/styles/v1/$username/$mapStyleId/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxAccessToken',
-              additionalOptions: {
-                'access_token': mapboxAccessToken,
-              },
-              userAgentPackageName: 'com.example.app',
-            ),
-            MarkerClusterLayerWidget(
-              options: MarkerClusterLayerOptions(
-                maxClusterRadius: 10,
-                disableClusteringAtZoom: 17,
-                zoomToBoundsOnClick: false,
-                spiderfyCluster: false,
-                size: const Size(40, 40),
-                markers: markers,
-                builder: (context, cluster) {
-                  return Container(
-                    decoration: const BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.orange,
-                    ),
-                    child: Center(
-                      child: Text(
-                        '${cluster.length}',
-                        style: const TextStyle(color: Colors.white),
-                      ),
-                    ),
-                  );
-                },
-                onClusterTap: (cluster) {
-                  // _showPanel(context, cluster.markers.first.point);
-                  _showClusterInfo(context, cluster);
-                },
-                onMarkerTap: (marker) {
-                  // setState(() => selectedMarker = marker.point);
-                  _showMarkerInfo(context, marker.point);
-
-                  // _showPanel(context, marker.point);
-                },
+        child: FutureBuilder<List<Moment>>(
+          future: _momentsFuture,
+          builder: (context, snapshot) {
+            return FlutterMap(
+              mapController: _mapController,
+              options: MapOptions(
+                center: LatLng(16.047079, 108.206230),
+                zoom: 6,
+                onTap: (_, __) => _removePanel(),
               ),
-            ),
-          ],
+              children: [
+                TileLayer(
+                  urlTemplate:
+                      'https://api.mapbox.com/styles/v1/$username/$mapStyleId/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxAccessToken',
+                  additionalOptions: {
+                    'access_token': mapboxAccessToken,
+                  },
+                  userAgentPackageName: 'com.example.app',
+                ),
+                if (snapshot.connectionState == ConnectionState.done &&
+                    snapshot.hasData)
+                  MarkerClusterLayerWidget(
+                    options: MarkerClusterLayerOptions(
+                      maxClusterRadius: 10,
+                      disableClusteringAtZoom: 17,
+                      zoomToBoundsOnClick: false,
+                      spiderfyCluster: false,
+                      size: const Size(40, 40),
+                      markers: _markers,
+                      builder: (context, cluster) {
+                        return Container(
+                          decoration: const BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.orange,
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${cluster.length}',
+                              style: const TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        );
+                      },
+                      onClusterTap: (cluster) {
+                        _showClusterInfo(context, cluster);
+                      },
+                      onMarkerTap: (marker) {
+                        _showMarkerInfo(context, marker);
+                      },
+                    ),
+                  ),
+              ],
+            );
+          },
         ),
       ),
     );
