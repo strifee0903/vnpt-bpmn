@@ -7,6 +7,7 @@ const Color optcard1 = Color(0xFFC9E1C9);
 const Color optcard2 = Color(0xFF708C5B);
 const Color optcardtitle = Color.fromARGB(255, 0, 0, 0);
 const Color button = Color.fromARGB(255, 128, 159, 90);
+const Color fieldborder = Color.fromARGB(255, 204, 204, 204);
 
 // Nature-inspired color palette
 const Color deepForest = Color(0xFF0A2E24); // Dark green (unchanged)

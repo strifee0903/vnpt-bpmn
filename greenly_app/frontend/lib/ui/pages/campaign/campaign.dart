@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../../components/colors.dart'; // Import colors.dart
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'addcampaign/step1.dart';
 
 class Campaign extends StatefulWidget {
   const Campaign({super.key});
@@ -22,6 +23,18 @@ class _CampaignState extends State<Campaign> {
         'description': 'A campaign to plant trees in local parks.',
         'status': 'Active',
         'icon': FontAwesomeIcons.tree, // Custom icon for this campaign
+      },
+      {
+        'title': 'Trash Classification',
+        'description': 'Encouraging proper waste sorting.',
+        'status': 'Pending',
+        'icon': FontAwesomeIcons.recycle, // Custom icon for this campaign
+      },
+      {
+        'title': 'Trash Classification',
+        'description': 'Encouraging proper waste sorting.',
+        'status': 'Pending',
+        'icon': FontAwesomeIcons.recycle, // Custom icon for this campaign
       },
       {
         'title': 'Trash Classification',
@@ -254,7 +267,10 @@ class _CampaignState extends State<Campaign> {
         padding: const EdgeInsets.all(16.0),
         child: TextButton(
           onPressed: () {
-            // Logic để thêm campaign
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const Step1()),
+            ); // Điều hướng sang Step1
           },
           style: TextButton.styleFrom(
             padding:
@@ -269,12 +285,12 @@ class _CampaignState extends State<Campaign> {
             children: [
               const Icon(
                 Icons.add,
-                size: 30,
+                size: 20,
                 color: Color.fromARGB(255, 255, 255, 255),
               ),
               const SizedBox(width: 4), // Khoảng cách giữa icon và text
               const Text(
-                'Add Campaign',
+                'Create Campaign',
                 style: TextStyle(
                   fontFamily: 'Oktah',
                   fontWeight: FontWeight.w700,
