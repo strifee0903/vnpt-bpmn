@@ -71,10 +71,17 @@ class _Step2State extends State<Step2> {
             children: [
               AddPostSection(
                 contentController: contentController,
-                selectedImage: selectedImage,
-                onPickImage: pickImage,
+                selectedImages: selectedImage != null ? [selectedImage!] : [],
+                onPickImages: pickImage,
                 avatarPath: 'assets/images/pagediary.png',
                 username: 'jane smith',
+                categories: [],
+                selectedCategory: null,
+                onCategoryChanged: (value) {},
+                selectedMomentType: null,
+                onMomentTypeChanged: (value) {},
+                isPublic: true,
+                onPublicChanged: (value) {},
               ),
               const SizedBox(height: 16.0), // Thêm khoảng cách
             ],

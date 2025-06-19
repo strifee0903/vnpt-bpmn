@@ -86,10 +86,10 @@ class _GreenMapState extends State<GreenMap> {
             point: point,
             width: 40,
             height: 40,
-            child: const Icon(Icons.image, color: Colors.blue, size: 35),
+            child: const Icon(Icons.location_on, color: Color.fromARGB(255, 41, 149, 86), size: 35),
           ),
         );
-
+// location_history_rounded
         _markerMomentMap.putIfAbsent(point.toString(), () => []).add(moment);
       }
       print('📊 DEBUG - Total markers created: ${_markers.length}');

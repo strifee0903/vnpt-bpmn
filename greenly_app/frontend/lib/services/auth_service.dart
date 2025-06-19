@@ -61,20 +61,26 @@ class AuthService {
     }
   }
 
-  Future<User> login(String email, String password) async {
+Future<User> login(String email, String password) async {
     final uri = Uri.parse('$baseUrl/users/login/');
-    var request = http.MultipartRequest('POST', uri);
-
-    request.fields['u_email'] = email;
-    request.fields['u_pass'] = password;
 
     try {
-      final streamedResponse = await request.send();
-      final response = await http.Response.fromStream(streamedResponse);
+      final response = await http.post(
+        uri,
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: {
+          'u_email': email,
+          'u_pass': password,
+        },
+      );
 
       print('📤 Sending login to: ${uri.toString()}');
-      print('📄 With data: ${request.fields}');
+      print('📄 With data: u_email=$email');
       print('📥 Raw response: ${response.body}');
+      print(
+          '🌐🌐🌐🌐🌐🌐🌐🌐DEBUG - Cookie: ${response.headers['set-cookie']}');
 
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
@@ -89,6 +95,16 @@ class AuthService {
 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_user', jsonEncode(userData));
+
+        // ⚠️ Lưu cookie
+        final rawCookie = response.headers['set-cookie'];
+        if (rawCookie != null) {
+          final sessionCookie = rawCookie.split(';').first;
+          await prefs.setString('session_cookie', sessionCookie);
+          print('🍪 Session cookie saved: $sessionCookie');
+        } else {
+          print('⚠️ No cookie received from server!');
+        }
 
         _currentUser = user;
         onAuthChange?.call(user);

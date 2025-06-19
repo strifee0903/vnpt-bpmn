@@ -140,6 +140,7 @@ async function login(email, password) {
         await updateLastLogin(user.u_id);
         return {
             u_id: user.u_id,
+            u_name: user.u_name,
             u_email: user.u_email,
             role_id: user.role_id,
             u_avt: user.u_avt

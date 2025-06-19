@@ -74,6 +74,7 @@ async function login(req, res, next) {
         const user = await usersService.login(u_email, u_pass);
         req.session.user = {
             u_id: user.u_id,
+            u_name: user.u_name,
             u_email: user.u_email,
             role_id: user.role_id,
             u_avt: user.u_avt

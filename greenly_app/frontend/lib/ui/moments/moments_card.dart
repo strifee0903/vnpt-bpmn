@@ -213,52 +213,85 @@ class MomentCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text("📍 $location"),
-              if (latitude != null && longitude != null)
-                Text(
-                    "🌍 Coordinates: ${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}"),
-              Text("🕒 $time"),
-              Text("📝 $type  |  📂 $category"),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.access_time, size: 18, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(time, style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                  const SizedBox(width: 20),
+                  const Icon(Icons.location_on, size: 18, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text('${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}',
+                      style:
+                          const TextStyle(fontSize: 10, color: Colors.grey)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  const Icon(Icons.travel_explore,
+                      size: 18, color: Colors.grey),
+                  const SizedBox(width: 4),
+                  Text(location,
+                      style:
+                          const TextStyle(fontSize: 14, color: Colors.black)),
+                ],
+              ),
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  getMomentTypeIcon(type),
+                  const SizedBox(width: 4),
+                  Text(type, style: const TextStyle(fontSize: 14)),
+                  const SizedBox(width: 10),
+                  getCategoryIcon(category),
+                  const SizedBox(width: 4),
+                  Expanded(
+                    child: Text(category, style: const TextStyle(fontSize: 14)),
+                  ),
+                ],
+              ),
+
             ],
           ),
         ),
         const SizedBox(height: 10),
-        // Debug info
-        // Padding(
-        //   padding: const EdgeInsets.symmetric(horizontal: 12.0),
-        //   child: Container(
-        //     padding: const EdgeInsets.all(8),
-        //     decoration: BoxDecoration(
-        //       color: Colors.grey[100],
-        //       borderRadius: BorderRadius.circular(4),
-        //     ),
-        //     child: Column(
-        //       crossAxisAlignment: CrossAxisAlignment.start,
-        //       children: [
-        //         Text(
-        //           'DEBUG INFO:',
-        //           style: TextStyle(
-        //             fontSize: 10,
-        //             fontWeight: FontWeight.bold,
-        //             color: Colors.blue[800],
-        //           ),
-        //         ),
-        //         Text(
-        //           'Avatar: $avatar',
-        //           style: const TextStyle(fontSize: 9, color: Colors.blue),
-        //         ),
-        //         if (images != null)
-        //           Text(
-        //             'Images: ${images!.length}',
-        //             style: const TextStyle(fontSize: 9, color: Colors.blue),
-        //           ),
-        //       ],
-        //     ),
-        //   ),
-        // ),
 
-        const SizedBox(height: 10),
       ],
     );
   }
+}
+Icon getMomentTypeIcon(String type) {
+  switch (type.toLowerCase()) {
+    case 'event':
+      return const Icon(Icons.event, size: 18, color: Colors.blueAccent);
+    case 'diary':
+      return const Icon(Icons.book, size: 18, color: Color.fromARGB(255, 48, 39, 176));
+    case 'report':
+      return const Icon(Icons.list_alt_rounded, size: 18, color: Color.fromARGB(255, 163, 22, 22));
+    default:
+      return const Icon(Icons.help_outline, size: 18, color: Colors.grey);
+  }
+}
+
+Icon getCategoryIcon(String category) {
+  final map = {
+    'Nhặt rác': Icons.cleaning_services,
+    'Trồng cây': Icons.park,
+    'Tái chế': Icons.loop,
+    'Tiết kiệm điện': Icons.lightbulb,
+    'Không dùng nhựa': Icons.block,
+    'Chia sẻ kiến thức môi trường': Icons.school,
+    'Đi xe đạp': Icons.directions_bike,
+    'Sử dụng năng lượng mặt trời': Icons.solar_power,
+    'Sống xanh': Icons.eco,
+    'Làm sạch bãi biển': Icons.beach_access,
+  };
+
+  return Icon(
+    map[category] ?? Icons.category,
+    size: 18,
+    color: Colors.green,
+  );
 }
