@@ -61,9 +61,7 @@ async function deleteCategory(req, res, next) {
 };
 
 async function getCategoryById(req, res, next) {
-    if (!req.session.user) {
-        return next(new ApiError(401, 'Please log in to perform this task!'));
-    }
+
     const category_id = req.params.category_id; 
     if (!category_id) {
         return next(new ApiError(400, 'Category id is required'));
@@ -81,9 +79,7 @@ async function getCategoryById(req, res, next) {
 };
 
 async function getAllCategories(req, res, next) {
-    if (!req.session.user) {
-        return next(new ApiError(401, 'Please log in to perform this task!'));
-    }
+
     let result = {
         categories: [],
         metadata: {

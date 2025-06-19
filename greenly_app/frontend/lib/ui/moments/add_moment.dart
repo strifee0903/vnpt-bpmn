@@ -220,7 +220,9 @@ class _AddMomentPageState extends State<AddMomentPage> {
         backgroundColor: button,
         elevation: 0,
         title: const Text(
-          'Create Moment',
+
+          'Create a new post',
+
           style: TextStyle(
             fontFamily: 'Oktah',
             fontWeight: FontWeight.w900,

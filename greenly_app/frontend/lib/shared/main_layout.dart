@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:greenly_app/ui/pages/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 import '../ui/auth/auth_manager.dart';
 import '../components/colors.dart';
 import '../shared/appbar.dart'; // CustomBottomAppBar
 import '../ui/home/home.dart'; // HomePage
 import '../ui/moments/moments.dart'; // MomentsPage
-import '../ui/user/userScreen.dart';
+
 import '../ui/pages/greenmap/greenmap.dart'; // Assuming you have a MapsPage
 
 class MainLayout extends StatefulWidget {
@@ -36,7 +37,7 @@ class _MainLayoutState extends State<MainLayout> {
             HomePage(),
             MomentsPage(),
             GreenMap(), // Assuming MapsPage is defined in your project
-            UserScreen(), // Assuming UserScreen is defined in your project
+            ProfileScreen(), // Assuming UserScreen is defined in your project
           ],
         ),
       ),
