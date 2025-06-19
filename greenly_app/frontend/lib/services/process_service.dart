@@ -3,7 +3,7 @@ import 'package:greenly_app/models/process.dart' as model;
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const process_url = 'http://10.0.2.2:3000/api';
+const process_url = 'http://192.168.1.5:3000/api';
 
 class ProcessService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? process_url;

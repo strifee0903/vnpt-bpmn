@@ -18,6 +18,46 @@ class MomentService {
     return 'http://192.168.1.5:3000';
   }
 
+  Future <Moment> createMoment(
+    String content,
+    String address,
+    double latitude,
+    double longitude,
+    String type,
+    int categoryId,
+    List<String> mediaUrls,
+  ) async {
+    final requestUrl = '$baseUrl/moment/new';
+    print('🌐 DEBUG - Request URL: $requestUrl');
+
+    final response = await http.post(
+      Uri.parse(requestUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'moment_content': content,
+        'moment_address': address,
+        'latitude': latitude,
+        'longitude': longitude,
+        'moment_type': type,
+        'category_id': categoryId,
+        'media_urls': mediaUrls,
+        'is_public': true, // Default to public
+      }),
+    );
+
+    print('📡 DEBUG - Response status: ${response.statusCode}');
+    print('📡 DEBUG - Response headers: ${response.headers}');
+
+    if (response.statusCode == 201) {
+      print('✅ DEBUG - Moment created successfully');
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      return Moment.fromJson(jsonResponse['data']['moment']);
+    } else {
+      print('❌ DEBUG - Failed to create moment: ${response.statusCode}');
+      throw Exception('Failed to create moment: ${response.statusCode}');
+    }
+  }
+
   Future<List<Moment>> getNewsFeedMoments() async {
     print('🔧 DEBUG - Environment BASE_URL: ${dotenv.env['BASE_URL']}');
     print('🔧 DEBUG - Service baseUrl: $baseUrl');
@@ -53,4 +93,8 @@ class MomentService {
       throw Exception('Failed to load moments: ${response.statusCode}');
     }
   }
+
+
 }
+
+

@@ -11,6 +11,7 @@ import 'package:greenly_app/services/moment_service.dart';
 import 'package:greenly_app/ui/moments/moments_card.dart';
 import 'package:greenly_app/models/moment.dart';
 import 'package:intl/intl.dart';
+import 'package:geocoding/geocoding.dart';
 
 String fullImageUrl(String? relativePath) {
   // Get the correct base URL for images (without /api)
@@ -85,7 +86,7 @@ class _GreenMapState extends State<GreenMap> {
             point: point,
             width: 40,
             height: 40,
-            child: const Icon(Icons.location_on, color: Colors.blue, size: 35),
+            child: const Icon(Icons.image, color: Colors.blue, size: 35),
           ),
         );
 
@@ -160,14 +161,63 @@ class _GreenMapState extends State<GreenMap> {
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
     }
+    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+    print('📍📍📍 Service enabled: $serviceEnabled');
+    final pos = await Geolocator.getCurrentPosition();
 
     if (permission == LocationPermission.deniedForever) return;
-
-    final pos = await Geolocator.getCurrentPosition();
-    setState(() {
+    setState(() async {
       currentLocation = LatLng(pos.latitude, pos.longitude);
+      final nameOfLocation = await getAddressFromLatLng(currentLocation!.latitude, currentLocation!.longitude);
+      print(
+          '📍📍📍 Current location: ${currentLocation!.latitude}, ${currentLocation!.longitude}');
+      print('📍📍📍 Address: $nameOfLocation');
     });
   }
+
+  String formatPlacemark(Placemark place) {
+    final parts = [
+      place.name,
+      place.street,
+      place.subLocality,
+      place.locality,
+      place.administrativeArea,
+      place.country,
+    ];
+
+    // Loại bỏ các phần tử null hoặc rỗng
+    final nonEmpty =
+        parts.where((part) => part != null && part.trim().isNotEmpty).toList();
+
+    return nonEmpty.join(', ');
+  }
+
+  Future<String?> getAddressFromLatLng(double latitude, double longitude) async {
+    try {
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(latitude, longitude);
+      if (placemarks.isNotEmpty) {
+        final place = placemarks[0];
+        final parts = [
+          place.name,
+          place.street,
+          place.subLocality,
+          place.locality,
+          place.administrativeArea,
+          place.country,
+        ];
+
+        // Loại bỏ các phần tử null hoặc rỗng
+        final nonEmpty = parts
+            .where((part) => part != null && part.trim().isNotEmpty)
+            .toList();
+        return nonEmpty.join(', ');
+      }
+    } catch (e) {
+      print('❌ Lỗi khi reverse geocoding: $e');
+    }
+    return null;
+  } 
 
   void _showMarkerInfo(BuildContext context, Marker point) async {
     await showModalBottomSheet(

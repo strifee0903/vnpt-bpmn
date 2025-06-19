@@ -13,6 +13,7 @@ class Moment {
   final User user;
   final Category category;
   final List<Media> media;
+  final bool? isPublic; // Default to true for public moments
 
   Moment({
     required this.id,
@@ -25,6 +26,7 @@ class Moment {
     required this.user,
     required this.category,
     required this.media,
+    this.isPublic,
   });
 
   factory Moment.fromJson(Map<String, dynamic> json) {
@@ -50,6 +52,9 @@ class Moment {
       final mediaData = json['media'] as List? ?? [];
       print('📝 DEBUG - media data: $mediaData');
 
+      final isPublic = json['is_public'];
+      print('📝 DEBUG - is_public value: $isPublic (${isPublic.runtimeType}');
+
       return Moment(
         id: _parseIntSafe(momentId, 'moment_id'),
         content: json['moment_content']?.toString() ?? '',
@@ -61,6 +66,9 @@ class Moment {
         user: User.fromJson(userData),
         category: Category.fromJson(categoryData),
         media: mediaData.map((e) => Media.fromJson(e)).toList(),
+        isPublic: json['is_public'] != null
+            ? (json['is_public'].toString() == '1' || json['is_public'] == true)
+            : true, // Default to true if not specified
       );
     } catch (e, stackTrace) {
       print('❌ DEBUG - Error parsing Moment JSON: $e');
