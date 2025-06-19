@@ -113,11 +113,12 @@ class _Step1State extends State<Step1> {
                 const SizedBox(height: 8.0),
                 DropdownButtonFormField<String>(
                   value: selectedCategory,
+                  isExpanded: true,
                   hint: const Text(
-                    'Select a category',
+                    'Select a Category',
                     style: TextStyle(
                       fontFamily: 'Oktah',
-                      fontSize: 16,
+                      fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
                   ),
@@ -128,18 +129,37 @@ class _Step1State extends State<Step1> {
                         category,
                         style: const TextStyle(
                           fontFamily: 'Oktah',
-                          fontSize: 16,
+                          fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                     );
                   }).toList(),
+                  selectedItemBuilder: (BuildContext context) {
+                    return categories.map<Widget>((String category) {
+                      return Text(
+                        category,
+                        style: const TextStyle(
+                          fontFamily: 'Oktah',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow
+                            .ellipsis, // Cắt ngắn với "..." khi hiển thị trên box
+                        maxLines: 1, // Giới hạn 1 dòng
+                      );
+                    }).toList();
+                  },
                   onChanged: (String? newValue) {
                     setState(() {
                       selectedCategory = newValue;
                     });
                   },
+                  icon: const Icon(Icons.arrow_drop_down, size: 18),
+                  iconSize: 18,
                   decoration: InputDecoration(
+                    contentPadding: const EdgeInsets.symmetric(
+                        vertical: 8.0, horizontal: 10.0),
                     border: OutlineInputBorder(
                       borderSide: const BorderSide(color: fieldborder),
                       borderRadius: BorderRadius.circular(18.0),

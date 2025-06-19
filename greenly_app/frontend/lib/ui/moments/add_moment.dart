@@ -45,7 +45,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
         backgroundColor: button,
         elevation: 0,
         title: const Text(
-          'Create Announcement Post', // Giữ tiêu đề giống Step2
+          'Create a new post',
           style: TextStyle(
             fontFamily: 'Oktah',
             fontWeight: FontWeight.w900,

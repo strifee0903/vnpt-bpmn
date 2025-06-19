@@ -11,7 +11,8 @@ import 'ui/slpash_screen.dart';
 import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
 import 'ui/pages/mydiary/mydiary.dart'; // Import MyDiary
 import 'ui/pages/campaign/campaign.dart'; // Import Campaign
-import 'ui/moments/moments.dart'; // Import MomentsPage
+import 'ui/moments/moments.dart';
+import 'ui/pages/profile/profile_screen.dart'; // Import MomentsPage
 import 'shared/main_layout.dart';
 
 class SlideUpRoute extends PageRouteBuilder {
@@ -284,6 +285,8 @@ class _MyAppState extends State<MyApp> {
                           const SafeArea(child: GreenLibrary()),
                       '/campaign': (ctx) => const SafeArea(child: Campaign()),
                       '/moments': (ctx) => const SafeArea(child: MomentsPage()),
+                      '/profile': (ctx) =>
+                          const SafeArea(child: ProfileScreen()),
                     },
                     onGenerateRoute: (settings) {
                       print('🔴 Navigating to route: ${settings.name}');
@@ -296,6 +299,8 @@ class _MyAppState extends State<MyApp> {
                           return FadeSlideRoute(page: const GreenLibrary());
                         case '/moments':
                           return ScaleRoute(page: const MomentsPage());
+                        case '/profile':
+                          return ScaleRoute(page: const ProfileScreen());
                         default:
                           print('🔴 Unknown route: ${settings.name}');
                           return SlideUpRoute(page: const NotFoundScreen());
