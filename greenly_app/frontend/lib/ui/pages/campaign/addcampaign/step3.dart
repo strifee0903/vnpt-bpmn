@@ -4,7 +4,14 @@ import '../../../../components/colors.dart';
 import 'success_dialog.dart'; // Import file success_dialog.dart
 
 class Step3 extends StatefulWidget {
-  const Step3({super.key});
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+  final bool isLast;
+  const Step3(
+      {super.key,
+      required this.onNext,
+      required this.onBack,
+      this.isLast = false});
 
   @override
   State<Step3> createState() => _Step3State();
@@ -64,7 +71,8 @@ class _Step3State extends State<Step3> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => widget.onBack() // Gọi hàm onBack từ widget
+          ,
         ),
       ),
       body: SafeArea(
@@ -187,7 +195,15 @@ class _Step3State extends State<Step3> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: showSuccessDialog, // Gọi dialog khi nhấn Next
+        onPressed: () {
+          if (widget.isLast) {
+            // Nếu là bước cuối cùng, hiển thị dialog thành công
+            showSuccessDialog();
+            return;
+          }
+          // Hiển thị dialog thành công
+          widget.onNext();
+        }, // Gọi dialog khi nhấn Next
         backgroundColor: button,
         label: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 13.0, vertical: 8.0),

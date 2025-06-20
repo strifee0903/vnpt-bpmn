@@ -1,9 +1,21 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
+import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import '../../../../components/colors.dart';
 import 'step2.dart';
 
 class Step1 extends StatefulWidget {
-  const Step1({super.key});
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+  final bool isLast; // Biến để xác định bước cuối cùng
+
+  const Step1(
+      {super.key,
+      required this.onNext,
+      required this.onBack,
+      this.isLast =
+          false}); // Thêm tham số isLast với giá trị mặc định là false
 
   @override
   State<Step1> createState() => _Step1State();
@@ -17,7 +29,6 @@ class _Step1State extends State<Step1> {
   DateTime? selectedEndDate;
   String? selectedCategory; // Biến để lưu category được chọn
 
-
   // Danh sách category
   final List<String> categories = [
     'Waste Sorting',
@@ -26,6 +37,13 @@ class _Step1State extends State<Step1> {
     'Water Conservation',
     'Renewable Energy',
   ];
+
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const SuccessDialog(),
+    );
+  }
 
   @override
   void dispose() {
@@ -53,7 +71,7 @@ class _Step1State extends State<Step1> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            widget.onBack(); // Gọi hàm onBack từ widget
           },
         ),
       ),
@@ -377,10 +395,16 @@ class _Step1State extends State<Step1> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Step2()),
-          );
+          if (widget.isLast) {
+            // Nếu là bước cuối cùng, hiển thị dialog thành công
+            showSuccessDialog();
+            return;
+          }
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => const Step2()),
+          // );
+          widget.onNext(); // Gọi hàm onNext từ widget
         },
         backgroundColor: button,
         label: Padding(

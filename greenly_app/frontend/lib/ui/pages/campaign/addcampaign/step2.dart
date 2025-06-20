@@ -1,12 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../../components/colors.dart';
 import '../../../moments/add_moment_section.dart'; // Import widget mới
 import 'step3.dart'; // Import file Step3.dart
 
 class Step2 extends StatefulWidget {
-  const Step2({super.key});
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+  final bool isLast;
+  const Step2(
+      {super.key,
+      required this.onNext,
+      required this.onBack,
+      this.isLast = false});
 
   @override
   State<Step2> createState() => _Step2State();
@@ -30,6 +38,13 @@ class _Step2State extends State<Step2> {
     // Logic xử lý đăng bài, có thể hiển thị snackbar hoặc lưu post
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Post submitted successfully')),
+    );
+  }
+
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const SuccessDialog(),
     );
   }
 
@@ -58,7 +73,7 @@ class _Step2State extends State<Step2> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => widget.onBack(), // Gọi hàm onBack từ widget
         ),
       ),
       body: SingleChildScrollView(
@@ -90,11 +105,17 @@ class _Step2State extends State<Step2> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const Step3()), // Chuyển sang Step3
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //       builder: (context) => const Step3()), // Chuyển sang Step3
+          // );
+          if (widget.isLast) {
+            // Nếu là bước cuối cùng, hiển thị dialog thành công
+            showSuccessDialog();
+            return;
+          }
+          widget.onNext(); // Gọi hàm onNext từ widget cha
         },
         backgroundColor: button,
         label: Padding(

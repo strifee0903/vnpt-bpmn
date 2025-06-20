@@ -24,11 +24,11 @@ class SuccessDialog extends StatelessWidget {
       actions: [
         TextButton(
           onPressed: () {
-            Navigator.pushReplacement(
+            Navigator.of(context).pop(); // đóng dialog
+            Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(
-                  builder: (context) =>
-                      const Campaign()), // Chuyển về campaign.dart
+              MaterialPageRoute(builder: (_) => const Campaign()),
+              (route) => route.isFirst, // hoặc tùy bé logic
             );
           },
           child: const Text(
