@@ -97,61 +97,6 @@ async function getPublicMomentsByUserId(u_id) {
     }
 };
 
-// async function getAllPublicMoments(query) {
-//     const { page = 1, limit = 5 } = query;
-//     const paginator = new Paginator(page, limit);
-
-//     try {
-//         const moments = await momentRepository()
-//             .where('is_public', true)
-//             .orderBy('created_at', 'desc')
-//             .limit(paginator.limit)
-//             .offset(paginator.offset);
-
-//         const totalRecords = (await momentRepository()
-//             .where('is_public', true)
-//             .count('moment_id as count')
-//             .first())?.count || 0;
-
-//         const result = await Promise.all(moments.map(async (moment) => {
-//             const media = await mediaRepository()
-//                 .where('moment_id', moment.moment_id)
-//                 .select('media_url');
-
-//             const category = await knex('category')
-//                 .where('category_id', moment.category_id)
-//                 .select('category_id', 'category_name')
-//                 .first();
-
-//             const user = await knex('users')
-//                 .where('u_id', moment.u_id)
-//                 .select('u_id', 'u_name', 'u_avt')
-//                 .first();
-
-//             return {
-//                 moment_id: moment.moment_id,
-//                 moment_content: moment.moment_content,
-//                 moment_address: moment.moment_address,
-//                 latitude: moment.latitude,
-//                 longitude: moment.longitude,
-//                 created_at: moment.created_at,
-//                 moment_type: moment.moment_type,
-//                 category: category || null,
-//                 user: user || null,
-//                 media: media
-//             };
-//         }));
-
-//         return {
-//             metadata: paginator.getMetadata(totalRecords),
-//             moments: result
-//         };
-//     } catch (error) {
-//         console.error('Error fetching public moments:', error);
-//         throw error;
-//     }
-// }
-
 async function getAllPublicMoments(query) {
     const { page = 1, limit = 5, moment_type } = query;
     const paginator = new Paginator(page, limit);
@@ -234,6 +179,7 @@ async function getAllMyMoments(u_id, query) {
 
         const moments = await baseQuery
             .clone()
+            .orderBy('created_at', 'desc') // sắp xếp mới nhất
             .limit(paginator.limit)
             .offset(paginator.offset);
 
