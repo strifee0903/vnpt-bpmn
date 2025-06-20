@@ -81,10 +81,24 @@ async function getPublicMomentsOfUser(req, res, next) {
 };
 
 //hiện tất cả bài viết công khai (public) cho news feed
+// async function getNewsFeed(req, res, next) {
+//     try {
+//         const { page, limit } = req.query;
+//         const result = await momentService.getAllPublicMoments({ page, limit });
+
+//         return res.json(JSend.success({
+//             moments: result.moments,
+//             metadata: result.metadata
+//         }));
+//     } catch (error) {
+//         return next(new ApiError(500, 'Error fetching public feed.'));
+//     }
+// }
+
 async function getNewsFeed(req, res, next) {
     try {
-        const { page, limit } = req.query;
-        const result = await momentService.getAllPublicMoments({ page, limit });
+        const { page, limit, moment_type } = req.query;
+        const result = await momentService.getAllPublicMoments({ page, limit, moment_type });
 
         return res.json(JSend.success({
             moments: result.moments,
@@ -94,6 +108,7 @@ async function getNewsFeed(req, res, next) {
         return next(new ApiError(500, 'Error fetching public feed.'));
     }
 }
+
 
 
 async function getMyMoments(req, res, next) {

@@ -154,6 +154,13 @@ module.exports.setup = (app) => {
      *           type: integer
      *         required: false
      *         description: Number of items per page (default = 10)
+     *       - in: query
+     *         name: moment_type
+     *         schema:
+     *           type: string
+     *           enum: [diary, event, report]
+     *         required: false
+     *         description: Filter by moment type
      *     responses:
      *       200:
      *         description: Public moments retrieved

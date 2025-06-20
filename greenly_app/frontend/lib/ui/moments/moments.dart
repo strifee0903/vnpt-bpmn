@@ -34,7 +34,7 @@ class _MomentsPageState extends State<MomentsPage> {
   bool _isLoading = false;
   bool _hasMore = true;
   final int _itemsPerPage = 10;
-  String _filter = 'all';
+  String _typeFilter = 'all'; // "diary", "event", "report", "all"
 
   @override
   void initState() {
@@ -59,19 +59,16 @@ class _MomentsPageState extends State<MomentsPage> {
         _hasMore = moments.length == _itemsPerPage;
       });
     } catch (e) {
-      print('❌ DEBUG - Error loading initial moments: $e');
+      print('❌ DEBUG - Error loading initial moments: \$e');
       setState(() => _isLoading = false);
     }
   }
 
   Future<List<Moment>> _fetchMoments() async {
-    bool? isPublic;
-    if (_filter == 'public') isPublic = true;
-    if (_filter == 'private') isPublic = false;
     return await _momentService.getNewsFeedMoments(
       page: _currentPage,
       limit: _itemsPerPage,
-      is_public: _filter == 'all' ? null : isPublic,
+      moment_type: _typeFilter == 'all' ? null : _typeFilter,
     );
   }
 
@@ -87,7 +84,7 @@ class _MomentsPageState extends State<MomentsPage> {
         _hasMore = moments.length == _itemsPerPage;
       });
     } catch (e) {
-      print('❌ DEBUG - Error loading more moments: $e');
+      print('❌ DEBUG - Error loading more moments: \$e');
       setState(() {
         _isLoading = false;
         _currentPage--;
@@ -112,30 +109,6 @@ class _MomentsPageState extends State<MomentsPage> {
     await _loadInitialMoments();
   }
 
-  Widget _buildChip(String label, String value) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: _filter == value,
-      onSelected: (_) {
-        setState(() {
-          _filter = value;
-          _currentPage = 1;
-          _moments.clear();
-        });
-        _loadInitialMoments();
-      },
-      selectedColor: button,
-      labelStyle: TextStyle(
-        color: _filter == value ? Colors.white : Colors.black,
-        fontFamily: 'Oktah',
-      ),
-      backgroundColor: Colors.grey.shade200,
-      shape: StadiumBorder(
-        side: BorderSide(color: Colors.grey.shade400),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,13 +118,13 @@ class _MomentsPageState extends State<MomentsPage> {
         child: CustomScrollView(
           controller: _scrollController,
           slivers: [
-            // Filter (Pinned)
+            // SliverPersistentHeader chứa filter theo type
             SliverPersistentHeader(
               pinned: true,
               delegate: _SliverFilterBar(
-                selected: _filter,
-                onChanged: (value) {
-                  setState(() => _filter = value);
+                selectedType: _typeFilter,
+                onTypeChanged: (value) {
+                  setState(() => _typeFilter = value);
                   _refreshFeed();
                 },
               ),
@@ -205,15 +178,19 @@ class _MomentsPageState extends State<MomentsPage> {
           ],
         ),
       ),
-
     );
   }
 }
-class _SliverFilterBar extends SliverPersistentHeaderDelegate {
-  final String selected;
-  final Function(String) onChanged;
 
-  _SliverFilterBar({required this.selected, required this.onChanged});
+// Sliver filter bar delegate with only type filter
+class _SliverFilterBar extends SliverPersistentHeaderDelegate {
+  final String selectedType;
+  final Function(String) onTypeChanged;
+
+  _SliverFilterBar({
+    required this.selectedType,
+    required this.onTypeChanged,
+  });
 
   @override
   Widget build(
@@ -227,9 +204,11 @@ class _SliverFilterBar extends SliverPersistentHeaderDelegate {
           children: [
             _buildChip('All', 'all'),
             const SizedBox(width: 6),
-            _buildChip('Public', 'public'),
+            _buildChip('Diary', 'diary'),
             const SizedBox(width: 6),
-            _buildChip('Private', 'private'),
+            _buildChip('Event', 'event'),
+            const SizedBox(width: 6),
+            _buildChip('Report', 'report'),
           ],
         ),
       ),
@@ -239,11 +218,11 @@ class _SliverFilterBar extends SliverPersistentHeaderDelegate {
   Widget _buildChip(String label, String value) {
     return ChoiceChip(
       label: Text(label),
-      selected: selected == value,
-      onSelected: (_) => onChanged(value),
+      selected: selectedType == value,
+      onSelected: (_) => onTypeChanged(value),
       selectedColor: button,
       labelStyle: TextStyle(
-        color: selected == value ? Colors.white : Colors.black,
+        color: selectedType == value ? Colors.white : Colors.black,
         fontFamily: 'Oktah',
       ),
       backgroundColor: Colors.grey.shade200,
@@ -254,9 +233,9 @@ class _SliverFilterBar extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 48 + 16; // height + padding
+  double get maxExtent => 56;
   @override
-  double get minExtent => 48 + 16;
+  double get minExtent => 56;
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
       true;
