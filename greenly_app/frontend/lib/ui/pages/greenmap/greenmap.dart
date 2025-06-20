@@ -12,6 +12,7 @@ import 'package:greenly_app/ui/moments/moments_card.dart';
 import 'package:greenly_app/models/moment.dart';
 import 'package:intl/intl.dart';
 import 'package:geocoding/geocoding.dart';
+
 String fullImageUrl(String? relativePath) {
   // Get the correct base URL for images (without /api)
   final imageBaseUrl = MomentService.imageBaseUrl;
@@ -58,7 +59,72 @@ class _GreenMapState extends State<GreenMap> {
   List<List<LatLng>> vietnamPolygons = [];
   final MomentService _momentService = MomentService();
   late Future<List<Moment>> _momentsFuture;
-  // PersistentBottomSheetController? _bottomSheetController;
+
+  Future<List<Moment>> fetchAllMoments() async {
+    print('📞 DEBUG - Fetching all moments...');
+    List<Moment> allMoments = [];
+    int page = 1;
+    int limit = 20;
+    bool hasMore = true;
+
+    // Clear existing markers before fetching new ones
+    _markers.clear();
+    _markerMomentMap.clear();
+
+    while (hasMore) {
+      try {
+        final moments =
+            await _momentService.getNewsFeedMoments(page: page, limit: limit);
+        print('📞 DEBUG - Page $page: fetched ${moments.length} moments');
+
+        allMoments.addAll(moments);
+
+        // Add markers for moments with valid coordinates
+        for (var moment in moments) {
+          if (moment.latitude != null && moment.longitude != null) {
+            final LatLng point = LatLng(moment.latitude!, moment.longitude!);
+            _markers.add(
+              Marker(
+                point: point,
+                width: 40,
+                height: 40,
+                child: const Icon(
+                  Icons.location_on,
+                  color: Color.fromARGB(255, 41, 149, 86),
+                  size: 35,
+                ),
+              ),
+            );
+            _markerMomentMap
+                .putIfAbsent(point.toString(), () => [])
+                .add(moment);
+          } else {
+            print( '❌ DEBUG - Moment with null coordinates found: $moment');
+          }
+        }
+
+        // Check if we have more pages
+        if (moments.length < limit) {
+          hasMore = false;
+        } else {
+          page++;
+        }
+      } catch (e) {
+        print('❌ DEBUG - Error fetching page $page: $e');
+        hasMore = false;
+      }
+    }
+
+    print('✅ DEBUG - Successfully fetched ${allMoments.length} moments');
+    print('📊 DEBUG - Total markers created: ${_markers.length}');
+
+    // Force a rebuild to update the map
+    if (mounted) {
+      setState(() {});
+    }
+
+    return allMoments;
+  }
 
   final List<LatLng> defaultMarkers = [
     LatLng(21.0285, 105.8542), // Hà Nội
@@ -72,33 +138,7 @@ class _GreenMapState extends State<GreenMap> {
   final List<Marker> _markers = [];
   final Map<String, List<Moment>> _markerMomentMap = {};
 
-  Future<List<Moment>> fetchMoments() async {
-    print('📞 DEBUG - Fetching moments...');
-    try {
-      final moments = await _momentService.getNewsFeedMoments();
-      print('✅ DEBUG - Successfully fetched ${moments.length} moments');
-      for (var moment in moments) {
-        final LatLng point = LatLng(moment.latitude!, moment.longitude!);
-
-        _markers.add(
-          Marker(
-            point: point,
-            width: 40,
-            height: 40,
-            child: const Icon(Icons.location_on, color: Color.fromARGB(255, 41, 149, 86), size: 35),
-          ),
-        );
-// location_history_rounded
-        _markerMomentMap.putIfAbsent(point.toString(), () => []).add(moment);
-      }
-      print('📊 DEBUG - Total markers created: ${_markers.length}');
-      return moments;
-    } catch (e) {
-      print('❌ DEBUG - Error fetching moments: $e');
-      rethrow;
-    }
-  }
-
+  // Remove the old fetchMoments function since we're using fetchAllMoments
   void _removePanel() {
     panelOverlay?.remove();
     panelOverlay = null;
@@ -108,7 +148,8 @@ class _GreenMapState extends State<GreenMap> {
   @override
   void initState() {
     super.initState();
-    _momentsFuture = fetchMoments();
+    // Use fetchAllMoments instead of fetchMoments
+    _momentsFuture = fetchAllMoments();
     _getLocation();
     _loadPolygon();
   }
@@ -162,16 +203,25 @@ class _GreenMapState extends State<GreenMap> {
     }
     final serviceEnabled = await Geolocator.isLocationServiceEnabled();
     print('📍📍📍 Service enabled: $serviceEnabled');
-    final pos = await Geolocator.getCurrentPosition();
 
     if (permission == LocationPermission.deniedForever) return;
-    setState(() async {
-      currentLocation = LatLng(pos.latitude, pos.longitude);
-      final nameOfLocation = await getAddressFromLatLng(currentLocation!.latitude, currentLocation!.longitude);
+
+    try {
+      final pos = await Geolocator.getCurrentPosition();
+      final newLocation = LatLng(pos.latitude, pos.longitude);
+      final nameOfLocation = await getAddressFromLatLng(
+          newLocation.latitude, newLocation.longitude);
+
+      setState(() {
+        currentLocation = newLocation;
+      });
+
       print(
           '📍📍📍 Current location: ${currentLocation!.latitude}, ${currentLocation!.longitude}');
       print('📍📍📍 Address: $nameOfLocation');
-    });
+    } catch (e) {
+      print('❌ Error getting location: $e');
+    }
   }
 
   String formatPlacemark(Placemark place) {
@@ -191,7 +241,8 @@ class _GreenMapState extends State<GreenMap> {
     return nonEmpty.join(', ');
   }
 
-  Future<String?> getAddressFromLatLng(double latitude, double longitude) async {
+  Future<String?> getAddressFromLatLng(
+      double latitude, double longitude) async {
     try {
       List<Placemark> placemarks =
           await placemarkFromCoordinates(latitude, longitude);
@@ -216,7 +267,7 @@ class _GreenMapState extends State<GreenMap> {
       print('❌ Lỗi khi reverse geocoding: $e');
     }
     return null;
-  } 
+  }
 
   void _showMarkerInfo(BuildContext context, Marker point) async {
     await showModalBottomSheet(
@@ -260,6 +311,7 @@ class _GreenMapState extends State<GreenMap> {
                           ? moment.media
                               .map((m) => fullImageUrl(m.media_url))
                               .toList()
+                              .cast<String>()
                           : null,
                       location: moment.address,
                       time: DateFormat('yyyy-MM-dd HH:mm')
@@ -329,6 +381,7 @@ class _GreenMapState extends State<GreenMap> {
                           ? moment.media
                               .map((m) => fullImageUrl(m.media_url))
                               .toList()
+                              .cast<String>()
                           : null,
                       location: moment.address,
                       time: DateFormat('yyyy-MM-dd HH:mm')
@@ -359,12 +412,48 @@ class _GreenMapState extends State<GreenMap> {
         'sk.eyJ1IjoidGFtbmdvLTE1OSIsImEiOiJjbWMwMjI0OWgwNW5pMmlzY2tqdDJ4bHN1In0.mBhsHjZ8iR2rGPWRYHjgjA';
     const String mapStyleId = 'streets-v11'; // hoặc satellite-v9
     const String username = 'mapbox'; // mặc định với style public
+
     return Scaffold(
       body: GestureDetector(
         onTap: _removePanel,
         child: FutureBuilder<List<Moment>>(
           future: _momentsFuture,
           builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CircularProgressIndicator(),
+                    SizedBox(height: 16),
+                    Text('Đang tải dữ liệu...'),
+                  ],
+                ),
+              );
+            }
+
+            if (snapshot.hasError) {
+              return Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.error, size: 64, color: Colors.red),
+                    const SizedBox(height: 16),
+                    Text('Lỗi: ${snapshot.error}'),
+                    const SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          _momentsFuture = fetchAllMoments();
+                        });
+                      },
+                      child: const Text('Thử lại'),
+                    ),
+                  ],
+                ),
+              );
+            }
+
             return FlutterMap(
               mapController: _mapController,
               options: MapOptions(
@@ -381,38 +470,36 @@ class _GreenMapState extends State<GreenMap> {
                   },
                   userAgentPackageName: 'com.example.app',
                 ),
-                if (snapshot.connectionState == ConnectionState.done &&
-                    snapshot.hasData)
-                  MarkerClusterLayerWidget(
-                    options: MarkerClusterLayerOptions(
-                      maxClusterRadius: 10,
-                      disableClusteringAtZoom: 17,
-                      zoomToBoundsOnClick: false,
-                      spiderfyCluster: false,
-                      size: const Size(40, 40),
-                      markers: _markers,
-                      builder: (context, cluster) {
-                        return Container(
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.orange,
+                MarkerClusterLayerWidget(
+                  options: MarkerClusterLayerOptions(
+                    maxClusterRadius: 45,
+                    disableClusteringAtZoom: 17,
+                    zoomToBoundsOnClick: false,
+                    spiderfyCluster: false,
+                    size: const Size(40, 40),
+                    markers: _markers,
+                    builder: (context, cluster) {
+                      return Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.orange,
+                        ),
+                        child: Center(
+                          child: Text(
+                            '${cluster.length}',
+                            style: const TextStyle(color: Colors.white),
                           ),
-                          child: Center(
-                            child: Text(
-                              '${cluster.length}',
-                              style: const TextStyle(color: Colors.white),
-                            ),
-                          ),
-                        );
-                      },
-                      onClusterTap: (cluster) {
-                        _showClusterInfo(context, cluster);
-                      },
-                      onMarkerTap: (marker) {
-                        _showMarkerInfo(context, marker);
-                      },
-                    ),
+                        ),
+                      );
+                    },
+                    onClusterTap: (cluster) {
+                      _showClusterInfo(context, cluster);
+                    },
+                    onMarkerTap: (marker) {
+                      _showMarkerInfo(context, marker);
+                    },
                   ),
+                ),
               ],
             );
           },
