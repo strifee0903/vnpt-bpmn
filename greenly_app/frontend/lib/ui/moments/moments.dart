@@ -1,10 +1,8 @@
-// moments_page.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../components/colors.dart';
 import '../../services/moment_service.dart';
 import '../../models/moment.dart';
-import 'add_moment.dart';
 import 'moments_card.dart';
 import 'add_moment_place.dart';
 
@@ -197,7 +195,7 @@ class _SliverFilterBar extends SliverPersistentHeaderDelegate {
       BuildContext context, double shrinkOffset, bool overlapsContent) {
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal,
         child: Row(
@@ -224,6 +222,7 @@ class _SliverFilterBar extends SliverPersistentHeaderDelegate {
       labelStyle: TextStyle(
         color: selectedType == value ? Colors.white : Colors.black,
         fontFamily: 'Oktah',
+        fontSize: 13
       ),
       backgroundColor: Colors.grey.shade200,
       shape: StadiumBorder(

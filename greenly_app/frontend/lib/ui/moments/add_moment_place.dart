@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../../../components/colors.dart';
 import '../../../services/user_service.dart';
 import '../../../models/user.dart';
 import 'add_moment.dart';
@@ -112,12 +111,10 @@ class _AddMomentPlaceState extends State<AddMomentPlace> {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-                const Icon(Icons.more_vert),
               ],
             ),
             const SizedBox(height: 12.0),
 
-            // Khung share moment (full chiều ngang như ảnh)
             Container(
               width: double.infinity,
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),

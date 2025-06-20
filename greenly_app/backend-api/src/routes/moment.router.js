@@ -196,6 +196,13 @@ module.exports.setup = (app) => {
      *           type: boolean
      *         required: false
      *         description: Filter by visibility. true = public, false = private. If omitted, returns all.
+     *       - in: query
+     *         name: moment_type
+     *         schema:
+     *           type: string
+     *           enum: [diary, event, report]
+     *         required: false
+     *         description: Filter by moment type
      *     responses:
      *       200:
      *         description: User's moments retrieved

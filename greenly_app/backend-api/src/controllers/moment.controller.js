@@ -101,9 +101,9 @@ async function getMyMoments(req, res, next) {
 
     try {
         const u_id = req.session.user.u_id;
-        const { page, limit, is_public } = req.query;
+        const { page, limit, is_public, moment_type } = req.query;
 
-        const result = await momentService.getAllMyMoments(u_id, { page, limit, is_public });
+        const result = await momentService.getAllMyMoments(u_id, { page, limit, is_public, moment_type });
 
         return res.json(JSend.success(result));
     } catch (error) {
