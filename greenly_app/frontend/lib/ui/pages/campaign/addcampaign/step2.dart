@@ -6,7 +6,9 @@ import '../../../moments/add_moment_section.dart'; // Import widget mới
 import 'step3.dart'; // Import file Step3.dart
 
 class Step2 extends StatefulWidget {
-  const Step2({super.key});
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+  const Step2({super.key, required this.onNext, required this.onBack});
 
   @override
   State<Step2> createState() => _Step2State();
@@ -58,7 +60,7 @@ class _Step2State extends State<Step2> {
         ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => widget.onBack(), // Gọi hàm onBack từ widget
         ),
       ),
       body: SingleChildScrollView(
@@ -90,11 +92,12 @@ class _Step2State extends State<Step2> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-                builder: (context) => const Step3()), // Chuyển sang Step3
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(
+          //       builder: (context) => const Step3()), // Chuyển sang Step3
+          // );
+          widget.onNext(); // Gọi hàm onNext từ widget cha
         },
         backgroundColor: button,
         label: Padding(

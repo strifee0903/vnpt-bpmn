@@ -1,9 +1,14 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import '../../../../components/colors.dart';
 import 'step2.dart';
 
 class Step1 extends StatefulWidget {
-  const Step1({super.key});
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+
+  const Step1({super.key, required this.onNext, required this.onBack});
 
   @override
   State<Step1> createState() => _Step1State();
@@ -16,7 +21,6 @@ class _Step1State extends State<Step1> {
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
   String? selectedCategory; // Biến để lưu category được chọn
-
 
   // Danh sách category
   final List<String> categories = [
@@ -53,7 +57,7 @@ class _Step1State extends State<Step1> {
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
-            Navigator.pop(context);
+            widget.onBack(); // Gọi hàm onBack từ widget
           },
         ),
       ),
@@ -377,10 +381,11 @@ class _Step1State extends State<Step1> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const Step2()),
-          );
+          // Navigator.push(
+          //   context,
+          //   MaterialPageRoute(builder: (context) => const Step2()),
+          // );
+          widget.onNext(); // Gọi hàm onNext từ widget
         },
         backgroundColor: button,
         label: Padding(
