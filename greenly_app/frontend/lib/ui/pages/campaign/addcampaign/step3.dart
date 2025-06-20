@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../../../../components/colors.dart';
 import 'success_dialog.dart'; // Import file success_dialog.dart
-import '../campaign.dart'; // Import file campaign.dart
 
 class Step3 extends StatefulWidget {
   const Step3({super.key});

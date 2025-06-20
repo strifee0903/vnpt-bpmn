@@ -1,57 +1,145 @@
 import 'package:flutter/material.dart';
-import 'package:greenly_app/components/colors.dart';
-import 'add_moment.dart'; // Import trang add_moment.dart
+import '../../../components/colors.dart';
+import '../../../services/user_service.dart';
+import '../../../models/user.dart';
+import 'add_moment.dart';
+import '../../../shared/getImageUrl.dart' as shared_image_url;
 
-class AddMomentPlace extends StatelessWidget {
+class AddMomentPlace extends StatefulWidget {
   const AddMomentPlace({super.key});
 
   @override
+  State<AddMomentPlace> createState() => _AddMomentPlaceState();
+}
+
+class _AddMomentPlaceState extends State<AddMomentPlace> {
+  final UserService _userService = UserService();
+  User? _currentUser;
+  String? _error;
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUser();
+  }
+
+  Future<void> _fetchCurrentUser() async {
+    try {
+      final user = await _userService.getCurrentUser();
+      if (mounted) {
+        setState(() {
+          _currentUser = user;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _error = 'Failed to load user data';
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(builder: (context) => const AddMomentPage()),
-        );
-      },
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
+    if (_isLoading) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(
+          child: SizedBox(
+            width: 24,
+            height: 24,
+            child: CircularProgressIndicator(strokeWidth: 2),
+          ),
+        ),
+      );
+    }
+
+    if (_error != null) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        child: Center(
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.error_outline, color: Colors.red, size: 20),
+              const SizedBox(width: 8),
+              Text(
+                _error!,
+                style: const TextStyle(color: Colors.red),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const AddMomentPage()),
+          );
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Hiển thị avatar và tên người dùng
+            // Avatar + username
             Row(
               children: [
                 CircleAvatar(
                   radius: 20,
-                  backgroundColor: background,
-                  backgroundImage: const AssetImage(
-                      'assets/images/blankava.png'), // Thay bằng avatar thực tế
-                ),
-                const SizedBox(width: 12.0),
-                const Text(
-                  'Mahmud Nik', // Tên người dùng mẫu, có thể thay bằng biến động
-                  style: TextStyle(
-                    fontFamily: 'Oktah',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.black87,
+                  backgroundColor: Colors.grey.shade100,
+                  backgroundImage: NetworkImage(
+                    shared_image_url.fullImageUrl(_currentUser?.u_avt),
                   ),
                 ),
+                const SizedBox(width: 15),
+                Expanded(
+                  child: Text(
+                    _currentUser?.u_name ?? 'Unknown User',
+                    style: const TextStyle(
+                      fontFamily: 'Oktah',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const Icon(Icons.more_vert),
               ],
             ),
-            const SizedBox(height: 15.0), // Khoảng cách giữa avatar/tên và hint
-            // Dòng hint (không có khung)
-            Padding(
-              padding: const EdgeInsets.only(left: 2), // Giữ padding để căn đều
-              child: const Text(
-                'Add a post or moment to share with others...',
-                style: TextStyle(
-                  fontFamily: 'Oktah',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                  color: Color.fromARGB(137, 42, 41, 41),
-                ),
+            const SizedBox(height: 12.0),
+
+            // Khung share moment (full chiều ngang như ảnh)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+              decoration: BoxDecoration(
+                color: const Color(0xFF708C5B).withOpacity(0.2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.edit_outlined,
+                      color: Colors.grey.shade500, size: 20),
+                  const SizedBox(width: 12),
+                  const Text(
+                    'Share your moment...',
+                    style: TextStyle(
+                      fontFamily: 'Oktah',
+                      fontSize: 15,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.black54,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

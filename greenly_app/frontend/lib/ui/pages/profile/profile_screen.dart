@@ -1,344 +1,219 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../../models/user.dart';
+import '../../../services/user_service.dart';
+import '../../../shared/getImageUrl.dart';
 import '../../auth/auth_manager.dart';
-import '../../../components/colors.dart'; // Import your colors
-import '../../moments/moments_card.dart'; // Import MomentCard
-import '../../moments/add_moment_place.dart'; // Import AddMomentPlace
+import '../../../components/colors.dart';
+import '../../moments/moments_card.dart';
+import '../../moments/add_moment_place.dart';
+import '../../../services/moment_service.dart';
+import '../../../models/moment.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
 
-  // Danh sách mẫu cho các bài post (thay bằng dữ liệu thực tế nếu có)
-  final List<Map<String, dynamic>> samplePosts = const [
-    {
-      'username': 'Mahmud Nik',
-      'avatar': 'https://via.placeholder.com/40',
-      'status': 'Enjoying a great day at the park!',
-      'images': [
-        'https://via.placeholder.com/300',
-        'https://via.placeholder.com/300'
-      ],
-      'location': 'Park Street, District 1, Ho Chi Minh',
-      'latitude': 10.7769,
-      'longitude': 106.7009,
-      'time': '2025-06-19 14:00',
-      'type': 'Diary',
-      'category': 'Tree Planting',
-    },
-    {
-      'username': 'Mahmud Nik',
-      'avatar': 'https://via.placeholder.com/40',
-      'status': 'Recycling event today!',
-      'images': ['https://via.placeholder.com/300'],
-      'location': 'Green Road, District 3, Ho Chi Minh',
-      'latitude': 10.7800,
-      'longitude': 106.6950,
-      'time': '2025-06-19 15:00',
-      'type': 'Event',
-      'category': 'Recycling',
-    },
-  ];
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  final MomentService _momentService = MomentService();
+  final UserService _userService = UserService();
+  List<Moment> _moments = [];
+  String _filter = 'all';
+  bool _isLoading = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUser();
+    _fetchMoments();
+  }
+
+  Future<void> _fetchCurrentUser() async {
+    try {
+      setState(() {
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load user data: $e';
+      });
+    }
+  }
+
+  Future<void> _fetchMoments() async {
+    setState(() {
+      _isLoading = true;
+      _error = null;
+    });
+    try {
+      bool? isPublic;
+      if (_filter == 'public') isPublic = true;
+      if (_filter == 'private') isPublic = false;
+
+      final moments = await _momentService.getMyMoments(
+        page: 1,
+        limit: 20,
+        is_public: _filter == 'all' ? null : isPublic,
+      );
+
+      setState(() {
+        _moments = moments;
+      });
+    } catch (e) {
+      setState(() {
+        _error = 'Failed to load moments: $e';
+      });
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Widget _buildChip(String label, String value) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: _filter == value,
+      onSelected: (_) {
+        setState(() {
+          _filter = value;
+        });
+        _fetchMoments();
+      },
+      selectedColor: button,
+      labelStyle: TextStyle(
+        color: _filter == value ? Colors.white : Colors.black,
+        fontFamily: 'Oktah',
+      ),
+      backgroundColor: Colors.grey.shade200,
+      shape: StadiumBorder(
+        side: BorderSide(color: Colors.grey.shade400),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final authManager = Provider.of<AuthManager>(context);
-    final user = authManager.loggedInUser;
 
-    // return Scaffold(
-    //   body: SafeArea(
-    //     child: Container(
-    //       // Thêm Container để áp dụng màu nền background cho toàn bộ khu vực
-    //       color: background, // Đảm bảo toàn bộ nền là background
-    //       child: SingleChildScrollView(
-    //         child: Column(
-    //           children: [
-    //             // Header với tiêu đề và icon bánh răng
-    //             Container(
-    //               padding: const EdgeInsets.symmetric(
-    //                   vertical: 16.0, horizontal: 16.0),
-    //               color: button,
-    //               child: Row(
-    //                 mainAxisAlignment: MainAxisAlignment.center,
-    //                 children: [
-    //                   SizedBox(width: 49.0),
-    //                   const Expanded(
-    //                     child: Text(
-    //                       'Profile',
-    //                       textAlign: TextAlign.center,
-    //                       style: TextStyle(
-    //                         fontSize: 25,
-    //                         fontFamily: 'Oktah',
-    //                         fontWeight: FontWeight.w900,
-    //                         color: Colors.white,
-    //                       ),
-    //                     ),
-    //                   ),
-    //                   IconButton(
-    //                     icon: const Icon(Icons.settings, color: Colors.white),
-    //                     onPressed: () {
-    //                       // Xử lý Edit Profile
-    //                     },
-    //                   ),
-    //                 ],
-    //               ),
-    //             ),
-    //             // Phần thông tin cá nhân (avatar và email) trong container bo tròn
-    //             Container(
-    //               width: double.infinity,
-    //               padding: const EdgeInsets.all(20.0),
-    //               decoration: const BoxDecoration(
-    //                 color: button,
-    //                 borderRadius: BorderRadius.vertical(
-    //                   bottom: Radius.circular(25.0),
-    //                 ),
-    //               ),
-    //               child: Column(
-    //                 mainAxisAlignment: MainAxisAlignment.center,
-    //                 children: [
-    //                   CircleAvatar(
-    //                     radius: 55,
-    //                     backgroundImage:
-    //                         const AssetImage('assets/images/blankava.png'),
-    //                     backgroundColor: button,
-    //                     child: const Stack(
-    //                       children: [
-    //                         Positioned(
-    //                           bottom: 0,
-    //                           right: 0,
-    //                           child: CircleAvatar(
-    //                             radius: 12,
-    //                             backgroundColor: Colors.white,
-    //                             child: Icon(Icons.add,
-    //                                 size: 14, color: Color(0xFFADD8E6)),
-    //                           ),
-    //                         ),
-    //                       ],
-    //                     ),
-    //                   ),
-    //                   const SizedBox(height: 20.0),
-    //                   // Hiển thị tên người dùng
-    //                   Text(
-    //                     'Unknown User', // Tên người dùng từ AuthManager
-    //                     style: const TextStyle(
-    //                       fontSize: 21,
-    //                       fontFamily: 'Oktah',
-    //                       fontWeight: FontWeight.w700,
-    //                       color: Colors.white,
-    //                     ),
-    //                     textAlign: TextAlign.center,
-    //                   ),
-    //                   const SizedBox(
-    //                       height: 3.0), // Khoảng cách giữa tên và email
-    //                   // Hiển thị email
-    //                   RichText(
-    //                     text: TextSpan(
-    //                       children: [
-    //                         const TextSpan(
-    //                           text: 'Email: ',
-    //                           style: TextStyle(
-    //                             fontSize: 15,
-    //                             fontFamily: 'Oktah',
-    //                             fontWeight: FontWeight.w500,
-    //                             color: Colors.white70,
-    //                           ),
-    //                         ),
-    //                         TextSpan(
-    //                           text: '${user?.u_email ?? ''}',
-    //                           style: const TextStyle(
-    //                             fontSize: 16,
-    //                             fontFamily: 'Oktah',
-    //                             fontWeight: FontWeight.w500,
-    //                             color: Colors.white,
-    //                           ),
-    //                         ),
-    //                       ],
-    //                     ),
-    //                     textAlign: TextAlign.center,
-    //                   ),
-    //                   const SizedBox(height: 16.0),
-    //                 ],
-    //               ),
-    //             ),
-    //             // Widget AddMomentPlace
-    //             const SizedBox(height: 10.0),
-    //             const AddMomentPlace(),
-    //             // Phần hiển thị các bài post
-    //             Container(
-    //               color:
-    //                   background, // Đảm bảo nền của danh sách bài post là background
-    //               child: ListView.builder(
-    //                 shrinkWrap: true,
-    //                 physics: const NeverScrollableScrollPhysics(),
-    //                 padding: const EdgeInsets.all(8.0),
-    //                 itemCount: samplePosts.length,
-    //                 itemBuilder: (context, index) {
-    //                   final post = samplePosts[index];
-    //                   return MomentCard(
-    //                     username: post['username'],
-    //                     avatar: post['avatar'],
-    //                     status: post['status'],
-    //                     images: post['images'] != null
-    //                         ? List<String>.from(post['images'])
-    //                         : null,
-    //                     location: post['location'],
-    //                     latitude: post['latitude'],
-    //                     longitude: post['longitude'],
-    //                     time: post['time'],
-    //                     type: post['type'],
-    //                     category: post['category'],
-    //                   );
-    //                 },
-    //               ),
-    //             ),
-    //           ],
-    //         ),
-    //       ),
-    //     ),
-    //   ),
-    // );
-  
-  return Scaffold(
-      backgroundColor: background,
+    return Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        backgroundColor: button,
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Profile',
-          style: TextStyle(
-            fontSize: 25,
-            fontFamily: 'Oktah',
-            fontWeight: FontWeight.w900,
-            color: Colors.white,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: () {
-              authManager.logout(); // ✅ Đăng xuất
-            },
-            icon: const Icon(Icons.logout),
-            tooltip: 'Log out',
-          ),
-        ],
-        leading: IconButton(
-          icon: const Icon(Icons.settings, color: Colors.white),
-          onPressed: () {
-            // Mở màn hình cài đặt hoặc sửa profile
-          },
-        ),
-      ),
-      body: SafeArea(
-        child: Container(
-          color: background,
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                // 🧼 Xoá container header cũ đi nếu đã dùng AppBar
-                // ✅ Giữ phần avatar + thông tin người dùng
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(20.0),
-                  decoration: const BoxDecoration(
-                    color: button,
-                    borderRadius: BorderRadius.vertical(
-                      bottom: Radius.circular(25.0),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      CircleAvatar(
-                        radius: 55,
-                        backgroundImage:
-                            const AssetImage('assets/images/blankava.png'),
-                        backgroundColor: button,
-                        child: const Stack(
-                          children: [
-                            Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: CircleAvatar(
-                                radius: 12,
-                                backgroundColor: Colors.white,
-                                child: Icon(Icons.add,
-                                    size: 14, color: Color(0xFFADD8E6)),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20.0),
-                      Text(
-                        user?.u_name ?? 'Unknown User',
-                        style: const TextStyle(
-                          fontSize: 21,
-                          fontFamily: 'Oktah',
-                          fontWeight: FontWeight.w700,
-                          color: Colors.white,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 3.0),
-                      RichText(
-                        text: TextSpan(
-                          children: [
-                            const TextSpan(
-                              text: 'Email: ',
-                              style: TextStyle(
-                                fontSize: 15,
-                                fontFamily: 'Oktah',
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white70,
-                              ),
-                            ),
-                            TextSpan(
-                              text: '${user?.u_email ?? ''}',
-                              style: const TextStyle(
-                                fontSize: 16,
-                                fontFamily: 'Oktah',
-                                fontWeight: FontWeight.w500,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 16.0),
-                    ],
-                  ),
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        automaticallyImplyLeading: false,
+        title: Row(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    _buildChip('All', 'all'),
+                    const SizedBox(width: 6),
+                    _buildChip('Public', 'public'),
+                    const SizedBox(width: 6),
+                    _buildChip('Private', 'private'),
+                  ],
                 ),
-                const SizedBox(height: 10.0),
-                const AddMomentPlace(),
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(8.0),
-                  itemCount: samplePosts.length,
-                  itemBuilder: (context, index) {
-                    final post = samplePosts[index];
-                    return MomentCard(
-                      username: post['username'],
-                      avatar: post['avatar'],
-                      status: post['status'],
-                      images: post['images'] != null
-                          ? List<String>.from(post['images'])
-                          : null,
-                      location: post['location'],
-                      latitude: post['latitude'],
-                      longitude: post['longitude'],
-                      time: post['time'],
-                      type: post['type'],
-                      category: post['category'],
-                    );
-                  },
+              ),
+            ),
+            const SizedBox(width: 8),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.settings, color: Colors.black),
+              onSelected: (value) {
+                if (value == 'logout') {
+                  authManager.logout();
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'profile',
+                  child: Text('Edit Profile'),
+                ),
+                const PopupMenuItem(
+                  value: 'logout',
+                  child: Text('Logout'),
                 ),
               ],
             ),
-          ),
+          ],
+        ),
+      ),
+
+      body: SafeArea(
+        child: CustomScrollView(
+          slivers: [
+            if (_error != null)
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+              )
+            else if (_isLoading)
+              const SliverToBoxAdapter(
+                child: Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+              )
+            else
+              SliverList(
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) {
+                    if (index == 0) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 10.0),
+                        child: AddMomentPlace(),
+                      );
+                    }
+                    if (_moments.isEmpty) {
+                      return const Padding(
+                        padding: EdgeInsets.all(16.0),
+                        child: Text(
+                          'No moments found.',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      );
+                    }
+                    final moment = _moments[index - 1];
+                    return MomentCard(
+                      username: moment.user.u_name,
+                      avatar: fullImageUrl(moment.user.u_avt),
+                      status: moment.content,
+                      images: moment.media.isNotEmpty
+                          ? moment.media
+                              .map((m) => fullImageUrl(m.media_url))
+                              .toList()
+                          : null,
+                      location: moment.address,
+                      time: DateFormat('yyyy-MM-dd HH:mm')
+                          .format(moment.createdAt),
+                      type: moment.type,
+                      category: moment.category.category_name,
+                      latitude: moment.latitude,
+                      longitude: moment.longitude,
+                    );
+                  },
+                  childCount: _moments.isEmpty ? 2 : _moments.length + 1,
+                ),
+              ),
+          ],
         ),
       ),
     );
-
   }
-
 }

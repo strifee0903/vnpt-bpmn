@@ -6,8 +6,7 @@ import '../models/user.dart';
 import '../shared/api_exception.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const userUrl = 'http://192.168.1.7:3000/api/users'; // Updated to match backend
-
+const userUrl = 'http://192.168.1.7:3000/api/users';
 class UserService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? userUrl;
   static final client = http.Client(); // Persistent client for cookies

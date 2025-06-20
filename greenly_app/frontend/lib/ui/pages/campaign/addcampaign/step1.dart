@@ -1,6 +1,4 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
 import '../../../../components/colors.dart';
 import 'step2.dart';
 
@@ -17,10 +15,8 @@ class _Step1State extends State<Step1> {
   final TextEditingController locationController = TextEditingController();
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
-  File? _selectedImage;
   String? selectedCategory; // Biến để lưu category được chọn
 
-  final ImagePicker _picker = ImagePicker();
 
   // Danh sách category
   final List<String> categories = [

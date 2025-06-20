@@ -1,4 +1,4 @@
-// moments_page.dart (unchanged, verified)
+// moments_page.dart
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import '../../components/colors.dart';
@@ -6,6 +6,7 @@ import '../../services/moment_service.dart';
 import '../../models/moment.dart';
 import 'add_moment.dart';
 import 'moments_card.dart';
+import 'add_moment_place.dart';
 
 String fullImageUrl(String? relativePath) {
   final imageBaseUrl = MomentService.imageBaseUrl;
@@ -33,6 +34,7 @@ class _MomentsPageState extends State<MomentsPage> {
   bool _isLoading = false;
   bool _hasMore = true;
   final int _itemsPerPage = 10;
+  String _filter = 'all';
 
   @override
   void initState() {
@@ -50,8 +52,7 @@ class _MomentsPageState extends State<MomentsPage> {
   Future<void> _loadInitialMoments() async {
     setState(() => _isLoading = true);
     try {
-      final moments = await _momentService.getNewsFeedMoments(
-          page: _currentPage, limit: _itemsPerPage);
+      final moments = await _fetchMoments();
       setState(() {
         _moments.addAll(moments);
         _isLoading = false;
@@ -63,13 +64,23 @@ class _MomentsPageState extends State<MomentsPage> {
     }
   }
 
+  Future<List<Moment>> _fetchMoments() async {
+    bool? isPublic;
+    if (_filter == 'public') isPublic = true;
+    if (_filter == 'private') isPublic = false;
+    return await _momentService.getNewsFeedMoments(
+      page: _currentPage,
+      limit: _itemsPerPage,
+      is_public: _filter == 'all' ? null : isPublic,
+    );
+  }
+
   Future<void> _loadMoreMoments() async {
     if (_isLoading || !_hasMore) return;
     setState(() => _isLoading = true);
     _currentPage++;
     try {
-      final moments = await _momentService.getNewsFeedMoments(
-          page: _currentPage, limit: _itemsPerPage);
+      final moments = await _fetchMoments();
       setState(() {
         _moments.addAll(moments);
         _isLoading = false;
@@ -92,18 +103,6 @@ class _MomentsPageState extends State<MomentsPage> {
     }
   }
 
-  Future<void> _navigateToAddMoment() async {
-    final newMoment = await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (context) => const AddMomentPage()),
-    );
-    if (newMoment != null && newMoment is Moment) {
-      setState(() {
-        _moments.insert(0, newMoment);
-      });
-    }
-  }
-
   Future<void> _refreshFeed() async {
     setState(() {
       _currentPage = 1;
@@ -113,25 +112,63 @@ class _MomentsPageState extends State<MomentsPage> {
     await _loadInitialMoments();
   }
 
+  Widget _buildChip(String label, String value) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: _filter == value,
+      onSelected: (_) {
+        setState(() {
+          _filter = value;
+          _currentPage = 1;
+          _moments.clear();
+        });
+        _loadInitialMoments();
+      },
+      selectedColor: button,
+      labelStyle: TextStyle(
+        color: _filter == value ? Colors.white : Colors.black,
+        fontFamily: 'Oktah',
+      ),
+      backgroundColor: Colors.grey.shade200,
+      shape: StadiumBorder(
+        side: BorderSide(color: Colors.grey.shade400),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: background,
-      floatingActionButton: FloatingActionButton(
-        heroTag: 'fab_home',
-        onPressed: _navigateToAddMoment,
-        backgroundColor: button,
-        tooltip: 'Create New Moment',
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
-      body: _moments.isEmpty && _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _refreshFeed,
-              child: ListView.builder(
-                controller: _scrollController,
-                itemCount: _moments.length + (_hasMore ? 1 : 0),
-                itemBuilder: (context, index) {
+      body: RefreshIndicator(
+        onRefresh: _refreshFeed,
+        child: CustomScrollView(
+          controller: _scrollController,
+          slivers: [
+            // Filter (Pinned)
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverFilterBar(
+                selected: _filter,
+                onChanged: (value) {
+                  setState(() => _filter = value);
+                  _refreshFeed();
+                },
+              ),
+            ),
+
+            // AddMomentPlace
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: AddMomentPlace(),
+              ),
+            ),
+
+            // Moments list
+            SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (context, index) {
                   if (index >= _moments.length) {
                     return Padding(
                       padding: const EdgeInsets.symmetric(vertical: 16.0),
@@ -142,6 +179,7 @@ class _MomentsPageState extends State<MomentsPage> {
                       ),
                     );
                   }
+
                   final moment = _moments[index];
                   return MomentCard(
                     username: moment.user.u_name,
@@ -161,8 +199,65 @@ class _MomentsPageState extends State<MomentsPage> {
                     longitude: moment.longitude,
                   );
                 },
+                childCount: _moments.length + (_hasMore ? 1 : 0),
               ),
             ),
+          ],
+        ),
+      ),
+
     );
   }
+}
+class _SliverFilterBar extends SliverPersistentHeaderDelegate {
+  final String selected;
+  final Function(String) onChanged;
+
+  _SliverFilterBar({required this.selected, required this.onChanged});
+
+  @override
+  Widget build(
+      BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: SingleChildScrollView(
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            _buildChip('All', 'all'),
+            const SizedBox(width: 6),
+            _buildChip('Public', 'public'),
+            const SizedBox(width: 6),
+            _buildChip('Private', 'private'),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChip(String label, String value) {
+    return ChoiceChip(
+      label: Text(label),
+      selected: selected == value,
+      onSelected: (_) => onChanged(value),
+      selectedColor: button,
+      labelStyle: TextStyle(
+        color: selected == value ? Colors.white : Colors.black,
+        fontFamily: 'Oktah',
+      ),
+      backgroundColor: Colors.grey.shade200,
+      shape: StadiumBorder(
+        side: BorderSide(color: Colors.grey.shade400),
+      ),
+    );
+  }
+
+  @override
+  double get maxExtent => 48 + 16; // height + padding
+  @override
+  double get minExtent => 48 + 16;
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      true;
 }

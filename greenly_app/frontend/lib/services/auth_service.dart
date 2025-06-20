@@ -63,18 +63,12 @@ class AuthService {
 
 Future<User> login(String email, String password) async {
     final uri = Uri.parse('$baseUrl/users/login/');
-
+    var request = http.MultipartRequest('POST', uri);
+    request.fields['u_email'] = email;
+    request.fields['u_pass'] = password;
     try {
-      final response = await http.post(
-        uri,
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-        },
-        body: {
-          'u_email': email,
-          'u_pass': password,
-        },
-      );
+      final streamedResponse = await request.send();
+      final response = await http.Response.fromStream(streamedResponse);
 
       print('📤 Sending login to: ${uri.toString()}');
       print('📄 With data: u_email=$email');

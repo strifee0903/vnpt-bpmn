@@ -11,8 +11,6 @@ import '../../services/user_service.dart';
 import 'add_moment_section.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-import 'package:provider/provider.dart';
-
 
 String fullImageUrl(String? relativePath) {
   final imageBaseUrl = MomentService.imageBaseUrl;

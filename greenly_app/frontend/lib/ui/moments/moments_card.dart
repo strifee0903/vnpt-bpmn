@@ -4,11 +4,10 @@ class MomentCard extends StatelessWidget {
   final String username;
   final String avatar;
   final String status;
-  final List<String>? images; // Changed from String? to List<String>?
+  final List<String>? images;
   final String location;
-  final double? latitude; // Add these new fields
+  final double? latitude;
   final double? longitude;
-
   final String time;
   final String type;
   final String category;
@@ -36,11 +35,10 @@ class MomentCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(12.0),
           child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: () {
-                  print('👤 DEBUG - Avatar tapped, URL: $avatar');
-                },
+                onTap: () => print('👤 Avatar tapped: $avatar'),
                 child: CircleAvatar(
                   radius: 20,
                   backgroundColor: Colors.grey[300],
@@ -50,47 +48,24 @@ class MomentCard extends StatelessWidget {
                       width: 40,
                       height: 40,
                       fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) {
-                          print(
-                              '✅ DEBUG - Avatar loaded successfully: $avatar');
-                          return child;
-                        }
-                        print('⏳ DEBUG - Avatar loading: $avatar');
-                        return const CircularProgressIndicator(strokeWidth: 2);
-                      },
-                      errorBuilder: (context, error, stackTrace) {
-                        print('❌ DEBUG - Avatar load failed: $avatar');
-                        print('❌ DEBUG - Avatar error: $error');
-                        print('❌ DEBUG - Avatar stackTrace: $stackTrace');
-                        return Container(
-                          width: 40,
-                          height: 40,
-                          decoration: const BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.grey,
-                          ),
-                          child: const Icon(
-                            Icons.person,
-                            color: Colors.white,
-                            size: 20,
-                          ),
-                        );
-                      },
+                      errorBuilder: (_, __, ___) => const Icon(Icons.person),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(width: 15),
-              Text(
-                username,
-                style: const TextStyle(
-                  fontFamily: 'Oktah',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 18,
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  username,
+                  style: const TextStyle(
+                    fontFamily: 'Oktah',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
                 ),
               ),
-              const Spacer(),
               const Icon(Icons.more_vert),
             ],
           ),
@@ -107,11 +82,13 @@ class MomentCard extends StatelessWidget {
               fontWeight: FontWeight.w500,
               color: Colors.black87,
             ),
+            softWrap: true,
+            overflow: TextOverflow.visible,
           ),
         ),
         const SizedBox(height: 10),
 
-        // Image carousel for multiple images
+        // Image carousel
         if (images != null && images!.isNotEmpty)
           SizedBox(
             height: 300,
@@ -119,67 +96,16 @@ class MomentCard extends StatelessWidget {
               itemCount: images!.length,
               itemBuilder: (context, index) {
                 final image = images![index];
-                return GestureDetector(
-                  onTap: () {
-                    print('🖼️ DEBUG - Image tapped, URL: $image');
-                  },
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        image,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        loadingBuilder: (context, child, loadingProgress) {
-                          if (loadingProgress == null) {
-                            print(
-                                '✅ DEBUG - Image loaded successfully: $image');
-                            return child;
-                          }
-                          print('⏳ DEBUG - Image loading: $image');
-                          return Center(
-                            child: CircularProgressIndicator(
-                              value: loadingProgress.expectedTotalBytes != null
-                                  ? loadingProgress.cumulativeBytesLoaded /
-                                      loadingProgress.expectedTotalBytes!
-                                  : null,
-                            ),
-                          );
-                        },
-                        errorBuilder: (context, error, stackTrace) {
-                          print('❌ DEBUG - Image load failed: $image');
-                          print('❌ DEBUG - Image error: $error');
-                          print('❌ DEBUG - Image stackTrace: $stackTrace');
-                          return Container(
-                            color: Colors.grey[300],
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                const Icon(
-                                  Icons.broken_image,
-                                  size: 50,
-                                  color: Colors.grey,
-                                ),
-                                const SizedBox(height: 8),
-                                const Text(
-                                  'Image failed to load',
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  'URL: $image',
-                                  style: const TextStyle(
-                                    color: Colors.grey,
-                                    fontSize: 10,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                      ),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: Image.network(
+                      image,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (_, __, ___) =>
+                          const Icon(Icons.broken_image),
                     ),
                   ),
                 );
@@ -187,7 +113,7 @@ class MomentCard extends StatelessWidget {
             ),
           ),
 
-        // Page indicator if there are multiple images
+        // Image indicator
         if (images != null && images!.length > 1)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
@@ -207,39 +133,63 @@ class MomentCard extends StatelessWidget {
             ),
           ),
 
-        // In the additional information section, modify to show coordinates:
+        // Info: time, location, coordinates, type, category
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const SizedBox(height: 4),
+              // Time & Coordinates
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.access_time, size: 18, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(time, style: const TextStyle(fontSize: 10, color: Colors.grey)),
-                  const SizedBox(width: 20),
+                  Expanded(
+                    child: Text(
+                      time,
+                      style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
                   const Icon(Icons.location_on, size: 18, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text('${latitude!.toStringAsFixed(4)}, ${longitude!.toStringAsFixed(4)}',
-                      style:
-                          const TextStyle(fontSize: 10, color: Colors.grey)),
+                  Expanded(
+                    child: Text(
+                      '${latitude?.toStringAsFixed(4)}, ${longitude?.toStringAsFixed(4)}',
+                      style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
+
+              // Location
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.travel_explore,
                       size: 18, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Text(location,
-                      style:
-                          const TextStyle(fontSize: 14, color: Colors.black)),
+                  Expanded(
+                    child: Text(
+                      location,
+                      style: const TextStyle(fontSize: 14, color: Colors.black),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
+                  ),
                 ],
               ),
               const SizedBox(height: 4),
+
+              // Type & Category
               Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   getMomentTypeIcon(type),
                   const SizedBox(width: 4),
@@ -248,28 +198,34 @@ class MomentCard extends StatelessWidget {
                   getCategoryIcon(category),
                   const SizedBox(width: 4),
                   Expanded(
-                    child: Text(category, style: const TextStyle(fontSize: 14)),
+                    child: Text(
+                      category,
+                      style: const TextStyle(fontSize: 14),
+                      softWrap: true,
+                      overflow: TextOverflow.visible,
+                    ),
                   ),
                 ],
               ),
-
             ],
           ),
         ),
         const SizedBox(height: 10),
-
       ],
     );
   }
 }
+
 Icon getMomentTypeIcon(String type) {
   switch (type.toLowerCase()) {
     case 'event':
       return const Icon(Icons.event, size: 18, color: Colors.blueAccent);
     case 'diary':
-      return const Icon(Icons.book, size: 18, color: Color.fromARGB(255, 48, 39, 176));
+      return const Icon(Icons.book,
+          size: 18, color: Color.fromARGB(255, 48, 39, 176));
     case 'report':
-      return const Icon(Icons.list_alt_rounded, size: 18, color: Color.fromARGB(255, 163, 22, 22));
+      return const Icon(Icons.list_alt_rounded,
+          size: 18, color: Color.fromARGB(255, 163, 22, 22));
     default:
       return const Icon(Icons.help_outline, size: 18, color: Colors.grey);
   }
@@ -289,9 +245,5 @@ Icon getCategoryIcon(String category) {
     'Làm sạch bãi biển': Icons.beach_access,
   };
 
-  return Icon(
-    map[category] ?? Icons.category,
-    size: 18,
-    color: Colors.green,
-  );
+  return Icon(map[category] ?? Icons.category, size: 18, color: Colors.green);
 }

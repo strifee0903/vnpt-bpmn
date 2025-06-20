@@ -27,7 +27,7 @@ class _MainLayoutState extends State<MainLayout> {
 
   @override
   Widget build(BuildContext context) {
-    final authManager = Provider.of<AuthManager>(context);
+    Provider.of<AuthManager>(context);
     return Scaffold(
       backgroundColor: background,
       body: SafeArea(

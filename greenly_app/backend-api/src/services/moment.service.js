@@ -175,16 +175,35 @@ async function getAllMyMoments(u_id, query) {
         let totalRecords = await totalRecordsQuery;
         totalRecords = totalRecords?.count || 0;
 
-        // 2. Gắn ảnh cho mỗi moment
+        // 2. Gắn ảnh và thông tin user, category cho mỗi moment
         const result = await Promise.all(
             moments.map(async (moment) => {
                 const media = await mediaRepository()
                     .where('moment_id', moment.moment_id)
-                    .select('media_id','media_url');
+                    .select('media_id', 'media_url');
+
+                const category = await knex('category')
+                    .where('category_id', moment.category_id)
+                    .select('category_id', 'category_name')
+                    .first();
+
+                const user = await knex('users')
+                    .where('u_id', moment.u_id)
+                    .select('u_id', 'u_name', 'u_avt')
+                    .first();
 
                 return {
-                    ...moment,
-                    media
+                    moment_id: moment.moment_id,
+                    moment_content: moment.moment_content,
+                    moment_address: moment.moment_address,
+                    latitude: moment.latitude,
+                    longitude: moment.longitude,
+                    created_at: moment.created_at,
+                    moment_type: moment.moment_type,
+                    is_public: moment.is_public,
+                    category: category || null,
+                    user: user || null,
+                    media: media
                 };
             })
         );

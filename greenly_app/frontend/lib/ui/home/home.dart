@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import '../../components/colors.dart';
-import '../auth/auth_manager.dart';
 import '../../shared/main_layout.dart'; // Import MainLayout
 
 class MyApp extends StatelessWidget {
@@ -32,7 +30,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
-    final authManager = Provider.of<AuthManager>(context);
     return Scaffold(
       backgroundColor: background, // Đặt màu nền là background
       body: SafeArea(
