@@ -86,62 +86,72 @@ class _AddMomentPlaceState extends State<AddMomentPlace> {
             MaterialPageRoute(builder: (context) => const AddMomentPage()),
           );
         },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Avatar + username
-            Row(
-              children: [
-                CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey.shade100,
-                  backgroundImage: NetworkImage(
-                    shared_image_url.fullImageUrl(_currentUser?.u_avt),
-                  ),
-                ),
-                const SizedBox(width: 15),
-                Expanded(
-                  child: Text(
-                    _currentUser?.u_name ?? 'Unknown User',
-                    style: const TextStyle(
-                      fontFamily: 'Oktah',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 18,
-                    ),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12.0),
-
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF708C5B).withOpacity(0.2),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Row(
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: const Color(0xFF708C5B).withOpacity(0.2),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Avatar + username
+              Row(
                 children: [
-                  Icon(Icons.edit_outlined,
-                      color: Colors.grey.shade500, size: 20),
-                  const SizedBox(width: 12),
-                  const Text(
-                    'Share your moment...',
-                    style: TextStyle(
-                      fontFamily: 'Oktah',
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black54,
+                  CircleAvatar(
+                    radius: 20,
+                    backgroundColor: Colors.grey.shade100,
+                    backgroundImage: NetworkImage(
+                      shared_image_url.fullImageUrl(_currentUser?.u_avt),
+                    ),
+                  ),
+                  const SizedBox(width: 15),
+                  Expanded(
+                    child: Text(
+                      _currentUser?.u_name ?? 'Unknown User',
+                      style: const TextStyle(
+                        fontFamily: 'Oktah',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 18,
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
-            ),
-          ],
+              const SizedBox(height: 12.0),
+
+              // Share your moment
+              Container(
+                width: double.infinity,
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.edit_outlined,
+                        color: Colors.grey.shade500, size: 20),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Share your moment...',
+                      style: TextStyle(
+                        fontFamily: 'Oktah',
+                        fontSize: 15,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black54,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
+
   }
 }

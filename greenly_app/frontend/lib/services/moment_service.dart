@@ -76,17 +76,6 @@ class MomentService {
         // Chuẩn hóa media
         momentData['media'] ??= [];
 
-        // // Thêm fallback user & category nếu thiếu
-        // momentData['user'] ??= {
-        //   'u_id': momentData['u_id'] ?? 1,
-        //   'u_name': 'Current User',
-        //   'u_avt': null,
-        // };
-        // momentData['category'] ??= {
-        //   'category_id': categoryId,
-        //   'category_name': 'General',
-        // };
-
         return Moment.fromJson(momentData);
       } else {
         throw Exception(
@@ -186,6 +175,50 @@ class MomentService {
       throw Exception('Failed to load moments: ${response.statusCode}');
     }
   }
+
+  Future<List<Moment>> getPublicMomentsOfUser({
+    required int userId,
+    int page = 1,
+    int limit = 10,
+    String? moment_type, // optional: 'diary', 'event', 'report'
+  }) async {
+    print('🔧 DEBUG - Environment BASE_URL: ${dotenv.env['BASE_URL']}');
+    print('🔧 DEBUG - Service baseUrl: $baseUrl');
+
+    final prefs = await SharedPreferences.getInstance();
+    final sessionCookie = prefs.getString('session_cookie') ?? '';
+
+    String url = '$baseUrl/moment/public/user/$userId?page=$page&limit=$limit';
+    if (moment_type != null) {
+      url += '&moment_type=$moment_type';
+    }
+
+    print('🌐 DEBUG - Request URL: $url');
+
+    final response = await http.get(
+      Uri.parse(url),
+      headers: {
+        'Cookie': sessionCookie,
+      },
+    );
+
+    print('🔐 Cookie header added: $sessionCookie');
+    print('📡 DEBUG - Response status: ${response.statusCode}');
+    print('📡 DEBUG - Response headers: ${response.headers}');
+
+    if (response.statusCode == 200) {
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      final List data = jsonResponse['data']['moments'];
+
+      print('✅ DEBUG - Number of moments: ${data.length}');
+
+      return data.map((item) => Moment.fromJson(item)).toList();
+    } else {
+      print('❌ DEBUG - Failed to load public moments: ${response.body}');
+      throw Exception('Failed to load public moments for user $userId');
+    }
+  }
+
 }
 
 

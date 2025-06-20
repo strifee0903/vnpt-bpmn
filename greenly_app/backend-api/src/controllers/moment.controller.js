@@ -64,17 +64,15 @@ async function createMoment(req, res, next) {
 };
 
 async function getPublicMomentsOfUser(req, res, next) {
-    const { u_id } = req.params;
-
+    if (!req.session.user) {
+        return next(new ApiError(401, 'Please log in to view your posts.'));
+    }
     try {
-        const moments = await momentService.getPublicMomentsByUserId(u_id);
+        const { u_id } = req.params;
+        const { page, limit, moment_type } = req.query;
+        const result = await momentService.getPublicMomentsByUserId(u_id, { page, limit, moment_type });
 
-        return res.json(
-            JSend.success({
-                user_id: u_id,
-                public_moments: moments
-            })
-        );
+        return res.json(JSend.success(result));
     } catch (error) {
         return next(new ApiError(500, 'Error fetching public posts of user.'));
     }

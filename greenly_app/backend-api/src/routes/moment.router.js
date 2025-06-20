@@ -100,36 +100,30 @@ module.exports.setup = (app) => {
      *         schema:
      *           type: integer
      *           description: User ID to fetch public moments for
+     *       - in: query
+     *         name: page
+     *         schema:
+     *           type: integer
+     *         required: false
+     *         description: Page number (default = 1)
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
+     *         required: false
+     *         description: Number of items per page (default = 10)
+     *       - in: query
+     *         name: moment_type
+     *         schema:
+     *           type: string
+     *           enum: [diary, event, report]
+     *         required: false
+     *         description: Filter by moment type
      *     responses:
-     *       201:
-     *         description: Moment created successfully
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: object
-     *               properties:
-     *                 status:
-     *                   type: string
-     *                   example: success
-     *                 data:
-     *                   type: object
-     *                   properties:
-     *                     moment:
-     *                       type: object
-     *                       properties:
-     *                         moment_id:
-     *                           type: integer
-     *                         moment_content:
-     *                           type: string
-     *                         media:
-     *                           type: array
-     *                           items:
-     *                             type: string
-     *                             example: /public/uploads/example.jpg
-     *       401:
-     *         description: Unauthorized - User not logged in
+     *       200:
+     *         description: Public moments retrieved
      *       500:
-     *         description: Internal Server Error
+     *         description: Internal server error
      */
     router.get('/public/user/:u_id', momentController.getPublicMomentsOfUser);
 

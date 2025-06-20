@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../auth/auth_manager.dart';
+import '../pages/profile/profile_screen.dart';
+import '../pages/profile/otherUserProfile.dart';
 
 class MomentCard extends StatelessWidget {
   final String username;
@@ -11,6 +15,8 @@ class MomentCard extends StatelessWidget {
   final String time;
   final String type;
   final String category;
+  final int userId;
+  final void Function(int userId, String username, String avatarUrl)? onUserTap;
 
   const MomentCard({
     super.key,
@@ -24,7 +30,37 @@ class MomentCard extends StatelessWidget {
     required this.time,
     required this.type,
     required this.category,
+    required this.userId,
+    this.onUserTap,
   });
+
+  void _handleUserTap(BuildContext context) {
+    final authManager = Provider.of<AuthManager>(context, listen: false);
+    final currentUser = authManager.loggedInUser;
+
+    if (currentUser != null && currentUser.u_id == userId) {
+      // Navigate to own profile
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const ProfileScreen(),
+        ),
+      );
+    } else {
+      // Navigate to other user's profile
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => OtherUserProfileScreen(
+            userId: userId,
+            username: username,
+            avatarUrl: avatar,
+          ),
+        ),
+      );
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -38,32 +74,40 @@ class MomentCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               GestureDetector(
-                onTap: () => print('👤 Avatar tapped: $avatar'),
-                child: CircleAvatar(
-                  radius: 20,
-                  backgroundColor: Colors.grey[300],
-                  child: ClipOval(
-                    child: Image.network(
-                      avatar,
-                      width: 40,
-                      height: 40,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => const Icon(Icons.person),
+                onTap: () => _handleUserTap(context),
+                child: Row(
+                  children: [
+                    CircleAvatar(
+                      radius: 20,
+                      backgroundColor: Colors.grey[300],
+                      child: ClipOval(
+                        child: Image.network(
+                          avatar,
+                          width: 40,
+                          height: 40,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, __, ___) =>
+                              const Icon(Icons.person),
+                        ),
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  username,
-                  style: const TextStyle(
-                    fontFamily: 'Oktah',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 18,
+                child: GestureDetector(
+                  onTap: () => _handleUserTap(context),
+                  child: Text(
+                    username,
+                    style: const TextStyle(
+                      fontFamily: 'Oktah',
+                      fontWeight: FontWeight.w700,
+                      fontSize: 18,
+                    ),
+                    softWrap: true,
+                    overflow: TextOverflow.visible,
                   ),
-                  softWrap: true,
-                  overflow: TextOverflow.visible,
                 ),
               ),
               const Icon(Icons.more_vert),

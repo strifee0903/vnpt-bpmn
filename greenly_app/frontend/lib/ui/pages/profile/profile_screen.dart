@@ -10,7 +10,8 @@ import '../../../services/moment_service.dart';
 import '../../../models/moment.dart';
 
 class ProfileScreen extends StatefulWidget {
-  const ProfileScreen({super.key});
+  final bool showBottomNav; 
+  const ProfileScreen({super.key, this.showBottomNav = false});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -108,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     final authManager = Provider.of<AuthManager>(context);
 
     return Scaffold(
-      backgroundColor: Colors.transparent,
+      backgroundColor: Colors.white,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(120), // Tăng chiều cao AppBar
         child: AppBar(
@@ -230,22 +231,32 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             );
                           }
                           final moment = _moments[index - 1];
-                          return MomentCard(
-                            username: moment.user.u_name,
-                            avatar: fullImageUrl(moment.user.u_avt),
-                            status: moment.content,
-                            images: moment.media.isNotEmpty
-                                ? moment.media
-                                    .map((m) => fullImageUrl(m.media_url))
-                                    .toList()
-                                : null,
-                            location: moment.address,
-                            time: DateFormat('yyyy-MM-dd HH:mm')
-                                .format(moment.createdAt),
-                            type: moment.type,
-                            category: moment.category.category_name,
-                            latitude: moment.latitude,
-                            longitude: moment.longitude,
+                          return Container(
+                            margin: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 6),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF708C5B).withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: MomentCard(
+                                userId: moment.user.u_id,
+                                username: moment.user.u_name,
+                                avatar: fullImageUrl(moment.user.u_avt),
+                                status: moment.content,
+                                images: moment.media.isNotEmpty
+                                    ? moment.media
+                                        .map((m) => fullImageUrl(m.media_url))
+                                        .toList()
+                                    : null,
+                                location: moment.address,
+                                time: DateFormat('yyyy-MM-dd HH:mm')
+                                    .format(moment.createdAt),
+                                type: moment.type,
+                                category: moment.category.category_name,
+                                latitude: moment.latitude,
+                                longitude: moment.longitude,
+                              )
                           );
                         },
                         childCount: _moments.isEmpty ? 2 : _moments.length + 1,

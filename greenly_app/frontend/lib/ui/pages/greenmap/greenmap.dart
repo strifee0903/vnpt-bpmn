@@ -12,7 +12,6 @@ import 'package:greenly_app/ui/moments/moments_card.dart';
 import 'package:greenly_app/models/moment.dart';
 import 'package:intl/intl.dart';
 import 'package:geocoding/geocoding.dart';
-
 String fullImageUrl(String? relativePath) {
   // Get the correct base URL for images (without /api)
   final imageBaseUrl = MomentService.imageBaseUrl;
@@ -244,7 +243,7 @@ class _GreenMapState extends State<GreenMap> {
                   itemCount: markerMoments.length,
                   itemBuilder: (context, index) {
                     final moment = markerMoments[index];
-                    final avatarUrl = fullImageUrl(moment.user.u_avt);
+                    fullImageUrl(moment.user.u_avt);
                     String? mediaUrl;
 
                     if (moment.media.isNotEmpty) {
@@ -253,14 +252,14 @@ class _GreenMapState extends State<GreenMap> {
                     }
 
                     return MomentCard(
+                      userId: moment.user.u_id,
                       username: moment.user.u_name,
-                      avatar: avatarUrl,
+                      avatar: fullImageUrl(moment.user.u_avt),
                       status: moment.content,
                       images: moment.media.isNotEmpty
                           ? moment.media
                               .map((m) => fullImageUrl(m.media_url))
                               .toList()
-                              .cast<String>()
                           : null,
                       location: moment.address,
                       time: DateFormat('yyyy-MM-dd HH:mm')
@@ -313,7 +312,7 @@ class _GreenMapState extends State<GreenMap> {
                   itemCount: markerMoments.length,
                   itemBuilder: (context, index) {
                     final moment = markerMoments[index];
-                    final avatarUrl = fullImageUrl(moment.user.u_avt);
+                    fullImageUrl(moment.user.u_avt);
                     String? mediaUrl;
 
                     if (moment.media.isNotEmpty) {
@@ -322,14 +321,14 @@ class _GreenMapState extends State<GreenMap> {
                     }
 
                     return MomentCard(
+                      userId: moment.user.u_id,
                       username: moment.user.u_name,
-                      avatar: avatarUrl,
+                      avatar: fullImageUrl(moment.user.u_avt),
                       status: moment.content,
                       images: moment.media.isNotEmpty
                           ? moment.media
                               .map((m) => fullImageUrl(m.media_url))
                               .toList()
-                              .cast<String>()
                           : null,
                       location: moment.address,
                       time: DateFormat('yyyy-MM-dd HH:mm')

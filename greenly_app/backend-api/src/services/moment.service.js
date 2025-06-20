@@ -71,31 +71,74 @@ async function createMoment(payload, files = []) {
 };
 
 /**hàm để khi vào trang cá nhân của người khác thì có thể xem hết tất cả bài viết ở trạng thái public của người đó.*/
-async function getPublicMomentsByUserId(u_id) {
-    try {
-        // 1. Lấy tất cả moments công khai của người dùng
-        const moments = await momentRepository()
-            .where({ u_id, is_public: true })
-            .orderBy('created_at', 'desc'); // optional: sắp xếp mới nhất trước
+async function getPublicMomentsByUserId(u_id, query) {
+    const { page = 1, limit = 5, moment_type } = query;
+    const paginator = new Paginator(page, limit);
 
-        // 2. Với mỗi moment, lấy media tương ứng
+    try {
+        let baseQuery = momentRepository()
+            .where('u_id', u_id)
+            .andWhere('is_public', true);
+
+        if (moment_type && moment_type !== 'all') {
+            baseQuery = baseQuery.andWhere('moment_type', moment_type);
+        }
+
+        const moments = await baseQuery
+            .orderBy('created_at', 'desc')
+            .limit(paginator.limit)
+            .offset(paginator.offset);
+
+        const total = await momentRepository()
+            .where('u_id', u_id)
+            .andWhere('is_public', true)
+            .modify((qb) => {
+                if (moment_type && moment_type !== 'all') {
+                    qb.andWhere('moment_type', moment_type);
+                }
+            })
+            .count('moment_id as count')
+            .first();
+
         const result = await Promise.all(moments.map(async (moment) => {
             const media = await mediaRepository()
                 .where('moment_id', moment.moment_id)
                 .select('media_url');
 
+            const category = await knex('category')
+                .where('category_id', moment.category_id)
+                .select('category_id', 'category_name')
+                .first();
+
+            const user = await knex('users')
+                .where('u_id', moment.u_id)
+                .select('u_id', 'u_name', 'u_avt')
+                .first();
+
             return {
-                ...moment,
-                media_urls: media.map(m => m.media_url),
+                moment_id: moment.moment_id,
+                moment_content: moment.moment_content,
+                moment_address: moment.moment_address,
+                latitude: moment.latitude,
+                longitude: moment.longitude,
+                created_at: moment.created_at,
+                moment_type: moment.moment_type,
+                category: category || null,
+                user: user || null,
+                media: media
             };
         }));
 
-        return result;
+        return {
+            metadata: paginator.getMetadata(total.count || 0),
+            moments: result
+        };
     } catch (error) {
         console.error('Error fetching public moments:', error);
         throw error;
     }
-};
+}
+
 
 async function getAllPublicMoments(query) {
     const { page = 1, limit = 5, moment_type } = query;
@@ -161,9 +204,6 @@ async function getAllPublicMoments(query) {
         throw error;
     }
 }
-
-
-
 async function getAllMyMoments(u_id, query) {
     const { page = 1, limit = 5, is_public, moment_type } = query;
     const paginator = new Paginator(page, limit);
