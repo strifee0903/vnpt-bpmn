@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/pages/profile/profile_screen.dart';
-import 'package:provider/provider.dart';
-import '../ui/auth/auth_manager.dart';
 import '../components/colors.dart';
 import '../shared/appbar.dart'; // CustomBottomAppBar
 import '../ui/home/home.dart'; // HomePage
@@ -10,24 +8,30 @@ import '../ui/moments/moments.dart'; // MomentsPage
 import '../ui/pages/greenmap/greenmap.dart'; // Assuming you have a MapsPage
 
 class MainLayout extends StatefulWidget {
-  const MainLayout({super.key});
+  final int initialIndex;
+  const MainLayout({super.key, this.initialIndex = 0});
 
   @override
   _MainLayoutState createState() => _MainLayoutState();
 }
 
 class _MainLayoutState extends State<MainLayout> {
-  int _currentIndex = 0; // Default to Home
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   void _onTabTapped(int index) {
     setState(() {
-      _currentIndex = index; // Update the selected index
+      _currentIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final authManager = Provider.of<AuthManager>(context);
     return Scaffold(
       backgroundColor: background,
       body: SafeArea(
@@ -36,8 +40,8 @@ class _MainLayoutState extends State<MainLayout> {
           children: const [
             HomePage(),
             MomentsPage(),
-            GreenMap(), // Assuming MapsPage is defined in your project
-            ProfileScreen(), // Assuming UserScreen is defined in your project
+            GreenMap(),
+            ProfileScreen(), // Removed showBottomNav since it's handled by MainLayout
           ],
         ),
       ),

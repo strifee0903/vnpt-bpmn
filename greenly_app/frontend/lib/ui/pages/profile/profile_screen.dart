@@ -10,8 +10,7 @@ import '../../../services/moment_service.dart';
 import '../../../models/moment.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final bool showBottomNav; 
-  const ProfileScreen({super.key, this.showBottomNav = false});
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -20,8 +19,8 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final MomentService _momentService = MomentService();
   List<Moment> _moments = [];
-  bool? _privacyFilter; // null, true, false
-  String? _typeFilter; // null, 'diary', 'event', 'report'
+  bool? _privacyFilter;
+  String? _typeFilter;
   bool _isLoading = false;
   String? _error;
 
@@ -43,7 +42,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         is_public: _privacyFilter,
         moment_type: _typeFilter,
       );
-
       setState(() {
         _moments = moments;
       });
@@ -72,7 +70,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       labelStyle: TextStyle(
         color: _privacyFilter == value ? Colors.white : Colors.black,
         fontFamily: 'Oktah',
-        fontSize: 13
+        fontSize: 13,
       ),
       backgroundColor: Colors.grey.shade200,
       shape: StadiumBorder(
@@ -95,7 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       labelStyle: TextStyle(
         color: _typeFilter == value ? Colors.white : Colors.black,
         fontFamily: 'Oktah',
-        fontSize: 13
+        fontSize: 13,
       ),
       backgroundColor: Colors.grey.shade200,
       shape: StadiumBorder(
@@ -111,7 +109,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(120), // Tăng chiều cao AppBar
+        preferredSize: const Size.fromHeight(120),
         child: AppBar(
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -124,13 +122,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Filter chips bên trái
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Hàng đầu: privacy filter
-                        // Hàng thứ hai: type filter
                         SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Row(
@@ -158,11 +153,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                         ),
-                        
                       ],
                     ),
                   ),
-                  // Nút settings bên phải
                   PopupMenuButton<String>(
                     icon: const Icon(Icons.settings, color: Colors.black),
                     onSelected: (value) {
@@ -183,11 +176,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
         ),
       ),
-
       body: SafeArea(
         child: Column(
           children: [
-            // Main content
             Expanded(
               child: CustomScrollView(
                 slivers: [
@@ -240,23 +231,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               borderRadius: BorderRadius.circular(10),
                             ),
                             child: MomentCard(
-                                userId: moment.user.u_id,
-                                username: moment.user.u_name,
-                                avatar: fullImageUrl(moment.user.u_avt),
-                                status: moment.content,
-                                images: moment.media.isNotEmpty
-                                    ? moment.media
-                                        .map((m) => fullImageUrl(m.media_url))
-                                        .toList()
-                                    : null,
-                                location: moment.address,
-                                time: DateFormat('yyyy-MM-dd HH:mm')
-                                    .format(moment.createdAt),
-                                type: moment.type,
-                                category: moment.category.category_name,
-                                latitude: moment.latitude,
-                                longitude: moment.longitude,
-                              )
+                              userId: moment.user.u_id,
+                              username: moment.user.u_name,
+                              avatar: fullImageUrl(moment.user.u_avt),
+                              status: moment.content,
+                              images: moment.media.isNotEmpty
+                                  ? moment.media
+                                      .map((m) => fullImageUrl(m.media_url))
+                                      .toList()
+                                  : null,
+                              location: moment.address,
+                              time: DateFormat('yyyy-MM-dd HH:mm')
+                                  .format(moment.createdAt),
+                              type: moment.type,
+                              category: moment.category.category_name,
+                              latitude: moment.latitude,
+                              longitude: moment.longitude,
+                            ),
                           );
                         },
                         childCount: _moments.isEmpty ? 2 : _moments.length + 1,
@@ -268,8 +259,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ],
         ),
       ),
-    
-    
     );
   }
 }

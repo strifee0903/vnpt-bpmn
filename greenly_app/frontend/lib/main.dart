@@ -12,7 +12,6 @@ import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
 import 'ui/pages/mydiary/mydiary.dart'; // Import MyDiary
 import 'ui/pages/campaign/campaign.dart'; // Import Campaign
 import 'ui/moments/moments.dart';
-import 'ui/pages/profile/profile_screen.dart'; // Import MomentsPage
 import 'shared/main_layout.dart';
 
 class SlideUpRoute extends PageRouteBuilder {
@@ -238,82 +237,76 @@ class _MyAppState extends State<MyApp> {
     );
 
     return MultiProvider(
-        providers: [
-          ChangeNotifierProvider(create: (ctx) => AuthManager()),
-        ],
-        child: Builder(builder: (context) {
-          final authManager = Provider.of<AuthManager>(context, listen: false);
-          // Initialize only once
-          if (!authManager.isInitialized) {
-            print('🔴 Triggering AuthManager initialization');
-            authManager.initialize();
-          }
+      providers: [
+        ChangeNotifierProvider(create: (ctx) => AuthManager()),
+      ],
+      child: Builder(builder: (context) {
+        final authManager = Provider.of<AuthManager>(context, listen: false);
+        if (!authManager.isInitialized) {
+          print('🔴 Triggering AuthManager initialization');
+          authManager.initialize();
+        }
 
-          return Consumer<AuthManager>(
-            builder: (ctx, authManager, child) {
-              print(
-                  '🔴 Building app: isInitialized=${authManager.isInitialized}, '
-                  'isAuth=${authManager.isAuth}, '
-                  'isSplashComplete=${authManager.isSplashComplete}, '
-                  'loggedInUser=${authManager.loggedInUser?.u_email}');
-              return Consumer<AuthManager>(
-                builder: (ctx, authManager, child) {
-                  print(
-                      '🔴 Building app: isInitialized=${authManager.isInitialized}, isAuth=${authManager.isAuth}, isSplashComplete=${authManager.isSplashComplete}');
+        return Consumer<AuthManager>(
+          builder: (ctx, authManager, child) {
+            print(
+                '🔴 Building app: isInitialized=${authManager.isInitialized}, '
+                'isAuth=${authManager.isAuth}, '
+                'isSplashComplete=${authManager.isSplashComplete}');
 
-                  Widget homeScreen;
-                  if (!authManager.isSplashComplete) {
-                    homeScreen = const SplashScreen();
-                  } else if (!authManager.isAuth) {
-                    homeScreen = const AuthScreen();
-                  } else {
-                    homeScreen = const MainLayout();
-                  }
+            Widget homeScreen;
+            if (!authManager.isSplashComplete) {
+              homeScreen = const SplashScreen();
+            } else if (!authManager.isAuth) {
+              homeScreen = const AuthScreen();
+            } else {
+              homeScreen = const MainLayout();
+            }
 
-                  return MaterialApp(
-                    debugShowCheckedModeBanner: false,
-                    title: 'Greenly App',
-                    theme: themeData,
-                    home: homeScreen,
-                    routes: {
-                      AuthScreen.routeName: (ctx) =>
-                          const SafeArea(child: AuthScreen()),
-                      HomePage.routeName: (ctx) =>
-                          const SafeArea(child: MainLayout()),
-                      '/myDiary': (ctx) => const SafeArea(child: MyDiary()),
-                      '/greenLibrary': (ctx) =>
-                          const SafeArea(child: GreenLibrary()),
-                      '/campaign': (ctx) => const SafeArea(child: Campaign()),
-                      '/moments': (ctx) => const SafeArea(child: MomentsPage()),
-                      '/profile': (ctx) =>
-                          const SafeArea(child: ProfileScreen()),
-                    },
-                    onGenerateRoute: (settings) {
-                      print('🔴 Navigating to route: ${settings.name}');
-                      switch (settings.name) {
-                        case HomePage.routeName:
-                          return SlideUpRoute(page: const MainLayout());
-                        case '/myDiary':
-                          return SlideRightRoute(page: const MyDiary());
-                        case '/greenLibrary':
-                          return FadeSlideRoute(page: const GreenLibrary());
-                        case '/moments':
-                          return ScaleRoute(page: const MomentsPage());
-                        case '/profile':
-                          return ScaleRoute(page: const ProfileScreen());
-                        default:
-                          print('🔴 Unknown route: ${settings.name}');
-                          return SlideUpRoute(page: const NotFoundScreen());
-                      }
-                    },
-                    onUnknownRoute: (settings) {
-                      return SlideUpRoute(page: const NotFoundScreen());
-                    },
-                  );
-                },
-              );
-            },
-          );
-        }));
+            return MaterialApp(
+              debugShowCheckedModeBanner: false,
+              title: 'Greenly App',
+              theme: themeData,
+              home: homeScreen,
+              routes: {
+                AuthScreen.routeName: (ctx) =>
+                    const SafeArea(child: AuthScreen()),
+                HomePage.routeName: (ctx) =>
+                    const SafeArea(child: MainLayout()),
+                '/myDiary': (ctx) => const SafeArea(child: MyDiary()),
+                '/greenLibrary': (ctx) => const SafeArea(child: GreenLibrary()),
+                '/campaign': (ctx) => const SafeArea(child: Campaign()),
+                '/moments': (ctx) => const SafeArea(child: MomentsPage()),
+                '/profile': (ctx) => const SafeArea(
+                    child: MainLayout(initialIndex: 3)), // Update to MainLayout
+              },
+              onGenerateRoute: (settings) {
+                print('🔴 Navigating to route: ${settings.name}');
+                switch (settings.name) {
+                  case HomePage.routeName:
+                    return SlideUpRoute(page: const MainLayout());
+                  case '/myDiary':
+                    return SlideRightRoute(page: const MyDiary());
+                  case '/greenLibrary':
+                    return FadeSlideRoute(page: const GreenLibrary());
+                  case '/moments':
+                    return ScaleRoute(page: const MomentsPage());
+                  case '/profile':
+                    return ScaleRoute(
+                        page: const MainLayout(
+                            initialIndex: 3)); // Update to MainLayout
+                  default:
+                    print('🔴 Unknown route: ${settings.name}');
+                    return SlideUpRoute(page: const NotFoundScreen());
+                }
+              },
+              onUnknownRoute: (settings) {
+                return SlideUpRoute(page: const NotFoundScreen());
+              },
+            );
+          },
+        );
+      }),
+    );
   }
 }

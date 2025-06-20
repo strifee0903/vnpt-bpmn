@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../shared/main_layout.dart';
 import '../auth/auth_manager.dart';
-import '../pages/profile/profile_screen.dart';
 import '../pages/profile/otherUserProfile.dart';
 
 class MomentCard extends StatelessWidget {
@@ -39,11 +39,12 @@ class MomentCard extends StatelessWidget {
     final currentUser = authManager.loggedInUser;
 
     if (currentUser != null && currentUser.u_id == userId) {
-      // Navigate to own profile
+      // Navigate to own profile with Profile tab selected
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => const ProfileScreen(),
+          builder: (_) =>
+              MainLayout(initialIndex: 3), // Set index to 3 (Profile)
         ),
       );
     } else {
