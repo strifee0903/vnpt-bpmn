@@ -80,11 +80,10 @@ async function getPublicMomentsOfUser(req, res, next) {
     }
 };
 
-//hiện tất cả bài viết công khai (public) cho news feed
 async function getNewsFeed(req, res, next) {
     try {
-        const { page, limit } = req.query;
-        const result = await momentService.getAllPublicMoments({ page, limit });
+        const { page, limit, moment_type } = req.query;
+        const result = await momentService.getAllPublicMoments({ page, limit, moment_type });
 
         return res.json(JSend.success({
             moments: result.moments,
@@ -95,7 +94,6 @@ async function getNewsFeed(req, res, next) {
     }
 }
 
-
 async function getMyMoments(req, res, next) {
     if (!req.session.user) {
         return next(new ApiError(401, 'Please log in to view your posts.'));
@@ -103,9 +101,9 @@ async function getMyMoments(req, res, next) {
 
     try {
         const u_id = req.session.user.u_id;
-        const { page, limit, is_public } = req.query;
+        const { page, limit, is_public, moment_type } = req.query;
 
-        const result = await momentService.getAllMyMoments(u_id, { page, limit, is_public });
+        const result = await momentService.getAllMyMoments(u_id, { page, limit, is_public, moment_type });
 
         return res.json(JSend.success(result));
     } catch (error) {

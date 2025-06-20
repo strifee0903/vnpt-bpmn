@@ -100,12 +100,15 @@ class MomentService {
   }
 
   Future<List<Moment>> getNewsFeedMoments(
-      {int page = 1, int limit = 10, bool? is_public}) async {
+      {int page = 1, int limit = 10, String? moment_type}) async {
     print('🔧 DEBUG - Environment BASE_URL: ${dotenv.env['BASE_URL']}');
     print('🔧 DEBUG - Service baseUrl: $baseUrl');
     print('🔧 DEBUG - Image baseUrl: $imageBaseUrl');
 
-    final requestUrl = '$baseUrl/moment/public/feed?page=$page&limit=$limit';
+    String requestUrl = '$baseUrl/moment/public/feed?page=$page&limit=$limit';
+    if (moment_type != null) {
+      requestUrl += '&moment_type=$moment_type';
+    }
     print('🌐 DEBUG - Request URL: $requestUrl');
 
     final response = await http.get(Uri.parse(requestUrl));
@@ -135,7 +138,7 @@ class MomentService {
   }
 
   Future<List<Moment>> getMyMoments(
-      {int page = 1, int limit = 10, bool? is_public}) async {
+      {int page = 1, int limit = 10, bool? is_public, String? moment_type}) async {
     print('🔧 DEBUG - Environment BASE_URL: ${dotenv.env['BASE_URL']}');
     print('🔧 DEBUG - Service baseUrl: $baseUrl');
     print('🔧 DEBUG - Image baseUrl: $imageBaseUrl');
@@ -146,6 +149,9 @@ class MomentService {
     String url = '$baseUrl/moment/me?page=$page&limit=$limit';
     if (is_public != null) {
       url += '&is_public=$is_public';
+    }
+    if (moment_type != null) {
+      url += '&moment_type=$moment_type';
     }
 
     print('🌐 DEBUG - Request URL: $url');

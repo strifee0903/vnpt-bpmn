@@ -98,20 +98,30 @@ async function getPublicMomentsByUserId(u_id) {
 };
 
 async function getAllPublicMoments(query) {
-    const { page = 1, limit = 5 } = query;
+    const { page = 1, limit = 5, moment_type } = query;
     const paginator = new Paginator(page, limit);
 
     try {
-        const moments = await momentRepository()
-            .where('is_public', true)
+        // Base query
+        let baseQuery = momentRepository().where('is_public', true);
+
+        // Optional: filter by moment_type
+        if (moment_type && moment_type !== 'all') {
+            baseQuery = baseQuery.where('moment_type', moment_type);
+        }
+
+        const moments = await baseQuery
             .orderBy('created_at', 'desc')
             .limit(paginator.limit)
             .offset(paginator.offset);
 
-        const totalRecords = (await momentRepository()
-            .where('is_public', true)
-            .count('moment_id as count')
-            .first())?.count || 0;
+        // Count total (with same filter)
+        let countQuery = momentRepository().where('is_public', true);
+        if (moment_type && moment_type !== 'all') {
+            countQuery = countQuery.where('moment_type', moment_type);
+        }
+
+        const totalRecords = (await countQuery.count('moment_id as count').first())?.count || 0;
 
         const result = await Promise.all(moments.map(async (moment) => {
             const media = await mediaRepository()
@@ -153,29 +163,33 @@ async function getAllPublicMoments(query) {
 }
 
 
+
 async function getAllMyMoments(u_id, query) {
-    const { page = 1, limit = 5, is_public } = query;
+    const { page = 1, limit = 5, is_public, moment_type } = query;
     const paginator = new Paginator(page, limit);
 
     try {
-        // 1. Build query
-        const baseQuery = momentRepository().where('u_id', u_id);
+        // Base query
+        let baseQuery = momentRepository().where('u_id', u_id);
 
-        // Nếu có lọc is_public thì thêm điều kiện
         if (is_public !== undefined) {
-            baseQuery.andWhere('is_public', is_public === 'true' || is_public === true);
+            baseQuery = baseQuery.andWhere('is_public', is_public === 'true' || is_public === true);
+        }
+
+        if (moment_type && moment_type !== 'all') {
+            baseQuery = baseQuery.andWhere('moment_type', moment_type);
         }
 
         const moments = await baseQuery
             .clone()
+            .orderBy('created_at', 'desc')
             .limit(paginator.limit)
             .offset(paginator.offset);
 
+        // Count query (clone lại từ baseQuery)
         const totalRecordsQuery = baseQuery.clone().count('moment_id as count').first();
-        let totalRecords = await totalRecordsQuery;
-        totalRecords = totalRecords?.count || 0;
+        const totalRecords = (await totalRecordsQuery)?.count || 0;
 
-        // 2. Gắn ảnh và thông tin user, category cho mỗi moment
         const result = await Promise.all(
             moments.map(async (moment) => {
                 const media = await mediaRepository()
