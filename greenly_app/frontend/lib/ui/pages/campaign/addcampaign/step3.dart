@@ -6,7 +6,12 @@ import 'success_dialog.dart'; // Import file success_dialog.dart
 class Step3 extends StatefulWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
-  const Step3({super.key, required this.onNext, required this.onBack});
+  final bool isLast;
+  const Step3(
+      {super.key,
+      required this.onNext,
+      required this.onBack,
+      this.isLast = false});
 
   @override
   State<Step3> createState() => _Step3State();
@@ -191,7 +196,12 @@ class _Step3State extends State<Step3> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          showSuccessDialog(); // Hiển thị dialog thành công
+          if (widget.isLast) {
+            // Nếu là bước cuối cùng, hiển thị dialog thành công
+            showSuccessDialog();
+            return;
+          }
+          // Hiển thị dialog thành công
           widget.onNext();
         }, // Gọi dialog khi nhấn Next
         backgroundColor: button,

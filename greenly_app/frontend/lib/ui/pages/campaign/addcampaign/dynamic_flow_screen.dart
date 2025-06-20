@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:greenly_app/models/process.dart' as model;
 import 'package:greenly_app/services/process_service.dart';
+import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'screen_register.dart';
 import '../../../../components/colors.dart';
 
@@ -118,6 +119,13 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
     }
   }
 
+  void showSuccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => const SuccessDialog(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (orderedSteps.isEmpty) {
@@ -153,6 +161,7 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
                 }
               },
               goToPrevious,
+              currentIndex == orderedSteps.length - 1 ? true : false,
             )
           : const Center(child: Text('Không có screen phù hợp')),
       // floatingActionButton: FloatingActionButton.extended(
