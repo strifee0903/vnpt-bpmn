@@ -7,6 +7,7 @@ import '../../shared/main_layout.dart';
 import '../auth/auth_manager.dart';
 import '../pages/profile/otherUserProfile.dart';
 import 'edit_moment.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class MomentCard extends StatefulWidget {
   final Moment moment;
@@ -31,6 +32,8 @@ class MomentCard extends StatefulWidget {
 class _MomentCardState extends State<MomentCard> {
   late Moment moment;
   bool _isLikeLoading = false;
+  bool _isExpanded = false;
+
 
   @override
   void initState() {
@@ -130,18 +133,30 @@ class _MomentCardState extends State<MomentCard> {
               Expanded(
                 child: GestureDetector(
                   onTap: () => _handleUserTap(context),
-                  child: Text(
-                    moment.user.u_name,
-                    style: const TextStyle(
-                      fontFamily: 'Oktah',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 18,
-                    ),
-                    softWrap: true,
-                    overflow: TextOverflow.visible,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        moment.user.u_name,
+                        style: const TextStyle(
+                          fontFamily: 'Oktah',
+                          fontWeight: FontWeight.w700,
+                          fontSize: 18,
+                        ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        DateFormat('dd/MM/yyyy - HH:mm').format(moment.createdAt),
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+
               PopupMenuButton<String>(
                 onSelected: (value) async {
                   switch (value) {
@@ -305,14 +320,14 @@ class _MomentCardState extends State<MomentCard> {
                     onTap: _toggleLike,
                     child: Row(
                       children: [
-                        Icon(
+                        FaIcon(
                           moment.isLikedByCurrentUser
-                              ? Icons.favorite
-                              : Icons.favorite_border,
+                              ? FontAwesomeIcons.solidFaceGrinHearts
+                              : FontAwesomeIcons.faceFrown,
                           color: moment.isLikedByCurrentUser
                               ? Colors.red
                               : const Color.fromARGB(255, 96, 96, 96),
-                          size: 22, // nhỏ bằng với icon thời gian
+                          size: 19, // nhỏ bằng với icon thời gian
                         ),
                         const SizedBox(width: 4),
                         Text(
@@ -327,59 +342,29 @@ class _MomentCardState extends State<MomentCard> {
                   // Comment button
                   Row(
                     children: [
-                      Icon(Icons.comment_outlined,
-                          size: 22, color: const Color.fromARGB(255, 96, 96, 96)),
+                      FaIcon(FontAwesomeIcons.solidCommentDots,
+                          size: 19, color: const Color.fromARGB(255, 96, 96, 96)),
                       const SizedBox(width: 4),
                       const Text('0', style: TextStyle(fontSize: 14)),
                     ],
                   ),
                   const SizedBox(width: 16),
 
-                  // Share button
-                  Icon(Icons.share_outlined, size: 22, color: const Color.fromARGB(255, 96, 96, 96)),
-                ],
-              ),
-
-              const SizedBox(height: 8),
-
-              // Row 2: Time and Coordinates
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.access_time, size: 18, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    DateFormat('yyyy-MM-dd HH:mm').format(moment.createdAt),
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  ),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.location_on, size: 18, color: Colors.grey),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${moment.latitude?.toStringAsFixed(4) ?? 'N/A'}, ${moment.longitude?.toStringAsFixed(4) ?? 'N/A'}',
-                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  Row(
+                    children: [
+                      FaIcon(FontAwesomeIcons.share,
+                          size: 19,
+                          color: const Color.fromARGB(255, 96, 96, 96)),
+                      const SizedBox(width: 4),
+                      const Text('0', style: TextStyle(fontSize: 14)),
+                    ],
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
 
-              // Row 3: Location
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(Icons.travel_explore, size: 18, color: Colors.black),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      moment.address,
-                      style: const TextStyle(fontSize: 12),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              // Row 4: Type and Category
+              // Row 2: Type & Category + expand icon
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -389,13 +374,52 @@ class _MomentCardState extends State<MomentCard> {
                   const SizedBox(width: 16),
                   getCategoryIcon(moment.category.category_name),
                   const SizedBox(width: 4),
-                  Text(
-                    moment.category.category_name,
-                    style: const TextStyle(fontSize: 12),
+                  Text(moment.category.category_name,
+                      style: const TextStyle(fontSize: 12)),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () => setState(() => _isExpanded = !_isExpanded),
+                    child: Icon(
+                      _isExpanded ? Icons.expand_less : Icons.expand_more,
+                      size: 20,
+                      color: Colors.grey,
+                    ),
                   ),
                 ],
               ),
-            
+
+              if (_isExpanded) ...[
+                const SizedBox(height: 8),
+                // Coordinates
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.location_on, size: 18, color: Colors.grey),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${moment.latitude?.toStringAsFixed(4) ?? 'N/A'}, ${moment.longitude?.toStringAsFixed(4) ?? 'N/A'}',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                // Location
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Icon(Icons.travel_explore,
+                        size: 18, color: Colors.black),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        moment.address,
+                        style: const TextStyle(fontSize: 12),
+                      ),
+                    ),
+                  ],
+                ),
+              ]
+
             ],
           ),
         ),
