@@ -4,6 +4,7 @@ import 'package:greenly_app/ui/user/not_found_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'components/colors.dart';
+import 'services/moment_service.dart';
 import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
@@ -239,6 +240,7 @@ class _MyAppState extends State<MyApp> {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (ctx) => AuthManager()),
+        Provider(create: (_) => MomentService()),
       ],
       child: Builder(builder: (context) {
         final authManager = Provider.of<AuthManager>(context, listen: false);

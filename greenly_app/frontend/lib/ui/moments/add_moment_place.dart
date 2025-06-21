@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:greenly_app/services/moment_service.dart';
 import '../../../services/user_service.dart';
 import '../../../models/user.dart';
 import 'add_moment.dart';
-import '../../../shared/getImageUrl.dart' as shared_image_url;
 
 class AddMomentPlace extends StatefulWidget {
   const AddMomentPlace({super.key});
@@ -102,7 +102,7 @@ class _AddMomentPlaceState extends State<AddMomentPlace> {
                     radius: 20,
                     backgroundColor: Colors.grey.shade100,
                     backgroundImage: NetworkImage(
-                      shared_image_url.fullImageUrl(_currentUser?.u_avt),
+                      MomentService.fullImageUrl(_currentUser?.u_avt),
                     ),
                   ),
                   const SizedBox(width: 15),

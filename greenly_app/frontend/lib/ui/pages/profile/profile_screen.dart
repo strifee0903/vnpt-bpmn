@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
-import '../../../shared/getImageUrl.dart';
 import '../../auth/auth_manager.dart';
 import '../../../components/colors.dart';
 import '../../moments/moments_card.dart';
@@ -23,11 +21,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? _typeFilter;
   bool _isLoading = false;
   String? _error;
+  int _currentPage = 1;
+  final int _itemsPerPage = 10;
 
   @override
   void initState() {
     super.initState();
-    _fetchMoments();
+    _fetchMoments(); // Remove the duplicate call, just use this one
   }
 
   Future<void> _fetchMoments() async {
@@ -37,13 +37,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
     try {
       final moments = await _momentService.getMyMoments(
-        page: 1,
-        limit: 20,
+        page: _currentPage,
+        limit: _itemsPerPage,
         is_public: _privacyFilter,
         moment_type: _typeFilter,
       );
       setState(() {
-        _moments = moments;
+        if (_currentPage == 1) {
+          _moments = moments; // Replace if first page
+        } else {
+          _moments.addAll(moments); // Add if loading more
+        }
       });
     } catch (e) {
       setState(() {
@@ -56,6 +60,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  Future<void> _refreshFeed() async {
+    setState(() {
+      _currentPage = 1;
+      _moments.clear();
+    });
+    await _fetchMoments();
+  }
+
   Widget _buildPrivacyChip(String label, bool? value) {
     return ChoiceChip(
       label: Text(label),
@@ -63,6 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onSelected: (_) {
         setState(() {
           _privacyFilter = value;
+          _currentPage = 1; // Reset to first page when filter changes
         });
         _fetchMoments();
       },
@@ -86,6 +99,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
       onSelected: (_) {
         setState(() {
           _typeFilter = value;
+          _currentPage = 1; // Reset to first page when filter changes
         });
         _fetchMoments();
       },
@@ -180,80 +194,70 @@ class _ProfileScreenState extends State<ProfileScreen> {
         child: Column(
           children: [
             Expanded(
-              child: CustomScrollView(
-                slivers: [
-                  if (_error != null)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          _error!,
-                          style: const TextStyle(color: Colors.red),
+              child: RefreshIndicator(
+                onRefresh: _refreshFeed,
+                child: CustomScrollView(
+                  slivers: [
+                    if (_error != null)
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Text(
+                            _error!,
+                            style: const TextStyle(color: Colors.red),
+                          ),
                         ),
-                      ),
-                    )
-                  else if (_isLoading)
-                    const SliverToBoxAdapter(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.0),
-                        child: Center(child: CircularProgressIndicator()),
-                      ),
-                    )
-                  else
-                    SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) {
-                          if (index == 0) {
-                            return const Padding(
-                              padding: EdgeInsets.symmetric(vertical: 10.0),
-                              child: AddMomentPlace(),
-                            );
-                          }
-                          if (_moments.isEmpty) {
-                            return const Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: Text(
-                                'No moments found.',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
+                      )
+                    else if (_isLoading && _moments.isEmpty)
+                      const SliverToBoxAdapter(
+                        child: Padding(
+                          padding: EdgeInsets.all(16.0),
+                          child: Center(child: CircularProgressIndicator()),
+                        ),
+                      )
+                    else
+                      SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            if (index == 0) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 10.0),
+                                child: AddMomentPlace(),
+                              );
+                            }
+                            if (_moments.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.all(16.0),
+                                child: Text(
+                                  'No moments found.',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
+                              );
+                            }
+                            final moment = _moments[index - 1];
+                            return Container(
+                              margin: const EdgeInsets.symmetric(
+                                  horizontal: 12, vertical: 6),
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFF708C5B).withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: MomentCard(
+                                moment: moment,
+                                refreshFeed: _refreshFeed,
                               ),
                             );
-                          }
-                          final moment = _moments[index - 1];
-                          return Container(
-                            margin: const EdgeInsets.symmetric(
-                                horizontal: 12, vertical: 6),
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF708C5B).withOpacity(0.2),
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            child: MomentCard(
-                              userId: moment.user.u_id,
-                              username: moment.user.u_name,
-                              avatar: fullImageUrl(moment.user.u_avt),
-                              status: moment.content,
-                              images: moment.media.isNotEmpty
-                                  ? moment.media
-                                      .map((m) => fullImageUrl(m.media_url))
-                                      .toList()
-                                  : null,
-                              location: moment.address,
-                              time: DateFormat('yyyy-MM-dd HH:mm')
-                                  .format(moment.createdAt),
-                              type: moment.type,
-                              category: moment.category.category_name,
-                              latitude: moment.latitude,
-                              longitude: moment.longitude,
-                            ),
-                          );
-                        },
-                        childCount: _moments.isEmpty ? 2 : _moments.length + 1,
+                          },
+                          childCount:
+                              _moments.isEmpty ? 2 : _moments.length + 1,
+                        ),
                       ),
-                    ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],

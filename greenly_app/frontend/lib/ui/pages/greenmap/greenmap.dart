@@ -10,7 +10,6 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:greenly_app/services/moment_service.dart';
 import 'package:greenly_app/ui/moments/moments_card.dart';
 import 'package:greenly_app/models/moment.dart';
-import 'package:intl/intl.dart';
 import 'package:geocoding/geocoding.dart';
 
 String fullImageUrl(String? relativePath) {
@@ -308,23 +307,7 @@ class _GreenMapState extends State<GreenMap> {
                       }
           
                       return MomentCard(
-                        userId: moment.user.u_id,
-                        username: moment.user.u_name,
-                        avatar: fullImageUrl(moment.user.u_avt),
-                        status: moment.content,
-                        images: moment.media.isNotEmpty
-                            ? moment.media
-                                .map((m) => fullImageUrl(m.media_url))
-                                .toList()
-                                .cast<String>()
-                            : null,
-                        location: moment.address,
-                        time: DateFormat('yyyy-MM-dd HH:mm')
-                            .format(moment.createdAt),
-                        type: moment.type,
-                        category: moment.category.category_name,
-                        latitude: moment.latitude,
-                        longitude: moment.longitude,
+                        moment: moment,
                       );
                     },
                   ),
@@ -396,23 +379,7 @@ class _GreenMapState extends State<GreenMap> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: MomentCard(
-                          userId: moment.user.u_id,
-                          username: moment.user.u_name,
-                          avatar: fullImageUrl(moment.user.u_avt),
-                          status: moment.content,
-                          images: moment.media.isNotEmpty
-                              ? moment.media
-                                  .map((m) => fullImageUrl(m.media_url))
-                                  .toList()
-                                  .cast<String>()
-                              : null,
-                          location: moment.address,
-                          time: DateFormat('yyyy-MM-dd HH:mm')
-                              .format(moment.createdAt),
-                          type: moment.type,
-                          category: moment.category.category_name,
-                          latitude: moment.latitude,
-                          longitude: moment.longitude,
+                          moment: moment,
                         ),
                       );
                     },

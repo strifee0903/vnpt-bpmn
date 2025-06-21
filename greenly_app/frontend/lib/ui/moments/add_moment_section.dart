@@ -3,41 +3,32 @@ import 'dart:io';
 import '../../components/colors.dart';
 import '../../models/category.dart';
 import '../../services/moment_service.dart';
+
 String fullImageUrl(String? relativePath) {
   final imageBaseUrl = MomentService.imageBaseUrl;
 
-  print('🖼️ DEBUG - Image base URL: $imageBaseUrl');
-  print('🖼️ DEBUG - Relative path: $relativePath');
-
   if (relativePath == null || relativePath.isEmpty) {
-    final defaultUrl = '$imageBaseUrl/public/images/blank_avt.jpg';
-    print('🖼️ DEBUG - Using default avatar: $defaultUrl');
-    return defaultUrl;
+    return '$imageBaseUrl/public/images/blank_avt.jpg';
   }
 
   if (relativePath.startsWith('http')) {
-    print('🖼️ DEBUG - Path is absolute URL: $relativePath');
     return relativePath;
   }
 
-  String fullUrl;
   if (relativePath.startsWith('/public')) {
-    fullUrl = '$imageBaseUrl$relativePath';
+    return '$imageBaseUrl$relativePath';
   } else if (!relativePath.startsWith('/')) {
-    fullUrl = '$imageBaseUrl/$relativePath';
+    return '$imageBaseUrl/$relativePath';
   } else {
-    fullUrl = '$imageBaseUrl$relativePath';
+    return '$imageBaseUrl$relativePath';
   }
-
-  print('🖼️ DEBUG - Final image URL: $fullUrl');
-  return fullUrl;
 }
 
 class AddPostSection extends StatelessWidget {
   final TextEditingController contentController;
   final List<File> selectedImages;
   final VoidCallback onPickImages;
-  final String avatarPath; // Network URL
+  final String avatarPath;
   final String username;
   final List<Category> categories;
   final Category? selectedCategory;
@@ -73,63 +64,59 @@ class AddPostSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GestureDetector(
-              onTap: () => print('👤 DEBUG - Avatar tapped, URL: $avatarPath'),
-              child: CircleAvatar(
-                radius: 20,
-                backgroundColor: Colors.grey[300],
-                child: ClipOval(
-                  child: Image.network(
-                    avatarPath,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const CircularProgressIndicator(strokeWidth: 2);
-                    },
-                    errorBuilder: (context, error, stackTrace) {
-                      print('❌ DEBUG - Avatar load failed: $avatarPath');
-                      return const Icon(Icons.person,
-                          color: Colors.white, size: 20);
-                    },
-                  ),
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: Colors.grey[300],
+              child: ClipOval(
+                child: Image.network(
+                  avatarPath,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.person,
+                        color: Colors.white, size: 20);
+                  },
                 ),
               ),
             ),
             const SizedBox(width: 15),
             Expanded(
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    username.isNotEmpty
-                        ? username
-                        : 'Anonymous', // Fallback for empty u_name
+                    username.isNotEmpty ? username : 'Anonymous',
                     style: const TextStyle(
                       fontFamily: 'Oktah',
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
                     ),
                   ),
-                  const SizedBox(width: 5.0),
-                  const Icon(
-                    Icons.location_pin,
-                    size: 16,
-                    color: Colors.grey,
-                  ),
-                  const SizedBox(width: 5.0),
-                  Expanded(
-                    child: Text(
-                      address ?? 'Fetching location...',
-                      style: const TextStyle(
-                        fontFamily: 'Oktah',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
+                  const SizedBox(height: 4.0),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.location_pin,
+                        size: 16,
                         color: Colors.grey,
                       ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                      const SizedBox(width: 4),
+                      Expanded(
+                        child: Text(
+                          address ?? 'Fetching location...',
+                          style: const TextStyle(
+                            fontFamily: 'Oktah',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.grey,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -137,6 +124,8 @@ class AddPostSection extends StatelessWidget {
           ],
         ),
         const SizedBox(height: 16.0),
+
+        // Moment Type + Category Dropdowns
         Row(
           children: [
             Expanded(
@@ -146,42 +135,24 @@ class AddPostSection extends StatelessWidget {
                 hint: const Text(
                   'Moment Type',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                      fontFamily: 'Oktah',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500),
                 ),
-                items: momentTypes.map((String type) {
+                items: momentTypes.map((type) {
                   return DropdownMenuItem<String>(
                     value: type,
                     child: Text(
                       type,
                       style: const TextStyle(
-                        fontFamily: 'Oktah',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                          fontFamily: 'Oktah',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500),
                     ),
                   );
                 }).toList(),
                 onChanged: onMomentTypeChanged,
-                icon: const Icon(Icons.arrow_drop_down, size: 18),
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 10.0),
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: fieldborder),
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: fieldborder),
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: button),
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                ),
+                decoration: _dropdownDecoration,
               ),
             ),
             const SizedBox(width: 5.0),
@@ -192,86 +163,54 @@ class AddPostSection extends StatelessWidget {
                 hint: const Text(
                   'Category',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                  ),
+                      fontFamily: 'Oktah',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w500),
                 ),
-                items: categories.map((Category category) {
+                items: categories.map((category) {
                   return DropdownMenuItem<Category>(
                     value: category,
                     child: Text(
                       category.category_name,
                       style: const TextStyle(
-                        fontFamily: 'Oktah',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w500,
-                      ),
+                          fontFamily: 'Oktah',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500),
                     ),
                   );
                 }).toList(),
                 onChanged: onCategoryChanged,
-                icon: const Icon(Icons.arrow_drop_down, size: 18),
-                decoration: InputDecoration(
-                  contentPadding: const EdgeInsets.symmetric(
-                      vertical: 8.0, horizontal: 10.0),
-                  border: OutlineInputBorder(
-                    borderSide: const BorderSide(color: fieldborder),
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: fieldborder),
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: button),
-                    borderRadius: BorderRadius.circular(18.0),
-                  ),
-                ),
+                decoration: _dropdownDecoration,
               ),
             ),
           ],
         ),
+
         const SizedBox(height: 16.0),
+
+        // Public/Private Switch
         Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Visibility:',
-              style: TextStyle(
-                fontFamily: 'Oktah',
-                fontSize: 14,
+            Text(
+              isPublic ? 'Public' : 'Private',
+              style: const TextStyle(
+                fontSize: 16,
                 fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(width: 8.0),
-            ChoiceChip(
-              label: const Text('Public'),
-              selected: isPublic,
-              onSelected: (selected) {
-                if (selected) onPublicChanged(true);
-              },
-              selectedColor: button,
-              labelStyle: TextStyle(
-                color: isPublic ? Colors.white : Colors.black,
                 fontFamily: 'Oktah',
               ),
             ),
-            const SizedBox(width: 8.0),
-            ChoiceChip(
-              label: const Text('Private'),
-              selected: !isPublic,
-              onSelected: (selected) {
-                if (selected) onPublicChanged(false);
-              },
-              selectedColor: button,
-              labelStyle: TextStyle(
-                color: !isPublic ? Colors.white : Colors.black,
-                fontFamily: 'Oktah',
-              ),
+            Switch(
+              value: isPublic,
+              onChanged: onPublicChanged,
+              activeColor: Colors.green,
             ),
           ],
         ),
+
         const SizedBox(height: 16.0),
+
+        // Content Input
         TextField(
           controller: contentController,
           maxLines: null,
@@ -286,7 +225,10 @@ class AddPostSection extends StatelessWidget {
             fontWeight: FontWeight.w500,
           ),
         ),
+
         const SizedBox(height: 16.0),
+
+        // Image Picker
         GestureDetector(
           onTap: onPickImages,
           child: Container(
@@ -302,11 +244,8 @@ class AddPostSection extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(
-                          Icons.add_photo_alternate,
-                          size: 50,
-                          color: Colors.grey,
-                        ),
+                        Icon(Icons.add_photo_alternate,
+                            size: 50, color: Colors.grey),
                         SizedBox(height: 8.0),
                         Text(
                           'Tap to add photos',
@@ -344,4 +283,21 @@ class AddPostSection extends StatelessWidget {
       ],
     );
   }
+
+  InputDecoration get _dropdownDecoration => InputDecoration(
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 8.0, horizontal: 10.0),
+        border: OutlineInputBorder(
+          borderSide: const BorderSide(color: fieldborder),
+          borderRadius: BorderRadius.circular(18.0),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: fieldborder),
+          borderRadius: BorderRadius.circular(18.0),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: button),
+          borderRadius: BorderRadius.circular(18.0),
+        ),
+      );
 }

@@ -20,6 +20,16 @@ class MomentService {
     return 'http://192.168.1.7:3000'; 
   }
 
+  static String fullImageUrl(String? relativePath) {
+    if (relativePath == null || relativePath.isEmpty) {
+      return '$imageBaseUrl/public/images/blank_avt.jpg';
+    }
+    if (relativePath.startsWith('http')) {
+      return relativePath;
+    }
+    return '$imageBaseUrl${relativePath.startsWith('/') ? '' : '/'}$relativePath';
+  }
+
   Future<Moment> createMoment({
     required String content,
     required String address,
@@ -219,6 +229,101 @@ class MomentService {
     }
   }
 
-}
+  Future<Moment> updateMoment({
+    required int momentId,
+    String? content,
+    String? address,
+    double? latitude,
+    double? longitude,
+    String? type,
+    int? categoryId,
+    bool? isPublic,
+    List<File>? images,
+    List<int>? mediaIdsToDelete,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionCookie = prefs.getString('session_cookie') ?? '';
 
+    final requestUrl = '$baseUrl/moment/me/update/$momentId';
+    print('🌐 DEBUG - Request URL: $requestUrl');
+
+    try {
+      var request = http.MultipartRequest('PATCH', Uri.parse(requestUrl));
+      request.headers['Cookie'] = sessionCookie;
+      print('🔐 Cookie header added: $sessionCookie');
+
+      if (content != null) request.fields['moment_content'] = content;
+      if (address != null) request.fields['moment_address'] = address;
+      if (latitude != null) request.fields['latitude'] = latitude.toString();
+      if (longitude != null) request.fields['longitude'] = longitude.toString();
+      if (type != null) request.fields['moment_type'] = type.toLowerCase();
+      if (categoryId != null)
+        request.fields['category_id'] = categoryId.toString();
+      if (isPublic != null)
+        request.fields['is_public'] = isPublic.toString().toLowerCase();
+      if (mediaIdsToDelete != null && mediaIdsToDelete.isNotEmpty) {
+        request.fields['media_ids_to_delete'] = jsonEncode(mediaIdsToDelete);
+      }
+
+      if (images != null) {
+        for (var image in images) {
+          request.files.add(await http.MultipartFile.fromPath(
+            'images',
+            image.path,
+            contentType: MediaType('image', 'jpeg'),
+          ));
+        }
+      }
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      print('📡 DEBUG - Response status: ${response.statusCode}');
+      print('📡 DEBUG - Response body: $responseBody');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(responseBody);
+        final momentData = jsonResponse['data']['moment'];
+        momentData['media'] ??= [];
+        return Moment.fromJson(momentData);
+      } else {
+        throw Exception(
+            'Failed to update moment: ${jsonDecode(responseBody)['message'] ?? responseBody}');
+      }
+    } catch (e, stackTrace) {
+      print('❌ DEBUG - Error updating moment: $e');
+      print('❌ DEBUG - StackTrace: $stackTrace');
+      throw Exception('Failed to update moment: $e');
+    }
+  }
+
+  Future<void> deleteMoment(int momentId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionCookie = prefs.getString('session_cookie') ?? '';
+
+    final requestUrl = '$baseUrl/moment/me/delete/$momentId';
+    print('🌐 DEBUG - Request URL: $requestUrl');
+
+    try {
+      final response = await http.delete(
+        Uri.parse(requestUrl),
+        headers: {'Cookie': sessionCookie},
+      );
+
+      print('📡 DEBUG - Response status: ${response.statusCode}');
+      print('📡 DEBUG - Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        throw Exception(
+            'Failed to delete moment: ${jsonDecode(response.body)['message'] ?? response.body}');
+      }
+    } catch (e, stackTrace) {
+      print('❌ DEBUG - Error deleting moment: $e');
+      print('❌ DEBUG - StackTrace: $stackTrace');
+      throw Exception('Failed to delete moment: $e');
+    }
+  }
+}
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import '../../components/colors.dart';
 import '../../services/moment_service.dart';
 import '../../models/moment.dart';
@@ -153,30 +152,15 @@ class _MomentsPageState extends State<MomentsPage> {
 
                   final moment = _moments[index];
                   return Container(
-                    margin:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: const Color(0xFF708C5B).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: MomentCard(
-                      userId: moment.user.u_id,
-                      username: moment.user.u_name,
-                      avatar: fullImageUrl(moment.user.u_avt),
-                      status: moment.content,
-                      images: moment.media.isNotEmpty
-                          ? moment.media
-                              .map((m) => fullImageUrl(m.media_url))
-                              .toList()
-                          : null,
-                      location: moment.address,
-                      time: DateFormat('yyyy-MM-dd HH:mm')
-                          .format(moment.createdAt),
-                      type: moment.type,
-                      category: moment.category.category_name,
-                      latitude: moment.latitude,
-                      longitude: moment.longitude,
+                      moment: moment,
+                      refreshFeed: _refreshFeed, 
                     ),
                   );
                 },

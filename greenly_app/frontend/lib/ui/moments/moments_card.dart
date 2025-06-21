@@ -1,44 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../../models/moment.dart';
+import '../../services/moment_service.dart';
 import '../../shared/main_layout.dart';
 import '../auth/auth_manager.dart';
 import '../pages/profile/otherUserProfile.dart';
+import 'edit_moment.dart';
 
 class MomentCard extends StatelessWidget {
-  final String username;
-  final String avatar;
-  final String status;
-  final List<String>? images;
-  final String location;
-  final double? latitude;
-  final double? longitude;
-  final String time;
-  final String type;
-  final String category;
-  final int userId;
+  final Moment moment;
   final void Function(int userId, String username, String avatarUrl)? onUserTap;
+  final VoidCallback? refreshFeed; // Add callback for refreshing feed
 
   const MomentCard({
     super.key,
-    required this.username,
-    required this.avatar,
-    required this.status,
-    this.images,
-    required this.location,
-    this.latitude,
-    this.longitude,
-    required this.time,
-    required this.type,
-    required this.category,
-    required this.userId,
+    required this.moment,
     this.onUserTap,
+    this.refreshFeed,
   });
 
   void _handleUserTap(BuildContext context) {
     final authManager = Provider.of<AuthManager>(context, listen: false);
     final currentUser = authManager.loggedInUser;
 
-    if (currentUser != null && currentUser.u_id == userId) {
+    if (currentUser != null && currentUser.u_id == moment.user.u_id) {
       // Navigate to own profile with Profile tab selected
       Navigator.push(
         context,
@@ -53,9 +39,9 @@ class MomentCard extends StatelessWidget {
         context,
         MaterialPageRoute(
           builder: (_) => OtherUserProfileScreen(
-            userId: userId,
-            username: username,
-            avatarUrl: avatar,
+            userId: moment.user.u_id,
+            username: moment.user.u_name,
+            avatarUrl: moment.user.u_avt ?? '',
           ),
         ),
       );
@@ -83,7 +69,8 @@ class MomentCard extends StatelessWidget {
                       backgroundColor: Colors.grey[300],
                       child: ClipOval(
                         child: Image.network(
-                          avatar,
+                          MomentService.fullImageUrl(
+                              moment.user.u_avt), 
                           width: 40,
                           height: 40,
                           fit: BoxFit.cover,
@@ -100,7 +87,7 @@ class MomentCard extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => _handleUserTap(context),
                   child: Text(
-                    username,
+                    moment.user.u_name,
                     style: const TextStyle(
                       fontFamily: 'Oktah',
                       fontWeight: FontWeight.w700,
@@ -111,7 +98,91 @@ class MomentCard extends StatelessWidget {
                   ),
                 ),
               ),
-              const Icon(Icons.more_vert),
+              PopupMenuButton<String>(
+                onSelected: (value) async {
+                  switch (value) {
+                    case 'edit':
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => EditMomentScreen(moment: moment),
+                        ),
+                      );
+                      if (result == 'deleted' || result is Moment) {
+                        refreshFeed
+                            ?.call(); // Trigger refresh after edit/delete
+                      }
+                      break;
+                    case 'delete':
+                      final momentService =
+                          Provider.of<MomentService>(context, listen: false);
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text('Delete Moment'),
+                          content: const Text(
+                              'Are you sure you want to delete this moment?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text('Cancel'),
+                            ),
+                            TextButton(
+                              onPressed: () async {
+                                try {
+                                  await momentService.deleteMoment(moment.id);
+                                  // ignore: use_build_context_synchronously
+                                  Navigator.pop(context);
+                                  refreshFeed?.call();
+                                } catch (e) {
+                                  // ignore: use_build_context_synchronously
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(
+                                        content: Text(
+                                            'Failed to delete moment: $e')),
+                                  );
+                                }
+                              },
+                              child: const Text('Delete',
+                                  style: TextStyle(color: Colors.red)),
+                            ),
+                          ],
+                        ),
+                      );
+                      break;
+                    case 'hide':
+                      // TODO: Implement hide functionality
+                      break;
+                    case 'report':
+                      // TODO: Implement report functionality
+                      break;
+                  }
+                },
+                itemBuilder: (context) {
+                  final currentUser =
+                      Provider.of<AuthManager>(context, listen: false)
+                          .loggedInUser;
+                  final isOwner = currentUser != null &&
+                      currentUser.u_id == moment.user.u_id;
+
+                  if (isOwner) {
+                    return [
+                      const PopupMenuItem(
+                          value: 'edit', child: Text('Sửa bài viết')),
+                      const PopupMenuItem(
+                          value: 'delete', child: Text('Xoá bài viết')),
+                    ];
+                  } else {
+                    return [
+                      const PopupMenuItem(
+                          value: 'hide', child: Text('Ẩn bài viết')),
+                      const PopupMenuItem(
+                          value: 'report', child: Text('Báo cáo bài viết')),
+                    ];
+                  }
+                },
+              ),
+
             ],
           ),
         ),
@@ -120,7 +191,7 @@ class MomentCard extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0),
           child: Text(
-            status,
+            moment.content,
             style: const TextStyle(
               fontFamily: 'Oktah',
               fontSize: 17,
@@ -134,13 +205,14 @@ class MomentCard extends StatelessWidget {
         const SizedBox(height: 10),
 
         // Image carousel
-        if (images != null && images!.isNotEmpty)
+        if (moment.media.isNotEmpty)
           SizedBox(
             height: 300,
             child: PageView.builder(
-              itemCount: images!.length,
+              itemCount: moment.media.length,
               itemBuilder: (context, index) {
-                final image = images![index];
+                final image =
+                    MomentService.fullImageUrl(moment.media[index].media_url);
                 return Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8.0),
                   child: ClipRRect(
@@ -159,12 +231,12 @@ class MomentCard extends StatelessWidget {
           ),
 
         // Image indicator
-        if (images != null && images!.length > 1)
+        if (moment.media.length > 1)
           Padding(
             padding: const EdgeInsets.only(top: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
-              children: List.generate(images!.length, (index) {
+              children: List.generate(moment.media.length, (index) {
                 return Container(
                   width: 8,
                   height: 8,
@@ -192,7 +264,7 @@ class MomentCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      time,
+                      DateFormat('yyyy-MM-dd HH:mm').format(moment.createdAt),
                       style: const TextStyle(fontSize: 10, color: Colors.grey),
                       softWrap: true,
                       overflow: TextOverflow.visible,
@@ -203,7 +275,7 @@ class MomentCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      '${latitude?.toStringAsFixed(4)}, ${longitude?.toStringAsFixed(4)}',
+                      '${moment.latitude?.toStringAsFixed(4) ?? 'N/A'}, ${moment.longitude?.toStringAsFixed(4) ?? 'N/A'}',
                       style: const TextStyle(fontSize: 10, color: Colors.grey),
                       softWrap: true,
                       overflow: TextOverflow.visible,
@@ -222,7 +294,7 @@ class MomentCard extends StatelessWidget {
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      location,
+                      moment.address,
                       style: const TextStyle(fontSize: 14, color: Colors.black),
                       softWrap: true,
                       overflow: TextOverflow.visible,
@@ -236,15 +308,15 @@ class MomentCard extends StatelessWidget {
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  getMomentTypeIcon(type),
+                  getMomentTypeIcon(moment.type),
                   const SizedBox(width: 4),
-                  Text(type, style: const TextStyle(fontSize: 14)),
+                  Text(moment.type, style: const TextStyle(fontSize: 14)),
                   const SizedBox(width: 10),
-                  getCategoryIcon(category),
+                  getCategoryIcon(moment.category.category_name),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
-                      category,
+                      moment.category.category_name,
                       style: const TextStyle(fontSize: 14),
                       softWrap: true,
                       overflow: TextOverflow.visible,
