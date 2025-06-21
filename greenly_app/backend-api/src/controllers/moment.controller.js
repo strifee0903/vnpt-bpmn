@@ -64,13 +64,18 @@ async function createMoment(req, res, next) {
 };
 
 async function getPublicMomentsOfUser(req, res, next) {
-    if (!req.session.user) {
-        return next(new ApiError(401, 'Please log in to view your posts.'));
-    }
     try {
         const { u_id } = req.params;
         const { page, limit, moment_type } = req.query;
-        const result = await momentService.getPublicMomentsByUserId(u_id, { page, limit, moment_type });
+
+        // Get current user ID if logged in
+        const current_user_id = req.session.user?.u_id;
+
+        const result = await momentService.getPublicMomentsByUserId(
+            u_id,
+            { page, limit, moment_type },
+            current_user_id
+        );
 
         return res.json(JSend.success(result));
     } catch (error) {
@@ -78,10 +83,17 @@ async function getPublicMomentsOfUser(req, res, next) {
     }
 };
 
+// In your controller
 async function getNewsFeed(req, res, next) {
     try {
+        const u_id = req.session.user?.u_id;
+        console.log('🔑 Current session user ID:', u_id, 'Type:', typeof u_id); // Debug log
+
         const { page, limit, moment_type } = req.query;
-        const result = await momentService.getAllPublicMoments({ page, limit, moment_type });
+        const result = await momentService.getAllPublicMoments(
+            { page, limit, moment_type },
+            u_id // Ensure this is passed
+        );
 
         return res.json(JSend.success({
             moments: result.moments,

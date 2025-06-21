@@ -71,7 +71,7 @@ async function createMoment(payload, files = []) {
 };
 
 /**hàm để khi vào trang cá nhân của người khác thì có thể xem hết tất cả bài viết ở trạng thái public của người đó.*/
-async function getPublicMomentsByUserId(u_id, query) {
+async function getPublicMomentsByUserId(u_id, query, current_user_id = null) {
     const { page = 1, limit = 5, moment_type } = query;
     const paginator = new Paginator(page, limit);
 
@@ -115,6 +115,9 @@ async function getPublicMomentsByUserId(u_id, query) {
                 .select('u_id', 'u_name', 'u_avt')
                 .first();
 
+            // Get vote data
+            const voteData = await getVoteData(moment.moment_id, current_user_id);
+
             return {
                 moment_id: moment.moment_id,
                 moment_content: moment.moment_content,
@@ -125,7 +128,9 @@ async function getPublicMomentsByUserId(u_id, query) {
                 moment_type: moment.moment_type,
                 category: category || null,
                 user: user || null,
-                media: media
+                media: media,
+                likeCount: voteData.likeCount,
+                isLikedByCurrentUser: voteData.isLikedByCurrentUser,
             };
         }));
 
@@ -140,7 +145,8 @@ async function getPublicMomentsByUserId(u_id, query) {
 }
 
 
-async function getAllPublicMoments(query) {
+
+async function getAllPublicMoments(query, u_id) {
     const { page = 1, limit = 5, moment_type } = query;
     const paginator = new Paginator(page, limit);
 
@@ -181,6 +187,9 @@ async function getAllPublicMoments(query) {
                 .select('u_id', 'u_name', 'u_avt')
                 .first();
 
+            // Get vote data
+            const voteData = await getVoteData(moment.moment_id, u_id);
+
             return {
                 moment_id: moment.moment_id,
                 moment_content: moment.moment_content,
@@ -191,7 +200,9 @@ async function getAllPublicMoments(query) {
                 moment_type: moment.moment_type,
                 category: category || null,
                 user: user || null,
-                media: media
+                media: media,
+                likeCount: voteData.likeCount,
+                isLikedByCurrentUser: voteData.isLikedByCurrentUser,
             };
         }));
 
@@ -204,6 +215,34 @@ async function getAllPublicMoments(query) {
         throw error;
     }
 }
+
+async function getVoteData(moment_id, current_user_id) {
+    // Ensure current_user_id is properly converted to number if needed
+    const userId = current_user_id ? Number(current_user_id) : null;
+
+    const [likeCount] = await knex('vote')
+        .where({ moment_id, vote_state: true })
+        .count('* as count');
+
+    let isLiked = false;
+    if (userId) {
+        const liked = await knex('vote')
+            .where({
+                moment_id,
+                u_id: userId,  // Use the properly converted ID
+                vote_state: true
+            })
+            .first();
+        isLiked = !!liked;
+    }
+
+    return {
+        likeCount: parseInt(likeCount?.count || 0),
+        isLikedByCurrentUser: isLiked
+    };
+}
+
+
 async function getAllMyMoments(u_id, query) {
     const { page = 1, limit = 5, is_public, moment_type } = query;
     const paginator = new Paginator(page, limit);
@@ -246,6 +285,9 @@ async function getAllMyMoments(u_id, query) {
                     .select('u_id', 'u_name', 'u_avt')
                     .first();
 
+                // Get vote data
+                const voteData = await getVoteData(moment.moment_id, u_id);
+
                 return {
                     moment_id: moment.moment_id,
                     moment_content: moment.moment_content,
@@ -257,7 +299,9 @@ async function getAllMyMoments(u_id, query) {
                     is_public: moment.is_public,
                     category: category || null,
                     user: user || null,
-                    media: media
+                    media: media,
+                    likeCount: voteData.likeCount,
+                    isLikedByCurrentUser: voteData.isLikedByCurrentUser,
                 };
             })
         );

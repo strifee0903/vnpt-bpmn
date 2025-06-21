@@ -8,33 +8,48 @@ import '../auth/auth_manager.dart';
 import '../pages/profile/otherUserProfile.dart';
 import 'edit_moment.dart';
 
-class MomentCard extends StatelessWidget {
+class MomentCard extends StatefulWidget {
   final Moment moment;
   final void Function(int userId, String username, String avatarUrl)? onUserTap;
-  final VoidCallback? refreshFeed; // Add callback for refreshing feed
+  final VoidCallback? refreshFeed;
+  final VoidCallback? onLikeToggle;
+  final void Function(Moment updatedMoment)? onUpdateMoment;
 
   const MomentCard({
     super.key,
     required this.moment,
     this.onUserTap,
     this.refreshFeed,
+    this.onLikeToggle,
+    this.onUpdateMoment,
   });
+
+  @override
+  State<MomentCard> createState() => _MomentCardState();
+}
+
+class _MomentCardState extends State<MomentCard> {
+  late Moment moment;
+  bool _isLikeLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    moment = widget.moment;
+  }
 
   void _handleUserTap(BuildContext context) {
     final authManager = Provider.of<AuthManager>(context, listen: false);
     final currentUser = authManager.loggedInUser;
 
     if (currentUser != null && currentUser.u_id == moment.user.u_id) {
-      // Navigate to own profile with Profile tab selected
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) =>
-              MainLayout(initialIndex: 3), // Set index to 3 (Profile)
+          builder: (_) => MainLayout(initialIndex: 3),
         ),
       );
     } else {
-      // Navigate to other user's profile
       Navigator.push(
         context,
         MaterialPageRoute(
@@ -48,6 +63,36 @@ class MomentCard extends StatelessWidget {
     }
   }
 
+  Future<void> _toggleLike() async {
+    if (_isLikeLoading) return;
+
+    setState(() => _isLikeLoading = true);
+
+    final momentService = Provider.of<MomentService>(context, listen: false);
+    try {
+      final result = moment.isLikedByCurrentUser
+          ? await momentService.unlikeMoment(moment.id)
+          : await momentService.likeMoment(moment.id);
+
+      final updatedMoment = moment.copyWith(
+        isLikedByCurrentUser: result['isLiked'],
+        likeCount: result['likeCount'],
+      );
+
+      setState(() {
+        moment = updatedMoment;
+        _isLikeLoading = false;
+      });
+
+      // Gọi callback để cập nhật lên parent
+      widget.onUpdateMoment?.call(updatedMoment);
+    } catch (e) {
+      setState(() => _isLikeLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to toggle like: $e')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +114,7 @@ class MomentCard extends StatelessWidget {
                       backgroundColor: Colors.grey[300],
                       child: ClipOval(
                         child: Image.network(
-                          MomentService.fullImageUrl(
-                              moment.user.u_avt), 
+                          MomentService.fullImageUrl(moment.user.u_avt),
                           width: 40,
                           height: 40,
                           fit: BoxFit.cover,
@@ -109,8 +153,7 @@ class MomentCard extends StatelessWidget {
                         ),
                       );
                       if (result == 'deleted' || result is Moment) {
-                        refreshFeed
-                            ?.call(); // Trigger refresh after edit/delete
+                        widget.refreshFeed?.call();
                       }
                       break;
                     case 'delete':
@@ -131,11 +174,9 @@ class MomentCard extends StatelessWidget {
                               onPressed: () async {
                                 try {
                                   await momentService.deleteMoment(moment.id);
-                                  // ignore: use_build_context_synchronously
                                   Navigator.pop(context);
-                                  refreshFeed?.call();
+                                  widget.refreshFeed?.call();
                                 } catch (e) {
-                                  // ignore: use_build_context_synchronously
                                   ScaffoldMessenger.of(context).showSnackBar(
                                     SnackBar(
                                         content: Text(
@@ -182,7 +223,6 @@ class MomentCard extends StatelessWidget {
                   }
                 },
               ),
-
             ],
           ),
         ),
@@ -249,84 +289,117 @@ class MomentCard extends StatelessWidget {
               }),
             ),
           ),
+          const SizedBox(height: 10),
 
-        // Info: time, location, coordinates, type, category
+        // Info section with 4 rows layout
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Time & Coordinates
+              // Row 1: Like, Comment, Share actions
+              Row(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  GestureDetector(
+                    onTap: _toggleLike,
+                    child: Row(
+                      children: [
+                        Icon(
+                          moment.isLikedByCurrentUser
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: moment.isLikedByCurrentUser
+                              ? Colors.red
+                              : const Color.fromARGB(255, 96, 96, 96),
+                          size: 22, // nhỏ bằng với icon thời gian
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${moment.likeCount}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Comment button
+                  Row(
+                    children: [
+                      Icon(Icons.comment_outlined,
+                          size: 22, color: const Color.fromARGB(255, 96, 96, 96)),
+                      const SizedBox(width: 4),
+                      const Text('0', style: TextStyle(fontSize: 14)),
+                    ],
+                  ),
+                  const SizedBox(width: 16),
+
+                  // Share button
+                  Icon(Icons.share_outlined, size: 22, color: const Color.fromARGB(255, 96, 96, 96)),
+                ],
+              ),
+
+              const SizedBox(height: 8),
+
+              // Row 2: Time and Coordinates
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Icon(Icons.access_time, size: 18, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      DateFormat('yyyy-MM-dd HH:mm').format(moment.createdAt),
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                      softWrap: true,
-                      overflow: TextOverflow.visible,
-                    ),
+                  Text(
+                    DateFormat('yyyy-MM-dd HH:mm').format(moment.createdAt),
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   const Icon(Icons.location_on, size: 18, color: Colors.grey),
                   const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      '${moment.latitude?.toStringAsFixed(4) ?? 'N/A'}, ${moment.longitude?.toStringAsFixed(4) ?? 'N/A'}',
-                      style: const TextStyle(fontSize: 10, color: Colors.grey),
-                      softWrap: true,
-                      overflow: TextOverflow.visible,
-                    ),
+                  Text(
+                    '${moment.latitude?.toStringAsFixed(4) ?? 'N/A'}, ${moment.longitude?.toStringAsFixed(4) ?? 'N/A'}',
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
 
-              // Location
+              // Row 3: Location
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.travel_explore,
-                      size: 18, color: Colors.grey),
+                  const Icon(Icons.travel_explore, size: 18, color: Colors.black),
                   const SizedBox(width: 4),
                   Expanded(
                     child: Text(
                       moment.address,
-                      style: const TextStyle(fontSize: 14, color: Colors.black),
-                      softWrap: true,
-                      overflow: TextOverflow.visible,
+                      style: const TextStyle(fontSize: 12),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
 
-              // Type & Category
+              // Row 4: Type and Category
               Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   getMomentTypeIcon(moment.type),
                   const SizedBox(width: 4),
-                  Text(moment.type, style: const TextStyle(fontSize: 14)),
-                  const SizedBox(width: 10),
+                  Text(moment.type, style: const TextStyle(fontSize: 12)),
+                  const SizedBox(width: 16),
                   getCategoryIcon(moment.category.category_name),
                   const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      moment.category.category_name,
-                      style: const TextStyle(fontSize: 14),
-                      softWrap: true,
-                      overflow: TextOverflow.visible,
-                    ),
+                  Text(
+                    moment.category.category_name,
+                    style: const TextStyle(fontSize: 12),
                   ),
                 ],
               ),
+            
             ],
           ),
         ),
+
         const SizedBox(height: 10),
       ],
     );
