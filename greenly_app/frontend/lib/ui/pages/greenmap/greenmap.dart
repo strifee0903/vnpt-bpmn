@@ -279,57 +279,70 @@ class _GreenMapState extends State<GreenMap> {
       builder: (context) {
         final markerMoments = _markerMomentMap[point.point.toString()] ?? [];
 
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text('📍 Các bài viết ở địa điểm xanh',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: markerMoments.length,
-                  itemBuilder: (context, index) {
-                    final moment = markerMoments[index];
-                    fullImageUrl(moment.user.u_avt);
-                    String? mediaUrl;
-
-                    if (moment.media.isNotEmpty) {
-                      mediaUrl = fullImageUrl(moment.media.first.media_url);
-                      print('   - Media URL: $mediaUrl');
-                    }
-
-                    return MomentCard(
-                      userId: moment.user.u_id,
-                      username: moment.user.u_name,
-                      avatar: fullImageUrl(moment.user.u_avt),
-                      status: moment.content,
-                      images: moment.media.isNotEmpty
-                          ? moment.media
-                              .map((m) => fullImageUrl(m.media_url))
-                              .toList()
-                              .cast<String>()
-                          : null,
-                      location: moment.address,
-                      time: DateFormat('yyyy-MM-dd HH:mm')
-                          .format(moment.createdAt),
-                      type: moment.type,
-                      category: moment.category.category_name,
-                      latitude: moment.latitude,
-                      longitude: moment.longitude,
-                    );
-                  },
+        return Container(
+            decoration: BoxDecoration(
+            color: const Color(0xFFEEF5E6), // Màu xanh lá nhạt
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                const Text('📍 Bài viết ở địa điểm xanh',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: markerMoments.length,
+                    itemBuilder: (context, index) {
+                      final moment = markerMoments[index];
+                      fullImageUrl(moment.user.u_avt);
+                      String? mediaUrl;
+          
+                      if (moment.media.isNotEmpty) {
+                        mediaUrl = fullImageUrl(moment.media.first.media_url);
+                        print('   - Media URL: $mediaUrl');
+                      }
+          
+                      return MomentCard(
+                        userId: moment.user.u_id,
+                        username: moment.user.u_name,
+                        avatar: fullImageUrl(moment.user.u_avt),
+                        status: moment.content,
+                        images: moment.media.isNotEmpty
+                            ? moment.media
+                                .map((m) => fullImageUrl(m.media_url))
+                                .toList()
+                                .cast<String>()
+                            : null,
+                        location: moment.address,
+                        time: DateFormat('yyyy-MM-dd HH:mm')
+                            .format(moment.createdAt),
+                        type: moment.type,
+                        category: moment.category.category_name,
+                        latitude: moment.latitude,
+                        longitude: moment.longitude,
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Đóng'),
-              ),
-            ],
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF708C5B).withOpacity(0.8),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Đóng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -351,55 +364,77 @@ class _GreenMapState extends State<GreenMap> {
 
         print(
             '📊 DEBUG - Cluster contains ${markerMoments.length} moments, ${cluster.markers.first}');
-        return Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              const Text('📍 Các bài viết trong khu vực',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-              const SizedBox(height: 12),
-              Flexible(
-                child: ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: markerMoments.length,
-                  itemBuilder: (context, index) {
-                    final moment = markerMoments[index];
-                    fullImageUrl(moment.user.u_avt);
-                    String? mediaUrl;
-
-                    if (moment.media.isNotEmpty) {
-                      mediaUrl = fullImageUrl(moment.media.first.media_url);
-                      print('   - Media URL: $mediaUrl');
-                    }
-
-                    return MomentCard(
-                      userId: moment.user.u_id,
-                      username: moment.user.u_name,
-                      avatar: fullImageUrl(moment.user.u_avt),
-                      status: moment.content,
-                      images: moment.media.isNotEmpty
-                          ? moment.media
-                              .map((m) => fullImageUrl(m.media_url))
-                              .toList()
-                              .cast<String>()
-                          : null,
-                      location: moment.address,
-                      time: DateFormat('yyyy-MM-dd HH:mm')
-                          .format(moment.createdAt),
-                      type: moment.type,
-                      category: moment.category.category_name,
-                      latitude: moment.latitude,
-                      longitude: moment.longitude,
-                    );
-                  },
+        return Container(
+            decoration: BoxDecoration(
+            color: const Color(0xFFEEF5E6), // Màu xanh lá nhạt
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                const SizedBox(height: 20),
+                const Text('📍 Các bài viết trong khu vực',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: markerMoments.length,
+                    itemBuilder: (context, index) {
+                      final moment = markerMoments[index];
+          
+                      if (moment.media.isNotEmpty) {
+                      }
+          
+                      return Container(
+                        margin: const EdgeInsets.symmetric(
+                        horizontal: 0, vertical: 6),
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF708C5B).withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(10),
+                        ),
+                        child: MomentCard(
+                          userId: moment.user.u_id,
+                          username: moment.user.u_name,
+                          avatar: fullImageUrl(moment.user.u_avt),
+                          status: moment.content,
+                          images: moment.media.isNotEmpty
+                              ? moment.media
+                                  .map((m) => fullImageUrl(m.media_url))
+                                  .toList()
+                                  .cast<String>()
+                              : null,
+                          location: moment.address,
+                          time: DateFormat('yyyy-MM-dd HH:mm')
+                              .format(moment.createdAt),
+                          type: moment.type,
+                          category: moment.category.category_name,
+                          latitude: moment.latitude,
+                          longitude: moment.longitude,
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              ElevatedButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Đóng'),
-              ),
-            ],
+          
+                const SizedBox(height: 12),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF708C5B).withOpacity(0.8),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                  child: const Text('Đóng',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
           ),
         );
       },

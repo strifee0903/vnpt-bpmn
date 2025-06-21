@@ -87,7 +87,7 @@ class _AddMomentPlaceState extends State<AddMomentPlace> {
           );
         },
         child: Container(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: const Color(0xFF708C5B).withOpacity(0.2),
             borderRadius: BorderRadius.circular(10),
