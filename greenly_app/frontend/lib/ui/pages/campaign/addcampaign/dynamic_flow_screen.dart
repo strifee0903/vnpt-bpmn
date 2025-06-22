@@ -147,7 +147,9 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
                   );
                 }
               },
-              goToPrevious,
+              // () => currentIndex > 0 ? Navigator.pop(context) : null,
+              () => currentIndex == 0 ? Navigator.pop(context) : goToPrevious(),
+              // goToPrevious,
               currentIndex == orderedSteps.length - 1 ? true : false,
               (String message) {
                 // ✅ onComplete callback
