@@ -244,7 +244,7 @@ async function updateUser(id, payload) {
         payload.u_avt &&
         existingUser.u_avt &&
         payload.u_avt !== existingUser.u_avt &&
-        existingUser.u_avt.startsWith('/public/uploads/avatars')
+        existingUser.u_avt.startsWith('/public/uploads')
     ) {
         unlink(`.${existingUser.u_avt}`, (err) => { });
     }
@@ -254,7 +254,7 @@ async function updateUser(id, payload) {
         .where({ u_id: id })
         .select('*')
         .first();
-    if (updatedUser) { delete user.u_pass; }
+    if (updatedUser) { delete updatedUser.u_pass; }
     return updatedUser;
 };
 

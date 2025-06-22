@@ -7,6 +7,7 @@ import '../shared/api_exception.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 const userUrl = 'http://192.168.1.7:3000/api/users';
+
 class UserService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? userUrl;
   static final client = http.Client(); // Persistent client for cookies
@@ -34,7 +35,6 @@ class UserService {
     }
   }
 
-
   // Get u_id from local store (shortcut)
   Future<int?> getCurrentUserId() async {
     final user = await getCurrentUser();
@@ -58,7 +58,7 @@ class UserService {
     final body = json.decode(response.body);
 
     if (response.statusCode == 200) {
-      final userJson = body['data']['contact'];
+      final userJson = body['data']['data']; // Updated to access 'data.data'
       final user = User.fromJson(userJson);
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_user', jsonEncode(user.toJson()));
@@ -74,9 +74,10 @@ class UserService {
     final uri = Uri.parse('$baseUrl/users/info/$userId');
     print('🌐 DEBUG - Request URL: $uri');
     final sessionCookie = await _getSessionCookie();
-    final Map<String, String> headers = sessionCookie != null && sessionCookie.isNotEmpty
-        ? {'Cookie': sessionCookie}
-        : <String, String>{};
+    final Map<String, String> headers =
+        sessionCookie != null && sessionCookie.isNotEmpty
+            ? {'Cookie': sessionCookie}
+            : <String, String>{};
 
     final response = await client.get(uri, headers: headers);
     print('📡 DEBUG - Response status: ${response.statusCode}');
@@ -94,11 +95,12 @@ class UserService {
 
   // Update current user
   Future<User> updateCurrentUser(Map<String, String> fields,
-      {http.MultipartFile? avatarFile}) async {
+      {http.MultipartFile? u_avtFile}) async {
+    // Changed from avatarFile to u_avtFile
     final userId = await getCurrentUserId();
     if (userId == null) throw ApiException('Not logged in.');
 
-    final uri = Uri.parse('$baseUrl/updateProfile');
+    final uri = Uri.parse('$baseUrl/users/updateProfile/'); // Updated endpoint
     print('🌐 DEBUG - Request URL: $uri');
     final request = http.MultipartRequest('PATCH', uri);
     final sessionCookie = await _getSessionCookie();
@@ -107,8 +109,11 @@ class UserService {
     }
 
     request.fields.addAll(fields);
-    if (avatarFile != null) {
-      request.files.add(avatarFile);
+    if (u_avtFile != null) {
+      request.files.add(u_avtFile);
+      print('🖼️ DEBUG - Adding avatar file: ${u_avtFile.field}');
+      print('🖼️ DEBUG - Avatar filename: ${u_avtFile.filename}');
+      print('🖼️ DEBUG - Avatar content-type: ${u_avtFile.contentType}');
     }
 
     final streamed = await client.send(request);
@@ -118,8 +123,8 @@ class UserService {
 
     if (response.statusCode == 200) {
       final body = json.decode(response.body);
-      final updatedUser = User.fromJson(body['data']['user']);
-      // Update stored user
+      final updatedUser = User.fromJson(
+          body['data']['data']); 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setString('auth_user', jsonEncode(updatedUser.toJson()));
       print(
@@ -135,12 +140,13 @@ class UserService {
     final userId = await getCurrentUserId();
     if (userId == null) throw ApiException('Not logged in.');
 
-    final uri = Uri.parse('$baseUrl/deleteAccount');
+    final uri = Uri.parse('$baseUrl/users/deleteAccount');
     print('🌐 DEBUG - Request URL: $uri');
     final sessionCookie = await _getSessionCookie();
-    final Map<String, String> headers = sessionCookie != null && sessionCookie.isNotEmpty
-        ? {'Cookie': sessionCookie}
-        : <String, String>{};
+    final Map<String, String> headers =
+        sessionCookie != null && sessionCookie.isNotEmpty
+            ? {'Cookie': sessionCookie}
+            : <String, String>{};
 
     final response = await client.delete(uri, headers: headers);
     print('📡 DEBUG - Response status: ${response.statusCode}');

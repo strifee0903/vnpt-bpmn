@@ -6,6 +6,7 @@ import '../../moments/moments_card.dart';
 import '../../moments/add_moment_place.dart';
 import '../../../services/moment_service.dart';
 import '../../../models/moment.dart';
+import 'edit_profile.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -170,8 +171,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authManager = Provider.of<AuthManager>(context);
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -310,6 +309,12 @@ class _FilterHeader extends SliverPersistentHeaderDelegate {
                       if (value == 'logout') {
                         Provider.of<AuthManager>(context, listen: false)
                             .logout();
+                      } else if (value == 'profile') {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const EditProfileScreen()),
+                        );
                       }
                     },
                     itemBuilder: (context) => [
