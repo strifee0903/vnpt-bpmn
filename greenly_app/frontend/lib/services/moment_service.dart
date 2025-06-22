@@ -98,6 +98,43 @@ class MomentService {
     }
   }
 
+  Future<Moment> getMomentById(int momentId) async {
+    print('🔧 DEBUG - Environment BASE_URL: ${dotenv.env['BASE_URL']}');
+    print('🔧 DEBUG - Service baseUrl: $baseUrl');
+    print('🔧 DEBUG - Image baseUrl: $imageBaseUrl');
+
+    final prefs = await SharedPreferences.getInstance();
+    final sessionCookie = prefs.getString('session_cookie') ?? '';
+
+    final requestUrl = '$baseUrl/moment/public/$momentId';
+    print('🌐 DEBUG - Request URL: $requestUrl');
+
+    final response = await http.get(
+      Uri.parse(requestUrl),
+      headers: {
+        'Cookie': sessionCookie, // Add cookie to get like status
+      },
+    );
+
+    print('📡 DEBUG - Response status: ${response.statusCode}');
+    print('📡 DEBUG - Response headers: ${response.headers}');
+
+    if (response.statusCode == 200) {
+      print('✅ DEBUG - Response received successfully');
+      final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+      print('📝 DEBUG - Parsed JSON keys: ${jsonResponse.keys}');
+
+      final momentData = jsonResponse['data']['moment'];
+      momentData['media'] ??= []; // Ensure media is always a list
+      print(momentData);
+      return Moment.fromJson(momentData);
+    } else {
+      print('❌ DEBUG - Request failed with status: ${response.statusCode}');
+      print('❌ DEBUG - Response body: ${response.body}');
+      throw Exception('Failed to load moment: ${response.statusCode}');
+    }
+  }
+
   Future<List<Moment>> getNewsFeedMoments(
       {int page = 1, int limit = 10, String? moment_type}) async {
     print('🔧 DEBUG - Environment BASE_URL: ${dotenv.env['BASE_URL']}');

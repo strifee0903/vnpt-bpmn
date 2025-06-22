@@ -1,27 +1,32 @@
 import 'dart:ffi';
-
 import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
+import 'package:greenly_app/ui/pages/campaign/campaign_manager.dart';
+import 'package:provider/provider.dart';
 import '../../../../components/colors.dart';
-import 'step2.dart';
+import 'package:greenly_app/services/campaign_service.dart';
+import 'package:greenly_app/models/campaign.dart';
 
 class Step1 extends StatefulWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
   final bool isLast; // Biến để xác định bước cuối cùng
+  final void Function(String message) onComplete;
 
-  const Step1(
-      {super.key,
-      required this.onNext,
-      required this.onBack,
-      this.isLast =
-          false}); // Thêm tham số isLast với giá trị mặc định là false
+  const Step1({
+    super.key,
+    required this.onNext,
+    required this.onBack,
+    this.isLast = false,
+    required this.onComplete,
+  }); // Thêm tham số isLast với giá trị mặc định là false
 
   @override
   State<Step1> createState() => _Step1State();
 }
 
 class _Step1State extends State<Step1> {
+  final CampaignService campaignService = CampaignService();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
@@ -43,6 +48,40 @@ class _Step1State extends State<Step1> {
       context: context,
       builder: (context) => const SuccessDialog(),
     );
+  }
+
+  Future<int> createCampaign() async {
+    if (selectedStartDate == null || selectedEndDate == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Vui lòng chọn ngày bắt đầu và kết thúc')),
+      );
+      return 0;
+    }
+
+    final campaign = Campaign(
+      id: 0, // server sẽ tạo
+      title: nameController.text.trim(),
+      description: descriptionController.text.trim(),
+      location: locationController.text.trim(),
+      startDate: selectedStartDate!.toIso8601String(),
+      endDate: selectedEndDate!.toIso8601String(),
+      categoryId: 49,
+    );
+
+    try {
+      final created = await campaignService.createCampaign(campaign);
+
+      if (created != null) {
+        widget.onComplete('Tạo chiến dịch thành công: $created');
+      } else {
+        widget.onComplete('Tạo chiến dịch thất bại');
+      }
+      return created ?? 0; // Trả về ID của chiến dịch đã tạo
+    } catch (e) {
+      print('⚠️ Exception: $e');
+      widget.onComplete('Có lỗi xảy ra khi tạo chiến dịch: $e');
+      return 0; // Trả về 0 nếu có lỗi
+    }
   }
 
   @override
@@ -394,7 +433,9 @@ class _Step1State extends State<Step1> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
+        onPressed: () async {
+          context.read<CampaignManager>().setCampaignId(await createCampaign());
+
           if (widget.isLast) {
             // Nếu là bước cuối cùng, hiển thị dialog thành công
             showSuccessDialog();

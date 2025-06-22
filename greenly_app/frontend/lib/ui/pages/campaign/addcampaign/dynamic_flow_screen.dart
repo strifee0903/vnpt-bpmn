@@ -4,6 +4,7 @@ import 'package:greenly_app/services/process_service.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'screen_register.dart';
 import '../../../../components/colors.dart';
+import '../campaign_manager.dart';
 
 class DynamicFlowPage extends StatefulWidget {
   const DynamicFlowPage({super.key});
@@ -135,19 +136,6 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
     final screenBuilder = screenRegistry[step.name];
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(step.name!),
-      //   leading: IconButton(
-      //     icon: const Icon(Icons.arrow_back),
-      //     onPressed: () {
-      //       if (currentIndex > 0) {
-      //         goToPrevious();
-      //       } else {
-      //         Navigator.pop(context);
-      //       }
-      //     },
-      //   ),
-      // ),
       body: screenBuilder != null
           ? screenBuilder(
               () {
@@ -160,56 +148,30 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
                   );
                 }
               },
-              goToPrevious,
+              // () => currentIndex > 0 ? Navigator.pop(context) : null,
+              () => currentIndex == 0 ? Navigator.pop(context) : goToPrevious(),
+              // goToPrevious,
               currentIndex == orderedSteps.length - 1 ? true : false,
+              (String message) {
+                // ✅ onComplete callback
+                showDialog(
+                  context: context,
+                  builder: (_) => AlertDialog(
+                    title: const Text('Thông báo'),
+                    content: Text(message),
+                    actions: [
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context);
+                        },
+                        child: const Text('OK'),
+                      )
+                    ],
+                  ),
+                );
+              },
             )
           : const Center(child: Text('Không có screen phù hợp')),
-      // floatingActionButton: FloatingActionButton.extended(
-      //   onPressed: () {
-      //     if (currentIndex < orderedSteps.length - 1) {
-      //       goToNext();
-      //     } else {
-      //       // Nếu đã đến bước cuối cùng, có thể hiển thị thông báo hoặc làm gì đó
-      //       ScaffoldMessenger.of(context).showSnackBar(
-      //         const SnackBar(content: Text('Đã đến bước cuối cùng')),
-      //       );
-      //     }
-      //   },
-      //   backgroundColor: button,
-      //   label: Padding(
-      //     padding: const EdgeInsets.symmetric(
-      //         horizontal: 13.0, vertical: 8.0), // Tăng vertical lên 12.0
-      //     child: const Text(
-      //       'Next',
-      //       style: TextStyle(
-      //         fontFamily: 'Oktah',
-      //         fontSize: 16,
-      //         color: Colors.white,
-      //         fontWeight: FontWeight.w700,
-      //       ),
-      //     ),
-      //   ),
-      //   shape: RoundedRectangleBorder(
-      //     borderRadius: BorderRadius.circular(15.0),
-      //   ),
-      // ),
-      // floatingActionButtonLocation:
-      //     FloatingActionButtonLocation.endFloat, // Đặt ở góc dưới bên phải
-      // bottomNavigationBar: BottomAppBar(
-      //   child: Row(
-      //     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      //     children: [
-      //       TextButton(
-      //         onPressed: goToPrevious,
-      //         child: const Text('Quay lại'),
-      //       ),
-      //       TextButton(
-      //         onPressed: goToNext,
-      //         child: const Text('Tiếp tục'),
-      //       ),
-      //     ],
-      //   ),
-      // ),
     );
   }
 }

@@ -8,7 +8,15 @@ class Category {
     required this.category_name,
     this.category_image,
   });
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Category &&
+          runtimeType == other.runtimeType &&
+          category_id == other.category_id;
 
+  @override
+  int get hashCode => category_id.hashCode;
   factory Category.fromJson(Map<String, dynamic> json) {
     print('📂 DEBUG - Parsing category JSON: $json');
 

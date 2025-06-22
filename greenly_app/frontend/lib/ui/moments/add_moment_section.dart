@@ -58,7 +58,7 @@ class AddPostSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final List<String> momentTypes = ['Diary', 'Event', 'Report'];
+    final List<String> momentTypes = ['diary', 'event', 'report'];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
