@@ -322,12 +322,12 @@ class _MomentCardState extends State<MomentCard> {
                       children: [
                         FaIcon(
                           moment.isLikedByCurrentUser
-                              ? FontAwesomeIcons.solidFaceGrinHearts
-                              : FontAwesomeIcons.faceFrown,
+                              ? FontAwesomeIcons.heartCircleCheck
+                              : FontAwesomeIcons.heartCrack,
                           color: moment.isLikedByCurrentUser
                               ? Colors.red
                               : const Color.fromARGB(255, 96, 96, 96),
-                          size: 19, // nhỏ bằng với icon thời gian
+                          size: 19, 
                         ),
                         const SizedBox(width: 4),
                         Text(
