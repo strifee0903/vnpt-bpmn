@@ -1,6 +1,8 @@
 import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
+import 'package:greenly_app/ui/pages/campaign/campaign_manager.dart';
+import 'package:provider/provider.dart';
 import '../../../../components/colors.dart';
 import 'package:greenly_app/services/campaign_service.dart';
 import 'package:greenly_app/models/campaign.dart';
@@ -48,12 +50,12 @@ class _Step1State extends State<Step1> {
     );
   }
 
-  void createCampaign() async {
+  Future<int> createCampaign() async {
     if (selectedStartDate == null || selectedEndDate == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Vui lòng chọn ngày bắt đầu và kết thúc')),
       );
-      return;
+      return 0;
     }
 
     final campaign = Campaign(
@@ -68,14 +70,17 @@ class _Step1State extends State<Step1> {
 
     try {
       final created = await campaignService.createCampaign(campaign);
+
       if (created != null) {
         widget.onComplete('Tạo chiến dịch thành công: $created');
       } else {
         widget.onComplete('Tạo chiến dịch thất bại');
       }
+      return created ?? 0; // Trả về ID của chiến dịch đã tạo
     } catch (e) {
       print('⚠️ Exception: $e');
       widget.onComplete('Có lỗi xảy ra khi tạo chiến dịch: $e');
+      return 0; // Trả về 0 nếu có lỗi
     }
   }
 
@@ -428,8 +433,9 @@ class _Step1State extends State<Step1> {
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          createCampaign();
+        onPressed: () async {
+          context.read<CampaignManager>().setCampaignId(await createCampaign());
+
           if (widget.isLast) {
             // Nếu là bước cuối cùng, hiển thị dialog thành công
             showSuccessDialog();

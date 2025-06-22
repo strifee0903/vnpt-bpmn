@@ -4,6 +4,7 @@ import 'package:greenly_app/services/process_service.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'screen_register.dart';
 import '../../../../components/colors.dart';
+import '../campaign_manager.dart';
 
 class DynamicFlowPage extends StatefulWidget {
   const DynamicFlowPage({super.key});
@@ -162,7 +163,6 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
                       TextButton(
                         onPressed: () {
                           Navigator.pop(context);
-                          goToNext();
                         },
                         child: const Text('OK'),
                       )

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../components/colors.dart'; // Import colors.dart
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'addcampaign/dynamic_flow_screen.dart'; // Import
+import 'campaign_manager.dart'; // Import CampaignManager
 import 'addcampaign/step1.dart';
 
 class Campaign extends StatefulWidget {
@@ -270,7 +272,10 @@ class _CampaignState extends State<Campaign> {
           onPressed: () {
             Navigator.push(
               context,
-              MaterialPageRoute(builder: (context) => const DynamicFlowPage()),
+              MaterialPageRoute(
+                  builder: (context) => ChangeNotifierProvider(
+                      create: (_) => CampaignManager(),
+                      child: const DynamicFlowPage())),
             ); // Điều hướng sang Step1
           },
           style: TextButton.styleFrom(

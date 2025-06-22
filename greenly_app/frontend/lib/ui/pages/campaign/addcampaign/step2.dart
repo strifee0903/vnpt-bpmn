@@ -2,9 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import '../../../../components/colors.dart';
 import '../../../moments/add_moment_section.dart'; // Import widget mới
-import 'step3.dart'; // Import file Step3.dart
+import '../campaign_manager.dart';
+import 'package:greenly_app/services/moment_service.dart';
+import 'package:greenly_app/models/moment.dart';
+import 'package:greenly_app/models/category.dart';
+import 'package:greenly_app/services/category_service.dart';
 
 class Step2 extends StatefulWidget {
   final VoidCallback onNext;
@@ -24,6 +29,10 @@ class Step2 extends StatefulWidget {
 }
 
 class _Step2State extends State<Step2> {
+  Moment? moment;
+  final MomentService momentService = MomentService();
+  final CategoryService categoryService = CategoryService();
+  final List<Category> categories = [];
   final TextEditingController contentController = TextEditingController();
   File? selectedImage;
   final ImagePicker picker = ImagePicker();
@@ -49,6 +58,32 @@ class _Step2State extends State<Step2> {
       context: context,
       builder: (context) => const SuccessDialog(),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo moment nếu cần
+    int? id = context.read<CampaignManager>().campaignId;
+    if (id != null) {
+      // Nếu có id, lấy thông tin moment từ service
+      momentService.getMomentById(id).then((value) {
+        setState(() {
+          moment = value;
+          contentController.text = moment?.content ?? '';
+          selectedImage = (moment?.media != null && moment!.media!.isNotEmpty)
+              ? File(moment!.media.first.media_url)
+              : null;
+        });
+      });
+    }
+    print(moment?.category);
+    // Lấy danh sách category
+    categoryService.getAllCategories().then((value) {
+      setState(() {
+        categories.addAll(value);
+      });
+    });
   }
 
   @override
@@ -93,10 +128,10 @@ class _Step2State extends State<Step2> {
                 onPickImages: pickImage,
                 avatarPath: 'assets/images/pagediary.png',
                 username: 'jane smith',
-                categories: [],
-                selectedCategory: null,
+                categories: categories,
+                selectedCategory: moment?.category,
                 onCategoryChanged: (value) {},
-                selectedMomentType: null,
+                selectedMomentType: moment?.type,
                 onMomentTypeChanged: (value) {},
                 isPublic: true,
                 onPublicChanged: (value) {},
@@ -108,11 +143,6 @@ class _Step2State extends State<Step2> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(
-          //       builder: (context) => const Step3()), // Chuyển sang Step3
-          // );
           if (widget.isLast) {
             // Nếu là bước cuối cùng, hiển thị dialog thành công
             showSuccessDialog();
