@@ -10,11 +10,14 @@ class Step2 extends StatefulWidget {
   final VoidCallback onNext;
   final VoidCallback onBack;
   final bool isLast;
-  const Step2(
-      {super.key,
-      required this.onNext,
-      required this.onBack,
-      this.isLast = false});
+  final void Function(String message) onComplete;
+  const Step2({
+    super.key,
+    required this.onNext,
+    required this.onBack,
+    this.isLast = false,
+    required this.onComplete,
+  });
 
   @override
   State<Step2> createState() => _Step2State();
