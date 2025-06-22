@@ -6,8 +6,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/moment.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
-const defaultUrl =
-    'http://192.168.1.7:3000/api'; 
+const defaultUrl = 'http://192.168.1.7:3000/api';
+
 class MomentService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? defaultUrl;
   static final client = http.Client(); // Persistent client for session cookies
@@ -17,7 +17,7 @@ class MomentService {
     if (envUrl != null) {
       return envUrl.replaceAll(RegExp(r'/api/?'), '');
     }
-    return 'http://192.168.1.7:3000'; 
+    return 'http://192.168.1.7:3000';
   }
 
   static String fullImageUrl(String? relativePath) {
@@ -110,7 +110,15 @@ class MomentService {
     }
     print('🌐 DEBUG - Request URL: $requestUrl');
 
-    final response = await http.get(Uri.parse(requestUrl));
+    final prefs = await SharedPreferences.getInstance();
+    final sessionCookie = prefs.getString('session_cookie') ?? '';
+
+    final response = await http.get(
+      Uri.parse(requestUrl),
+      headers: {
+        'Cookie': sessionCookie, // Add cookie to get like status
+      },
+    );
 
     print('📡 DEBUG - Response status: ${response.statusCode}');
     print('📡 DEBUG - Response headers: ${response.headers}');
@@ -122,6 +130,12 @@ class MomentService {
 
       final List data = jsonResponse['data']['moments'];
       print('📊 DEBUG - Number of moments: ${data.length}');
+
+      // Debug: Print first moment's like data
+      if (data.isNotEmpty) {
+        print(
+            '🔍 DEBUG - First moment like data: likeCount=${data[0]['likeCount']}, isLikedByCurrentUser=${data[0]['isLikedByCurrentUser']}');
+      }
 
       // Log metadata for debugging
       final metadata = jsonResponse['data']['metadata'];
@@ -137,7 +151,10 @@ class MomentService {
   }
 
   Future<List<Moment>> getMyMoments(
-      {int page = 1, int limit = 10, bool? is_public, String? moment_type}) async {
+      {int page = 1,
+      int limit = 10,
+      bool? is_public,
+      String? moment_type}) async {
     print('🔧 DEBUG - Environment BASE_URL: ${dotenv.env['BASE_URL']}');
     print('🔧 DEBUG - Service baseUrl: $baseUrl');
     print('🔧 DEBUG - Image baseUrl: $imageBaseUrl');
@@ -325,5 +342,57 @@ class MomentService {
       throw Exception('Failed to delete moment: $e');
     }
   }
-}
 
+  Future<Map<String, dynamic>> toggleMomentVote({
+    required int momentId,
+    required bool voteState,
+  }) async {
+    final prefs = await SharedPreferences.getInstance();
+    final sessionCookie = prefs.getString('session_cookie') ?? '';
+
+    final requestUrl = '$baseUrl/vote/moment/$momentId';
+    print('🌐 DEBUG - Request URL: $requestUrl');
+
+    try {
+      var request = http.MultipartRequest('POST', Uri.parse(requestUrl));
+      request.headers['Cookie'] = sessionCookie;
+      request.fields['vote_state'] = voteState.toString();
+
+      print('🔐 Cookie header added: $sessionCookie');
+      print('❤️❤️❤️ Sending vote_state: $voteState');
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+
+      print('❤️❤️❤️ DEBUG - Response status: ${response.statusCode}');
+      print('❤️❤️❤️ DEBUG - Response body: $responseBody');
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(responseBody);
+        final voteData = jsonResponse['data']['vote'];
+
+        return {
+          'success': true,
+          'isLiked': voteData['vote_state'], // Use the vote_state from response
+          'likeCount': voteData['likes'], // Use likes count from response
+          'unlikeCount': voteData['unlikes'],
+        };
+      } else {
+        throw Exception(
+            '❤️Failed to toggle vote: ${jsonDecode(responseBody)['message'] ?? responseBody}');
+      }
+    } catch (e, stackTrace) {
+      print('❌❤️ DEBUG - Error toggling vote: $e');
+      print('❌❤️ DEBUG - StackTrace: $stackTrace');
+      throw Exception('❤️Failed to toggle vote: $e');
+    }
+  }
+
+  Future<Map<String, dynamic>> likeMoment(int momentId) async {
+    return await toggleMomentVote(momentId: momentId, voteState: true);
+  }
+
+  Future<Map<String, dynamic>> unlikeMoment(int momentId) async {
+    return await toggleMomentVote(momentId: momentId, voteState: false);
+  }
+}

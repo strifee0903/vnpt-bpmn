@@ -152,15 +152,16 @@ class _MomentsPageState extends State<MomentsPage> {
 
                   final moment = _moments[index];
                   return Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    margin:
+                        const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: const Color(0xFF708C5B).withOpacity(0.2),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: MomentCard(
+                      key: ValueKey(moment.id),
                       moment: moment,
-                      refreshFeed: _refreshFeed, 
                     ),
                   );
                 },

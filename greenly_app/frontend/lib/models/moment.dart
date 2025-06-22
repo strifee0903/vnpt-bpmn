@@ -1,4 +1,3 @@
-// moment.dart
 import 'category.dart';
 import 'media.dart';
 import 'user.dart';
@@ -15,6 +14,9 @@ class Moment {
   final Category category;
   final List<Media> media;
   final bool? isPublic;
+  final int likeCount;
+  final int unlikeCount;
+  final bool isLikedByCurrentUser;
 
   Moment({
     required this.id,
@@ -28,6 +30,9 @@ class Moment {
     required this.category,
     required this.media,
     this.isPublic,
+    required this.likeCount,
+    required this.unlikeCount,
+    required this.isLikedByCurrentUser,
   });
 
   factory Moment.fromJson(Map<String, dynamic> json) {
@@ -71,6 +76,12 @@ class Moment {
                 json['is_public'].toString() == '1' ||
                 json['is_public'] == true)
             : true,
+        // Fixed: Parse both possible field names for likes
+        likeCount: json['likeCount'] ?? json['likes'] ?? 0,
+        unlikeCount: json['unlikeCount'] ?? json['unlikes'] ?? 0,
+        // Fixed: Parse both possible field names for like status
+        isLikedByCurrentUser:
+            json['isLikedByCurrentUser'] ?? json['is_liked'] ?? false,
       );
     } catch (e, stackTrace) {
       print('❌ DEBUG - Error parsing Moment JSON: $e');
@@ -78,6 +89,40 @@ class Moment {
       print('❌ DEBUG - JSON data: $json');
       rethrow;
     }
+  }
+
+  Moment copyWith({
+    int? id,
+    String? content,
+    String? address,
+    String? type,
+    double? latitude,
+    double? longitude,
+    DateTime? createdAt,
+    User? user,
+    Category? category,
+    List<Media>? media,
+    bool? isPublic,
+    int? likeCount,
+    int? unlikeCount,
+    bool? isLikedByCurrentUser,
+  }) {
+    return Moment(
+      id: id ?? this.id,
+      content: content ?? this.content,
+      address: address ?? this.address,
+      type: type ?? this.type,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      createdAt: createdAt ?? this.createdAt,
+      user: user ?? this.user,
+      category: category ?? this.category,
+      media: media ?? this.media,
+      isPublic: isPublic ?? this.isPublic,
+      likeCount: likeCount ?? this.likeCount,
+      unlikeCount: unlikeCount ?? this.unlikeCount,
+      isLikedByCurrentUser: isLikedByCurrentUser ?? this.isLikedByCurrentUser,
+    );
   }
 
   static int _parseIntSafe(dynamic value, String fieldName) {
