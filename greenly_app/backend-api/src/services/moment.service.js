@@ -175,7 +175,7 @@ async function getAllPublicMoments(query, u_id) {
         const result = await Promise.all(moments.map(async (moment) => {
             const media = await mediaRepository()
                 .where('moment_id', moment.moment_id)
-                .select('media_url');
+                .select('*');
 
             const category = await knex('category')
                 .where('category_id', moment.category_id)

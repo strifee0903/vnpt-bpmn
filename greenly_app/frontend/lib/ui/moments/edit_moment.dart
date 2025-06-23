@@ -52,7 +52,6 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
     _fetchCategories();
     _getCurrentLocation();
     _fetchCurrentUser();
-
   }
 
   Future<void> _fetchCurrentUser() async {
@@ -72,6 +71,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
       }
     }
   }
+
   Future<void> _fetchCategories() async {
     setState(() => _isLoading = true);
     try {
@@ -141,8 +141,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to get location: $e')),
       );
-    } finally {
-    }
+    } finally {}
   }
 
   Future<void> _pickImages() async {
@@ -175,7 +174,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
         categoryId: _selectedCategory?.category_id ?? 1,
         isPublic: _isPublic,
         images: _newImages,
-        mediaIdsToDelete: _mediaIdsToDelete,
+        mediaIdsToDelete:_mediaIdsToDelete.isNotEmpty ? _mediaIdsToDelete : null,
       );
 
       if (mounted) {
@@ -189,7 +188,6 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
       setState(() => _isLoading = false);
     }
   }
-
 
   @override
   Widget build(BuildContext context) {
@@ -426,7 +424,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                     right: 8,
                                     child: GestureDetector(
                                       onTap: () =>
-                                          _toggleMediaDeletion(media.media_id!),
+                                          _toggleMediaDeletion(media.media_id),
                                       child: Container(
                                         decoration: BoxDecoration(
                                           color: Colors.black54,
@@ -451,7 +449,6 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                       ),
                       const SizedBox(height: 16),
                     ],
-
                     // New Images - Giữ nguyên cách hiển thị ảnh mới
                     if (_newImages.isNotEmpty) ...[
                       const Text(
@@ -577,7 +574,6 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
     );
   }
 
-
   void _showDeleteDialog() {
     showDialog(
       context: context,
@@ -617,7 +613,9 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
     }
   }
 
-  void _toggleMediaDeletion(int mediaId) {
+  void _toggleMediaDeletion(int? mediaId) {
+    if (mediaId == null) return;
+
     setState(() {
       if (_mediaIdsToDelete.contains(mediaId)) {
         _mediaIdsToDelete.remove(mediaId);
