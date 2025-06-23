@@ -54,12 +54,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       final user = await _userService.getMyProfile();
       setState(() {
         _user = user;
-        _nameController.text = user.u_name ?? '';
-        _emailController.text = user.u_email ?? '';
+        _nameController.text = user.u_name;
+        _emailController.text = user.u_email;
         if (user.u_birthday != null) {
           _selectedDate = DateTime.parse(user.u_birthday!);
         }
-        _addressController.text = user.u_address ?? '';
+        _addressController.text = user.u_address;
         _isLoading = false;
       });
     } catch (e) {

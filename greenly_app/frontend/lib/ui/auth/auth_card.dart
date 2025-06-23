@@ -1,7 +1,6 @@
 import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../../../components/colors.dart';
 import '../../shared/dialog_utils.dart';
 import 'auth_manager.dart';
 
@@ -14,7 +13,7 @@ class AuthCard extends StatefulWidget {
   State<AuthCard> createState() => _AuthCardState();
 }
 
-class _AuthCardState extends State<AuthCard> {
+class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
   final GlobalKey<FormState> _formKey = GlobalKey();
   AuthMode _authMode = AuthMode.login;
   final Map<String, String> _authData = {
@@ -22,7 +21,7 @@ class _AuthCardState extends State<AuthCard> {
     'uEmail': '',
     'uPass': '',
     'uAddress': '',
-    'uBirthday':'',
+    'uBirthday': '',
   };
   final _isSubmitting = ValueNotifier<bool>(false);
   final _passwordController = TextEditingController();
@@ -30,13 +29,35 @@ class _AuthCardState extends State<AuthCard> {
   bool _obscurePassword = true;
   DateTime? _selectedBirthday;
   final _birthdayController = TextEditingController();
+  late AnimationController _animationController;
+  late Animation<double> _slideAnimation;
 
+  // Green color palette
+  static const Color primaryGreen = Color(0xFF4CAF50);
+  static const Color lightGreen = Color(0xFF81C784);
+  static const Color darkGreen = Color(0xFF2E7D32);
+  static const Color backgroundGreen = Color(0xFFF1F8E9);
+  static const Color softGreen = Color(0xFFE8F5E8);
+
+  @override
+  void initState() {
+    super.initState();
+    _animationController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+    _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+    _animationController.forward();
+  }
 
   @override
   void dispose() {
     _passwordController.dispose();
     _emailController.dispose();
     _birthdayController.dispose();
+    _animationController.dispose();
     super.dispose();
   }
 
@@ -46,9 +67,21 @@ class _AuthCardState extends State<AuthCard> {
       initialDate: _selectedBirthday ?? DateTime(2000),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: const ColorScheme.light(
+              primary: primaryGreen,
+              onPrimary: Colors.white,
+              surface: Colors.white,
+              onSurface: darkGreen,
+            ),
+          ),
+          child: child!,
+        );
+      },
     );
     if (pickedDate != null && mounted) {
-      // Check mounted before setState
       setState(() {
         _selectedBirthday = pickedDate;
         _birthdayController.text = "${pickedDate.toLocal()}".split(' ')[0];
@@ -57,7 +90,6 @@ class _AuthCardState extends State<AuthCard> {
     }
   }
 
-
   Future<bool> _validateFields() async {
     final username = _authData['uName'] ?? '';
     final email = _authData['uEmail'] ?? '';
@@ -65,8 +97,6 @@ class _AuthCardState extends State<AuthCard> {
     final address = _authData['uAddress'] ?? '';
     final birthday = _authData['uBirthday'] ?? '';
 
-
-    // Validate password (for both login and signup)
     if (password.isEmpty) {
       await showErrorDialog(context, 'Please enter a password');
       return false;
@@ -78,13 +108,11 @@ class _AuthCardState extends State<AuthCard> {
     }
 
     if (email.isEmpty) {
-      await showErrorDialog(context, 'Please enter a email');
+      await showErrorDialog(context, 'Please enter an email');
       return false;
     }
 
-    // Additional validations for signup mode
     if (_authMode == AuthMode.signup) {
-      // Validate username
       if (username.isEmpty) {
         await showErrorDialog(context, 'Username cannot be blank!');
         return false;
@@ -96,33 +124,28 @@ class _AuthCardState extends State<AuthCard> {
       }
 
       if (address.isEmpty) {
-        await showErrorDialog(context, 'Please enter a address');
+        await showErrorDialog(context, 'Please enter an address');
         return false;
       }
 
-      // Validate phone
       if (birthday.isEmpty) {
-        await showErrorDialog(context, 'Please enter a birthday');
+        await showErrorDialog(context, 'Please select your birthday');
         return false;
       }
     }
 
-    return true; // All validations passed
+    return true;
   }
 
   Future<void> _submit() async {
-    if (!mounted) return; // Early return if not mounted
+    if (!mounted) return;
 
     _formKey.currentState!.save();
     _isSubmitting.value = true;
 
-    print('✅ Auth data after save: $_authData');
-
-    // Validate fields and show errors in popup if validation fails
     final isValid = await _validateFields();
     if (!isValid) {
       if (mounted) {
-        // Check mounted before updating
         _isSubmitting.value = false;
       }
       return;
@@ -147,7 +170,6 @@ class _AuthCardState extends State<AuthCard> {
           await showSuccessDialog(
               context, 'Account created successfully! Please log in.');
         }
-        // Only proceed if still mounted
         if (mounted) {
           final email = _authData['uEmail'];
           final password = _authData['uPass'];
@@ -173,7 +195,6 @@ class _AuthCardState extends State<AuthCard> {
       }
     }
 
-    // Check mounted before updating UI
     if (mounted) {
       _isSubmitting.value = false;
     }
@@ -181,108 +202,151 @@ class _AuthCardState extends State<AuthCard> {
 
   void _switchAuthMode() {
     if (mounted) {
-      // Check mounted before setState
       setState(() {
         _authMode =
             _authMode == AuthMode.login ? AuthMode.signup : AuthMode.login;
       });
+      _animationController.reset();
+      _animationController.forward();
     }
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 0.0),
-          child: Container(
-            width: double.infinity,
-            height: size.height * 0.9,
-            decoration: const BoxDecoration(
-              color: color17,
-              borderRadius: BorderRadius.only(
-                topLeft: Radius.circular(50),
-                topRight: Radius.circular(50),
-              ),
-            ),
-            child: Column(
-              children: [
-                Padding(
-                  padding: const EdgeInsets.only(top: 30.0),
-                  child: Text(
+
+    return Container(
+      width: double.infinity,
+      height:
+          _authMode == AuthMode.login ? size.height * 0.65 : size.height * 0.75,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: primaryGreen.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, -5),
+          ),
+        ],
+      ),
+      child: SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.3),
+          end: Offset.zero,
+        ).animate(_slideAnimation),
+        child: FadeTransition(
+          opacity: _slideAnimation,
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Mode indicator
+                  Container(
+                    width: 60,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: softGreen,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+
+                  // Title
+                  // Text(
+                  //   _authMode == AuthMode.signup
+                  //       ? "Join the Green Community"
+                  //       : "Welcome Back!",
+                  //   style: const TextStyle(
+                  //     fontSize: 24,
+                  //     fontWeight: FontWeight.bold,
+                  //     color: darkGreen,
+                  //   ),
+                  // ),
+                  // const SizedBox(height: 8),
+                  Text(
                     _authMode == AuthMode.signup
-                        ? "Register new account!"
-                        : "Login to your account!",
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(
-                      fontFamily: 'OpenSans',
-                      fontSize: 25,
-                      letterSpacing: 1,
-                      fontWeight: FontWeight.bold,
-                      color: color4,
+                        ? "Start your eco-friendly journey"
+                        : "Welcome back!",
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: primaryGreen.withOpacity(0.7),
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      children: [
-                        if (_authMode == AuthMode.signup) ...[
-                          _buildUsernameField(),
-                        ],
-                        _buildEmailField(),
-                        _buildPasswordField(),
-                        if (_authMode == AuthMode.signup) ...[
-                          _buildBirthdayField(),
-                          _buildAddressField(),
-                        ],
-                        
-                        // if (_authMode == AuthMode.signup) ...[
-                        // ],
-                        ValueListenableBuilder<bool>(
-                          valueListenable: _isSubmitting,
-                          builder: (context, isSubmitting, child) {
-                            return isSubmitting
-                                ? const CircularProgressIndicator()
-                                : _buildSubmitButton();
-                          },
-                        ),
-                        _buildAuthModeSwitchButton(),
-                      ],
-                    ),
+                  const SizedBox(height: 15),
+
+                  // Form fields
+                  if (_authMode == AuthMode.signup) ...[
+                    _buildUsernameField(),
+                    const SizedBox(height: 16),
+                  ],
+                  _buildEmailField(),
+                  const SizedBox(height: 16),
+                  _buildPasswordField(),
+                  if (_authMode == AuthMode.signup) ...[
+                    const SizedBox(height: 16),
+                    _buildBirthdayField(),
+                    const SizedBox(height: 16),
+                    _buildAddressField(),
+                  ],
+                  const SizedBox(height: 25),
+
+                  // Submit button
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _isSubmitting,
+                    builder: (context, isSubmitting, child) {
+                      return isSubmitting
+                          ? Container(
+                              height: 50,
+                              child: const Center(
+                                child: CircularProgressIndicator(
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      primaryGreen),
+                                ),
+                              ),
+                            )
+                          : _buildSubmitButton();
+                    },
                   ),
-                ),
-              ],
+                  const SizedBox(height: 10),
+
+                  // Auth mode switch
+                  _buildAuthModeSwitchButton(),
+                ],
+              ),
             ),
           ),
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildUsernameField() {
     return _buildTextField(
-      hintText: "Username",
-      icon: Icons.person,
+      hintText: "Choose a username",
+      icon: Icons.person_outline,
       onSaved: (value) => _authData['uName'] = value!,
     );
   }
 
   Widget _buildAddressField() {
     return _buildTextField(
-      hintText: "Address",
-      icon: Icons.phone,
+      hintText: "Your address",
+      icon: Icons.location_on_outlined,
       onSaved: (value) => _authData['uAddress'] = value!,
     );
   }
 
   Widget _buildEmailField() {
     return _buildTextField(
-      hintText: "Email",
-      icon: Icons.email,
+      hintText: "Email address",
+      icon: Icons.email_outlined,
       controller: _emailController,
       onSaved: (value) => _authData['uEmail'] = value!,
     );
@@ -290,31 +354,36 @@ class _AuthCardState extends State<AuthCard> {
 
   Widget _buildBirthdayField() {
     return _buildTextField(
-      hintText: "Birthday (yyyy-mm-dd)",
-      icon: Icons.cake,
+      hintText: "Select your birthday",
+      icon: Icons.cake_outlined,
       controller: _birthdayController,
       onSaved: (value) {
         _authData['uBirthday'] = value!;
       },
-      suffixIcon: const Icon(Icons.calendar_today, color: color1),
+      suffixIcon: Icon(
+        Icons.calendar_today_outlined,
+        color: primaryGreen.withOpacity(0.7),
+        size: 20,
+      ),
       readOnly: true,
       onTap: () => _selectBirthday(context),
     );
   }
 
-
-
   Widget _buildPasswordField() {
     return _buildTextField(
       hintText: "Password",
-      icon: Icons.lock,
+      icon: Icons.lock_outline,
       obscureText: _obscurePassword,
       controller: _passwordController,
       onSaved: (value) => _authData['uPass'] = value!,
       suffixIcon: IconButton(
         icon: Icon(
-          _obscurePassword ? Icons.visibility_off : Icons.visibility,
-          color: color1,
+          _obscurePassword
+              ? Icons.visibility_off_outlined
+              : Icons.visibility_outlined,
+          color: primaryGreen.withOpacity(0.7),
+          size: 20,
         ),
         onPressed: () {
           setState(() {
@@ -325,28 +394,30 @@ class _AuthCardState extends State<AuthCard> {
     );
   }
 
-
   Widget _buildAuthModeSwitchButton() {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Text(
           _authMode == AuthMode.login
-              ? "Does not have any account?"
-              : "Already have an account?",
+              ? "New to Greenly? "
+              : "Already have an account? ",
           style: TextStyle(
-            color: color4,
-            fontSize: 15,
+            color: darkGreen.withOpacity(0.7),
+            fontSize: 14,
           ),
         ),
         TextButton(
           onPressed: _switchAuthMode,
+          style: TextButton.styleFrom(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+          ),
           child: Text(
-            _authMode == AuthMode.login ? 'Register here' : 'Login here',
-            style: TextStyle(
-              color: color4,
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
+            _authMode == AuthMode.login ? 'Sign Up' : 'Login',
+            style: const TextStyle(
+              color: primaryGreen,
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ),
@@ -355,21 +426,39 @@ class _AuthCardState extends State<AuthCard> {
   }
 
   Widget _buildSubmitButton() {
-    Size size = MediaQuery.of(context).size;
-
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
-      width: size.width * 0.8,
-      height: 55,
+      width: double.infinity,
+      height: 50,
       decoration: BoxDecoration(
-        color: color4,
-        borderRadius: BorderRadius.circular(50),
+        gradient: const LinearGradient(
+          colors: [primaryGreen, lightGreen],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
+        ),
+        borderRadius: BorderRadius.circular(25),
+        boxShadow: [
+          BoxShadow(
+            color: primaryGreen.withOpacity(0.3),
+            blurRadius: 8,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: TextButton(
         onPressed: _submit,
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(25),
+          ),
+        ),
         child: Text(
           _authMode == AuthMode.login ? 'LOGIN' : 'SIGN UP',
-          style: TextStyle(color: color13, fontSize: 18),
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            letterSpacing: 1,
+          ),
         ),
       ),
     );
@@ -385,52 +474,45 @@ class _AuthCardState extends State<AuthCard> {
     void Function()? onTap,
     Widget? suffixIcon,
   }) {
-    return TextFieldContainer(
+    return Container(
+      decoration: BoxDecoration(
+        color: backgroundGreen.withOpacity(0.3),
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(
+          color: softGreen,
+          width: 1.5,
+        ),
+      ),
       child: TextFormField(
         controller: controller,
         obscureText: obscureText,
         readOnly: readOnly,
         onTap: onTap,
-        cursorColor: color1,
-        style: const TextStyle(height: 1, fontSize: 16),
-        textAlignVertical: TextAlignVertical.center,
+        cursorColor: primaryGreen,
+        style: const TextStyle(
+          fontSize: 16,
+          color: darkGreen,
+        ),
         decoration: InputDecoration(
-          icon: Icon(
+          prefixIcon: Icon(
             icon,
-            color: color1,
+            color: primaryGreen.withOpacity(0.7),
+            size: 22,
           ),
           hintText: hintText,
-          hintStyle: const TextStyle(color: color1),
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(vertical: 20),
+          hintStyle: TextStyle(
+            color: darkGreen.withOpacity(0.5),
+            fontSize: 14,
+          ),
           suffixIcon: suffixIcon,
+          border: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 20,
+            vertical: 16,
+          ),
         ),
         onSaved: onSaved,
       ),
-    );
-  }
-}
-
-class TextFieldContainer extends StatelessWidget {
-  final Widget child;
-  const TextFieldContainer({
-    super.key,
-    required this.child,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 10),
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
-      width: size.width * 0.8,
-      decoration: BoxDecoration(
-        color: color13,
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: color4, width: 1.5),
-      ),
-      child: child,
     );
   }
 }
