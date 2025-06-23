@@ -2,27 +2,6 @@ import 'package:flutter/material.dart';
 import 'dart:io';
 import '../../components/colors.dart';
 import '../../models/category.dart';
-// import '../../services/moment_service.dart';
-
-// String fullImageUrl(String? relativePath) {
-//   final imageBaseUrl = MomentService.imageBaseUrl;
-
-//   if (relativePath == null || relativePath.isEmpty) {
-//     return '$imageBaseUrl/public/images/blank_avt.jpg';
-//   }
-
-//   if (relativePath.startsWith('http')) {
-//     return relativePath;
-//   }
-
-//   if (relativePath.startsWith('/public')) {
-//     return '$imageBaseUrl$relativePath';
-//   } else if (!relativePath.startsWith('/')) {
-//     return '$imageBaseUrl/$relativePath';
-//   } else {
-//     return '$imageBaseUrl$relativePath';
-//   }
-// }
 
 class AddPostSection extends StatelessWidget {
   final TextEditingController contentController;

@@ -4,7 +4,6 @@ import '../../../components/colors.dart'; // Import colors.dart
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'addcampaign/dynamic_flow_screen.dart'; // Import
 import 'campaign_manager.dart'; // Import CampaignManager
-import 'addcampaign/step1.dart';
 
 class Campaign extends StatefulWidget {
   const Campaign({super.key});
