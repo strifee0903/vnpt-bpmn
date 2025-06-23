@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import '../../../components/colors.dart'; // Import colors.dart
 import '../../../services/process_service.dart'; // Import ProcessService
 import 'package:greenly_app/models/process.dart'; // Import file model Process
-import '../greenlibrary/process_card.dart'; // Import ProcessCard
+import 'library_card.dart';
+import 'process_card.dart';
 
 class GreenLibrary extends StatefulWidget {
   const GreenLibrary({super.key});
@@ -49,8 +50,10 @@ class _GreenLibraryState extends State<GreenLibrary> {
         if (jsonData is Map<String, dynamic> && jsonData['data'] != null) {
           final processList = jsonData['data'] as List<dynamic>;
           if (processList.isNotEmpty) {
-            final processData =
-                processList[0]; // Lấy process đầu tiên (chỉ có 1 process)
+            final processData = processList.firstWhere(
+                (p) => p['id'] == processId,
+                orElse: () => processList[
+                    0]); // Tìm process theo processId, nếu không tìm thấy thì lấy process đầu tiên
             if (processData is! Map<String, dynamic>) {
               throw Exception('Invalid process data format: $processData');
             }
@@ -63,8 +66,7 @@ class _GreenLibraryState extends State<GreenLibrary> {
             // Hiển thị dialog bằng ProcessCard
             showDialog(
               context: context,
-              builder: (context) => ProcessCard(
-                  processData: _selectedProcess), // Sử dụng processData
+              builder: (context) => ProcessCard(processData: _selectedProcess),
             );
           } else {
             throw Exception('No processes found in the response');
@@ -124,65 +126,12 @@ class _GreenLibraryState extends State<GreenLibrary> {
           itemCount: campaigns.length,
           itemBuilder: (context, index) {
             final campaign = campaigns[index];
-            return GestureDetector(
-              onTap: () {
-                _showProcessDialog(campaign[
-                    'processId']); // Gọi với processId nhưng lấy từ /api/v1/bpmn/all
-              },
-              child: Container(
-                margin: const EdgeInsets.only(bottom: 20.0),
-                height: 140,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(25),
-                      child: Image.asset(
-                        campaign['image'],
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    Positioned(
-                      top: 20,
-                      right: 35,
-                      width: (MediaQuery.of(context).size.width - 32) * 0.6,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          Text(
-                            campaign['title'],
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              fontSize: 20,
-                              fontFamily: 'Oktah',
-                              fontWeight: FontWeight.w900,
-                              color: campaign['textColor'],
-                            ),
-                          ),
-                          const SizedBox(height: 4),
-                          Container(
-                            padding: const EdgeInsets.all(9.0),
-                            decoration: BoxDecoration(
-                              color: background,
-                              borderRadius: BorderRadius.circular(10.0),
-                            ),
-                            child: Text(
-                              'View Details',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                fontSize: 14,
-                                fontFamily: 'Oktah',
-                                fontWeight: FontWeight.w700,
-                                color: campaign['textColor'].withOpacity(0.8),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            return LibraryCard(
+              image: campaign['image'],
+              title: campaign['title'],
+              textColor: campaign['textColor'],
+              processId: campaign['processId'],
+              onTap: _showProcessDialog,
             );
           },
         ),
