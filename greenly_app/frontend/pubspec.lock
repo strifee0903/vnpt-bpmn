@@ -371,6 +371,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.5.12"
+  heic_to_jpg:
+    dependency: "direct main"
+    description:
+      name: heic_to_jpg
+      sha256: "48fce9176e722629e9d49513c4f9c10ca4a792408781fb24c0f7e50fd80be22f"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.2.0"
   html:
     dependency: transitive
     description:
@@ -540,13 +548,13 @@ packages:
     source: hosted
     version: "2.0.0"
   mime:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: mime
-      sha256: "41a20518f0cb1256669420fdba0cd90d21561e560ac240f26ef8322e45bb7ed6"
+      sha256: "801fd0b26f14a4a58ccb09d5892c3fbdeff209594300a542492cf13fba9d247a"
       url: "https://pub.dev"
     source: hosted
-    version: "2.0.0"
+    version: "1.0.6"
   nested:
     dependency: transitive
     description:

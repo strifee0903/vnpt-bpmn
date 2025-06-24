@@ -36,7 +36,9 @@ dependencies:
   flutter_map_marker_cluster: ^1.1.1
   geocoding: ^2.1.1
   flutter_vector_icons: ^2.0.0
-
+  mime: ^1.0.4
+  heic_to_jpg: 0.2.0
+  
 flutter:
   uses-material-design: true
   fonts:

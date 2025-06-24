@@ -7,6 +7,7 @@ module.exports = require("knex")({
         user: DB_USER,
         password: DB_PASS,
         database: DB_NAME,
+        timezone: '+07:00',
     },
     pool: { min: 0, max: 10 },
 });

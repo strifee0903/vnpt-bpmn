@@ -10,6 +10,7 @@ import '../../services/user_service.dart';
 import 'add_moment_section.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:heic_to_jpg/heic_to_jpg.dart';
 
 class AddMomentPage extends StatefulWidget {
   const AddMomentPage({super.key});
@@ -25,6 +26,8 @@ class _AddMomentPageState extends State<AddMomentPage> {
   final ImagePicker _picker = ImagePicker();
   final CategoryService _categoryService = CategoryService();
   final UserService _userService = UserService();
+  final MomentService _momentService =
+      MomentService(); // Add MomentService instance
   List<Category> _categories = [];
   Category? _selectedCategory;
   String? _selectedMomentType;
@@ -33,6 +36,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
   String? _errorMessage;
   String? _address;
   User? _currentUser;
+  Position? _currentPosition; // Store current position
 
   @override
   void initState() {
@@ -101,6 +105,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
         position.longitude,
       );
       setState(() {
+        _currentPosition = position; // Store the position
         _address = placemarks.isNotEmpty
             ? '${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}'
             : 'Unknown location';
@@ -114,11 +119,31 @@ class _AddMomentPageState extends State<AddMomentPage> {
 
   Future<void> _pickImages() async {
     final List<XFile>? images = await _picker.pickMultiImage();
-    if (images != null) {
+    if (images != null && images.isNotEmpty) {
+      final List<File> newImages = [];
+      for (var image in images) {
+        String path = image.path;
+        if (image.path.toLowerCase().endsWith('.heic')) {
+          final jpgPath = await HeicToJpg.convert(image.path);
+          if (jpgPath != null) {
+            path = jpgPath;
+          } else {
+            // Skip if conversion fails
+            continue;
+          }
+        }
+        newImages.add(File(path));
+      }
       setState(() {
-        _selectedImages.addAll(images.map((image) => File(image.path)));
+        _selectedImages.addAll(newImages);
       });
     }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
   }
 
   Future<void> _postMoment() async {
@@ -143,8 +168,27 @@ class _AddMomentPageState extends State<AddMomentPage> {
     });
 
     try {
+      // Create the moment using MomentService
+      await _momentService.createMoment(
+        content: _contentController.text,
+        address: _address ?? 'Unknown location',
+        latitude: _currentPosition?.latitude,
+        longitude: _currentPosition?.longitude,
+        type: _selectedMomentType!,
+        categoryId: _selectedCategory!.category_id,
+        isPublic: _isPublic,
+        images: _selectedImages,
+      );
 
       if (mounted) {
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Moment created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
         // Return 'refresh' to indicate that the moments page should refresh
         Navigator.pop(context, 'refresh');
       }
@@ -206,6 +250,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
                       contentController: _contentController,
                       selectedImages: _selectedImages,
                       onPickImages: _pickImages,
+                      onRemoveImage: _removeImage, // Add this callback
                       avatarPath:
                           MomentService.fullImageUrl(_currentUser!.u_avt),
                       username: _currentUser!.u_name,
@@ -234,7 +279,9 @@ class _AddMomentPageState extends State<AddMomentPage> {
                       width: double.infinity,
                       margin: const EdgeInsets.only(top: 16.0),
                       child: ElevatedButton(
-                        onPressed: _postMoment,
+                        onPressed: _isLoading
+                            ? null
+                            : _postMoment, // Disable button when loading
                         style: ElevatedButton.styleFrom(
                           backgroundColor: button,
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -242,15 +289,25 @@ class _AddMomentPageState extends State<AddMomentPage> {
                             borderRadius: BorderRadius.circular(25.0),
                           ),
                         ),
-                        child: const Text(
-                          'Post',
-                          style: TextStyle(
-                            fontFamily: 'Oktah',
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                'Post',
+                                style: TextStyle(
+                                  fontFamily: 'Oktah',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ],

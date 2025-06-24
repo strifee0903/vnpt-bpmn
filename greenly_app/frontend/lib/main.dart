@@ -8,6 +8,7 @@ import 'services/moment_service.dart';
 import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
+import 'ui/pages/profile/user_manager.dart';
 import 'ui/slpash_screen.dart';
 import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
 import 'ui/pages/mydiary/mydiary.dart'; // Import MyDiary
@@ -73,6 +74,7 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (ctx) => AuthManager()),
         Provider(create: (_) => MomentService()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
       ],
       child: Builder(builder: (context) {
         final authManager = Provider.of<AuthManager>(context, listen: false);
