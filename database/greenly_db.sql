@@ -78,6 +78,9 @@ CREATE TABLE moment (
     FOREIGN KEY (category_id) REFERENCES category(category_id) on delete cascade
 );
 select * from moment;
+EXPLAIN SELECT * FROM moment WHERE u_id = 1 AND is_public = true ORDER BY created_at DESC;
+
+
 create view view_moments as 
 	select 
 		u.u_name, 

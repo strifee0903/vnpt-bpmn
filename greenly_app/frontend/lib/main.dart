@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:greenly_app/ui/user/not_found_screen.dart';
+import 'package:greenly_app/shared/not_found_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'components/colors.dart';
@@ -8,6 +8,7 @@ import 'services/moment_service.dart';
 import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
+import 'ui/moments/moment_manager.dart';
 import 'ui/pages/profile/user_manager.dart';
 import 'ui/slpash_screen.dart';
 import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
@@ -75,6 +76,7 @@ class _MyAppState extends State<MyApp> {
         ChangeNotifierProvider(create: (ctx) => AuthManager()),
         Provider(create: (_) => MomentService()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => MomentProvider()),
       ],
       child: Builder(builder: (context) {
         final authManager = Provider.of<AuthManager>(context, listen: false);

@@ -12,6 +12,7 @@ import '../../services/category_service.dart';
 import '../../services/moment_service.dart';
 import '../../services/user_service.dart';
 import '../auth/auth_manager.dart';
+import 'moment_manager.dart';
 
 class EditMomentScreen extends StatefulWidget {
   final Moment moment;
@@ -174,21 +175,38 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
         categoryId: _selectedCategory?.category_id ?? 1,
         isPublic: _isPublic,
         images: _newImages,
-        mediaIdsToDelete:_mediaIdsToDelete.isNotEmpty ? _mediaIdsToDelete : null,
+        mediaIdsToDelete:
+        _mediaIdsToDelete.isNotEmpty ? _mediaIdsToDelete : null,
       );
 
       if (mounted) {
+        // Cập nhật dữ liệu trong MomentProvider
+        Provider.of<MomentProvider>(context, listen: false)
+            .updateMomentLocally(updatedMoment);
+
+        // Làm mới các feed
+        await Provider.of<MomentProvider>(context, listen: false)
+            .refreshAllFeeds();
+
+        // Thoát màn hình và truyền dữ liệu cập nhật
+        print(
+            '‼️‼️‼️‼️Popping EditMomentScreen with updated moment: ${updatedMoment.id}');
         Navigator.pop(context, updatedMoment);
+      } else {
+        print('‼️‼️‼️‼️Widget is not mounted, cannot pop');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update moment: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update moment: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -602,6 +620,8 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
     try {
       await _momentService.deleteMoment(widget.moment.id);
       if (mounted) {
+        await Provider.of<MomentProvider>(context, listen: false)
+            .refreshAllFeeds();
         Navigator.pop(context, 'deleted');
       }
     } catch (e) {

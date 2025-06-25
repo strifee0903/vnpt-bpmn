@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'dart:io';
 import '../../components/colors.dart';
 import '../../models/category.dart';
@@ -11,6 +12,8 @@ import 'add_moment_section.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:heic_to_jpg/heic_to_jpg.dart';
+
+import 'moment_manager.dart';
 
 class AddMomentPage extends StatefulWidget {
   const AddMomentPage({super.key});
@@ -189,7 +192,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
           ),
         );
 
-        // Return 'refresh' to indicate that the moments page should refresh
+        await Provider.of<MomentProvider>(context, listen: false).refreshAllFeeds();
         Navigator.pop(context, 'refresh');
       }
     } catch (e) {

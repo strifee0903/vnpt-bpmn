@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../components/colors.dart';
 import '../../services/moment_service.dart';
 import '../../models/moment.dart';
+import 'moment_manager.dart';
 import 'moments_card.dart';
 import 'add_moment_place.dart';
 
@@ -13,15 +15,7 @@ class MomentsPage extends StatefulWidget {
 }
 
 class _MomentsPageState extends State<MomentsPage> {
-  final MomentService _momentService = MomentService();
   final ScrollController _scrollController = ScrollController();
-  final List<Moment> _moments = [];
-  int _currentPage = 1;
-  bool _isLoading = false;
-  bool _hasMore = true;
-  final int _itemsPerPage = 10;
-  String _typeFilter = 'all'; // "diary", "event", "report", "all"
-
   Offset _filterGroupPosition = Offset(20, 100);
   bool _isDragging = false;
   bool _showFilterBar = false;
@@ -29,8 +23,10 @@ class _MomentsPageState extends State<MomentsPage> {
   @override
   void initState() {
     super.initState();
-    _loadInitialMoments();
     _scrollController.addListener(_scrollListener);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MomentProvider>(context, listen: false).loadInitialMoments();
+    });
   }
 
   @override
@@ -39,64 +35,17 @@ class _MomentsPageState extends State<MomentsPage> {
     super.dispose();
   }
 
-  Future<void> _loadInitialMoments() async {
-    setState(() => _isLoading = true);
-    try {
-      final moments = await _fetchMoments();
-      setState(() {
-        _moments.addAll(moments);
-        _isLoading = false;
-        _hasMore = moments.length == _itemsPerPage;
-      });
-    } catch (e) {
-      print('❌ DEBUG - Error loading initial moments: $e');
-      setState(() => _isLoading = false);
-    }
-  }
-
-  Future<List<Moment>> _fetchMoments() async {
-    return await _momentService.getNewsFeedMoments(
-      page: _currentPage,
-      limit: _itemsPerPage,
-      moment_type: _typeFilter == 'all' ? null : _typeFilter,
-    );
-  }
-
-  Future<void> _loadMoreMoments() async {
-    if (_isLoading || !_hasMore) return;
-    setState(() => _isLoading = true);
-    _currentPage++;
-    try {
-      final moments = await _fetchMoments();
-      setState(() {
-        _moments.addAll(moments);
-        _isLoading = false;
-        _hasMore = moments.length == _itemsPerPage;
-      });
-    } catch (e) {
-      print('❌ DEBUG - Error loading more moments: $e');
-      setState(() {
-        _isLoading = false;
-        _currentPage--;
-      });
-    }
-  }
-
   void _scrollListener() {
     if (_scrollController.offset >=
             _scrollController.position.maxScrollExtent - 200 &&
         !_scrollController.position.outOfRange) {
-      _loadMoreMoments();
+      Provider.of<MomentProvider>(context, listen: false).loadMoreMoments();
     }
   }
 
   Future<void> _refreshFeed() async {
-    setState(() {
-      _currentPage = 1;
-      _moments.clear();
-      _hasMore = true;
-    });
-    await _loadInitialMoments();
+    await Provider.of<MomentProvider>(context, listen: false)
+        .loadInitialMoments();
   }
 
   // Method to handle post creation callback
@@ -129,6 +78,7 @@ class _MomentsPageState extends State<MomentsPage> {
 
   @override
   Widget build(BuildContext context) {
+    final momentProvider = Provider.of<MomentProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -149,17 +99,17 @@ class _MomentsPageState extends State<MomentsPage> {
                 SliverList(
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
-                      if (index >= _moments.length) {
+                      if (index >= momentProvider.moments.length) {
                         return Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           child: Center(
-                            child: _hasMore
+                            child: momentProvider.hasMore
                                 ? const CircularProgressIndicator()
                                 : const Text('No more moments to load'),
                           ),
                         );
                       }
-                      final moment = _moments[index];
+                      final moment = momentProvider.moments[index];
                       return Container(
                         margin: const EdgeInsets.symmetric(
                             horizontal: 12, vertical: 6),
@@ -176,7 +126,7 @@ class _MomentsPageState extends State<MomentsPage> {
                         ),
                       );
                     },
-                    childCount: _moments.length + (_hasMore ? 1 : 0),
+                    childCount: momentProvider.moments.length + (momentProvider.hasMore ? 1 : 0),
                   ),
                 ),
               ],
@@ -306,30 +256,35 @@ class _MomentsPageState extends State<MomentsPage> {
   }
 
   Widget _buildChip(String label, String value, Icon icon) {
-    return ChoiceChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          icon,
-          const SizedBox(width: 4),
-          Text(label),
-        ],
-      ),
-      selected: _typeFilter == value,
-      onSelected: (_) {
-        setState(() => _typeFilter = value);
-        _refreshFeed();
+    return Consumer<MomentProvider>(
+      builder: (context, momentProvider, child) {
+        return ChoiceChip(
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon,
+              const SizedBox(width: 4),
+              Text(label),
+            ],
+          ),
+          selected: momentProvider.typeFilter == value,
+          onSelected: (_) {
+            momentProvider.setTypeFilter(value);
+          },
+          selectedColor: button,
+          labelStyle: TextStyle(
+            color: momentProvider.typeFilter == value
+                ? Colors.white
+                : Colors.black,
+            fontFamily: 'Oktah',
+            fontSize: 13,
+          ),
+          backgroundColor: Colors.grey.shade200,
+          shape: StadiumBorder(
+            side: BorderSide(color: Colors.grey.shade400),
+          ),
+        );
       },
-      selectedColor: button,
-      labelStyle: TextStyle(
-        color: _typeFilter == value ? Colors.white : Colors.black,
-        fontFamily: 'Oktah',
-        fontSize: 13,
-      ),
-      backgroundColor: Colors.grey.shade200,
-      shape: StadiumBorder(
-        side: BorderSide(color: Colors.grey.shade400),
-      ),
     );
   }
 }

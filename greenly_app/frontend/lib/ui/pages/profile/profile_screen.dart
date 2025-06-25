@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../auth/auth_manager.dart';
 import '../../../components/colors.dart';
+import '../../moments/moment_manager.dart';
 import '../../moments/moments_card.dart';
 import '../../moments/add_moment_place.dart';
-import '../../../services/moment_service.dart';
-import '../../../models/moment.dart';
+
 import 'edit_profile.dart';
 
 class ProfileScreen extends StatefulWidget {
@@ -16,62 +16,23 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final MomentService _momentService = MomentService();
-  List<Moment> _moments = [];
-  bool _privacyFilter = true; // Default to public (true)
-  String? _typeFilter;
-  bool _isLoading = false;
-  String? _error;
-  int _currentPage = 1;
-  final int _itemsPerPage = 10;
-  bool _showFilterBar = false;
-
   // Draggable filter position
   Offset _filterGroupPosition = Offset(20, 100);
   bool _isDragging = false;
+  bool _showFilterBar = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchMoments();
-  }
-
-  Future<void> _fetchMoments() async {
-    setState(() {
-      _isLoading = true;
-      _error = null;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      Provider.of<MomentProvider>(context, listen: false)
+          .loadInitialProfileMoments();
     });
-    try {
-      final moments = await _momentService.getMyMoments(
-        page: _currentPage,
-        limit: _itemsPerPage,
-        is_public: _privacyFilter,
-        moment_type: _typeFilter,
-      );
-      setState(() {
-        if (_currentPage == 1) {
-          _moments = moments;
-        } else {
-          _moments.addAll(moments);
-        }
-      });
-    } catch (e) {
-      setState(() {
-        _error = 'Failed to load moments: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
-    }
   }
 
   Future<void> _refreshFeed() async {
-    setState(() {
-      _currentPage = 1;
-      _moments.clear();
-    });
-    await _fetchMoments();
+    await Provider.of<MomentProvider>(context, listen: false)
+        .loadInitialProfileMoments();
   }
 
   // Update filter position with constraints
@@ -90,6 +51,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
     setState(() {
       _filterGroupPosition = Offset(x, y);
     });
+  }
+
+  Widget _buildTypeChip(String label, String? value, Icon icon) {
+    return Consumer<MomentProvider>(
+      builder: (context, momentProvider, child) {
+        return ChoiceChip(
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon,
+              const SizedBox(width: 4),
+              Text(label),
+            ],
+          ),
+          selected: momentProvider.profileTypeFilter == value,
+          onSelected: (_) {
+            momentProvider.setProfileTypeFilter(value);
+          },
+          selectedColor: button,
+          labelStyle: TextStyle(
+            color: momentProvider.profileTypeFilter == value
+                ? Colors.white
+                : Colors.black,
+            fontFamily: 'Oktah',
+            fontSize: 13,
+          ),
+          backgroundColor: Colors.grey.shade200,
+          shape: StadiumBorder(
+            side: BorderSide(color: Colors.grey.shade400),
+          ),
+        );
+      },
+    );
   }
 
   Widget _buildTypeFilterBar() {
@@ -119,53 +113,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
-
-  Widget _buildTypeChip(String label, String? value, Icon icon) {
-    return ChoiceChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          icon,
-          const SizedBox(width: 4),
-          Text(label),
-        ],
-      ),
-      selected: _typeFilter == value,
-      onSelected: (_) {
-        setState(() {
-          _typeFilter = value;
-          _currentPage = 1;
-        });
-        _fetchMoments();
-        _refreshFeed();
+  
+  Widget _buildChip(String label, String value, Icon icon) {
+    return Consumer<MomentProvider>(
+      builder: (context, momentProvider, child) {
+        return ChoiceChip(
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              icon,
+              const SizedBox(width: 4),
+              Text(label),
+            ],
+          ),
+          selected: momentProvider.typeFilter == value,
+          onSelected: (_) {
+            momentProvider.setTypeFilter(value);
+          },
+          selectedColor: button,
+          labelStyle: TextStyle(
+            color: momentProvider.typeFilter == value
+                ? Colors.white
+                : Colors.black,
+            fontFamily: 'Oktah',
+            fontSize: 13,
+          ),
+          backgroundColor: Colors.grey.shade200,
+          shape: StadiumBorder(
+            side: BorderSide(color: Colors.grey.shade400),
+          ),
+        );
       },
-      selectedColor: button,
-      labelStyle: TextStyle(
-        color: _typeFilter == value ? Colors.white : Colors.black,
-        fontFamily: 'Oktah',
-        fontSize: 13,
-      ),
-      backgroundColor: Colors.grey.shade200,
-      shape: StadiumBorder(
-        side: BorderSide(color: Colors.grey.shade400),
-      ),
     );
   }
 
-  Widget _buildPrivacySwitch() {
+  Widget _buildPrivacySwitch(MomentProvider momentProvider) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       color: Colors.white,
       child: Row(
         children: [
           Switch(
-            value: _privacyFilter,
+            value: momentProvider.privacyFilter,
             onChanged: (value) {
-              setState(() {
-                _privacyFilter = value;
-                _currentPage = 1;
-              });
-              _refreshFeed();
+              momentProvider.setPrivacyFilter(value);
             },
             activeColor: button,
             inactiveThumbColor: Colors.grey,
@@ -173,8 +164,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(width: 8),
           Icon(
-            _privacyFilter ? Icons.public : Icons.lock,
-            color: _privacyFilter ? Colors.green : Colors.grey,
+            momentProvider.privacyFilter ? Icons.public : Icons.lock,
+            color: momentProvider.privacyFilter ? Colors.green : Colors.grey,
             size: 25,
           ),
           const Spacer(),
@@ -204,6 +195,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final momentProvider = Provider.of<MomentProvider>(context);
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -215,21 +207,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 slivers: [
                   // Privacy switch bar
                   SliverToBoxAdapter(
-                    child: _buildPrivacySwitch(),
+                    child: _buildPrivacySwitch(momentProvider),
                   ),
 
                   // Content
-                  if (_error != null)
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          _error!,
-                          style: const TextStyle(color: Colors.red),
-                        ),
-                      ),
-                    )
-                  else if (_isLoading && _moments.isEmpty)
+                  if (momentProvider.profileIsLoading &&
+                      momentProvider.profileMoments.isEmpty)
                     const SliverToBoxAdapter(
                       child: Padding(
                         padding: EdgeInsets.all(16.0),
@@ -246,7 +229,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               child: AddMomentPlace(),
                             );
                           }
-                          if (_moments.isEmpty) {
+                          if (momentProvider.profileMoments.isEmpty) {
                             return const Padding(
                               padding: EdgeInsets.all(16.0),
                               child: Text(
@@ -258,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             );
                           }
-                          final moment = _moments[index - 1];
+                          final moment = momentProvider.profileMoments[index - 1];
                           return Container(
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
@@ -273,7 +256,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ),
                           );
                         },
-                        childCount: _moments.isEmpty ? 2 : _moments.length + 1,
+                        childCount: momentProvider.profileMoments.isEmpty ? 2 : momentProvider.profileMoments.length + 1,
                       ),
                     ),
                 ],
