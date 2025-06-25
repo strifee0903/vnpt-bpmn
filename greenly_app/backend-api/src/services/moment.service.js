@@ -1,5 +1,6 @@
 const knex = require('../database/knex');
 const Paginator = require('./paginator');
+const timezone = require('moment-timezone');
 
 function momentRepository() {
     return knex('moment');
@@ -20,8 +21,8 @@ function readMoment(payload) {
         longitude: payload.longitude,
         moment_type: payload.moment_type,
         is_public: payload.is_public,
-        created_at: payload.created_at,
-        updated_at: payload.updated_at,
+        created_at: payload.created_at ? moment(payload.created_at).tz('Asia/Bangkok').format() : null,
+        updated_at: payload.updated_at ? moment(payload.updated_at).tz('Asia/Bangkok').format() : null,
     };
 
     // Remove undefined/null values
@@ -118,13 +119,15 @@ async function getPublicMomentsByUserId(u_id, query, current_user_id = null) {
             // Get vote data
             const voteData = await getVoteData(moment.moment_id, current_user_id);
 
+            const createdAt = timezone(moment.created_at).tz('Asia/Bangkok').format();
+
             return {
                 moment_id: moment.moment_id,
                 moment_content: moment.moment_content,
                 moment_address: moment.moment_address,
                 latitude: moment.latitude,
                 longitude: moment.longitude,
-                created_at: moment.created_at,
+                created_at: createdAt,
                 moment_type: moment.moment_type,
                 category: category || null,
                 user: user || null,
@@ -175,7 +178,7 @@ async function getAllPublicMoments(query, u_id) {
         const result = await Promise.all(moments.map(async (moment) => {
             const media = await mediaRepository()
                 .where('moment_id', moment.moment_id)
-                .select('media_url');
+                .select('*');
 
             const category = await knex('category')
                 .where('category_id', moment.category_id)
@@ -190,13 +193,16 @@ async function getAllPublicMoments(query, u_id) {
             // Get vote data
             const voteData = await getVoteData(moment.moment_id, u_id);
 
+            // Convert created_at to +07:00 timezone
+            const createdAt = timezone(moment.created_at).tz('Asia/Bangkok').format();
+
             return {
                 moment_id: moment.moment_id,
                 moment_content: moment.moment_content,
                 moment_address: moment.moment_address,
                 latitude: moment.latitude,
                 longitude: moment.longitude,
-                created_at: moment.created_at,
+                created_at: createdAt, // Return formatted timestamp
                 moment_type: moment.moment_type,
                 category: category || null,
                 user: user || null,
@@ -214,7 +220,7 @@ async function getAllPublicMoments(query, u_id) {
         console.error('Error fetching public moments:', error);
         throw error;
     }
-}
+};
 
 async function getVoteData(moment_id, current_user_id) {
     // Ensure current_user_id is properly converted to number if needed
@@ -240,7 +246,7 @@ async function getVoteData(moment_id, current_user_id) {
         likeCount: parseInt(likeCount?.count || 0),
         isLikedByCurrentUser: isLiked
     };
-}
+};
 
 
 async function getAllMyMoments(u_id, query) {
@@ -288,13 +294,15 @@ async function getAllMyMoments(u_id, query) {
                 // Get vote data
                 const voteData = await getVoteData(moment.moment_id, u_id);
 
+                const createdAt = timezone(moment.created_at).tz('Asia/Bangkok').format();
+
                 return {
                     moment_id: moment.moment_id,
                     moment_content: moment.moment_content,
                     moment_address: moment.moment_address,
                     latitude: moment.latitude,
                     longitude: moment.longitude,
-                    created_at: moment.created_at,
+                    created_at: createdAt,
                     moment_type: moment.moment_type,
                     is_public: moment.is_public,
                     category: category || null,

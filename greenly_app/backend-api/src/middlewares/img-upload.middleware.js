@@ -15,14 +15,28 @@ const storage = multer.diskStorage({
 
 // === FILE FILTERS ===
 const imageFileFilter = (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif/;
-    const isValid = allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype);
+    // const allowed = /jpeg|jpg|png|gif|heic/;
+    const allowedExtensions = /\.(jpeg|jpg|png|gif|heic)$/i;
+    const allowedMimeTypes = /^image\/(jpeg|png|gif|heic)$/i;
+    const isValidExtension = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
+    const isValidMimeType = allowedMimeTypes.test(file.mimetype.toLowerCase());
+    // const isValid = allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype);
+    // cb(isValid ? null : new ApiError(400, 'Only image files are allowed!'), isValid);
+    const isValid = isValidExtension && isValidMimeType;
     cb(isValid ? null : new ApiError(400, 'Only image files are allowed!'), isValid);
 };
 
 const momentFileFilter = (req, file, cb) => {
-    const allowed = /jpeg|jpg|png|gif|mp4|avi|mov|webm/;
-    const isValid = allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype);
+    // const allowed = /jpeg|jpg|png|gif|mp4|avi|mov|webm/;
+    // const isValid = allowed.test(path.extname(file.originalname).toLowerCase()) && allowed.test(file.mimetype);
+    // cb(isValid ? null : new ApiError(400, 'Only image and video files are allowed!'), isValid);
+    const allowedExtensions = /\.(jpeg|jpg|png|gif|heic|mp4|avi|mov|webm)$/i;
+    const allowedMimeTypes = /^(image\/(jpeg|png|gif|heic)|video\/(mp4|avi|quicktime|webm))$/i;
+
+    const isValidExtension = allowedExtensions.test(path.extname(file.originalname).toLowerCase());
+    const isValidMimeType = allowedMimeTypes.test(file.mimetype.toLowerCase());
+
+    const isValid = isValidExtension && isValidMimeType;
     cb(isValid ? null : new ApiError(400, 'Only image and video files are allowed!'), isValid);
 };
 

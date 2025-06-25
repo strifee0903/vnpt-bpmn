@@ -1,4 +1,3 @@
-// add_moment.dart
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
@@ -11,39 +10,11 @@ import '../../services/user_service.dart';
 import 'add_moment_section.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
-
-String fullImageUrl(String? relativePath) {
-  final imageBaseUrl = MomentService.imageBaseUrl;
-
-  print('🖼️ DEBUG - Image base URL: $imageBaseUrl');
-  print('🖼️ DEBUG - Relative path: $relativePath');
-
-  if (relativePath == null || relativePath.isEmpty) {
-    final defaultUrl = '$imageBaseUrl/public/images/blank_avt.jpg';
-    print('🖼️ DEBUG - Using default avatar: $defaultUrl');
-    return defaultUrl;
-  }
-
-  if (relativePath.startsWith('http')) {
-    print('🖼️ DEBUG - Path is absolute URL: $relativePath');
-    return relativePath;
-  }
-
-  String fullUrl;
-  if (relativePath.startsWith('/public')) {
-    fullUrl = '$imageBaseUrl$relativePath';
-  } else if (!relativePath.startsWith('/')) {
-    fullUrl = '$imageBaseUrl/$relativePath';
-  } else {
-    fullUrl = '$imageBaseUrl$relativePath';
-  }
-
-  print('🖼️ DEBUG - Final image URL: $fullUrl');
-  return fullUrl;
-}
+import 'package:heic_to_jpg/heic_to_jpg.dart';
 
 class AddMomentPage extends StatefulWidget {
   const AddMomentPage({super.key});
+  static const routeName = '/add-moment';
 
   @override
   _AddMomentPageState createState() => _AddMomentPageState();
@@ -53,9 +24,10 @@ class _AddMomentPageState extends State<AddMomentPage> {
   final TextEditingController _contentController = TextEditingController();
   final List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
-  final MomentService _momentService = MomentService();
   final CategoryService _categoryService = CategoryService();
   final UserService _userService = UserService();
+  final MomentService _momentService =
+      MomentService(); // Add MomentService instance
   List<Category> _categories = [];
   Category? _selectedCategory;
   String? _selectedMomentType;
@@ -63,9 +35,8 @@ class _AddMomentPageState extends State<AddMomentPage> {
   bool _isLoading = false;
   String? _errorMessage;
   String? _address;
-  double? _latitude;
-  double? _longitude;
   User? _currentUser;
+  Position? _currentPosition; // Store current position
 
   @override
   void initState() {
@@ -134,8 +105,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
         position.longitude,
       );
       setState(() {
-        _latitude = position.latitude;
-        _longitude = position.longitude;
+        _currentPosition = position; // Store the position
         _address = placemarks.isNotEmpty
             ? '${placemarks[0].street}, ${placemarks[0].locality}, ${placemarks[0].country}'
             : 'Unknown location';
@@ -149,11 +119,31 @@ class _AddMomentPageState extends State<AddMomentPage> {
 
   Future<void> _pickImages() async {
     final List<XFile>? images = await _picker.pickMultiImage();
-    if (images != null) {
+    if (images != null && images.isNotEmpty) {
+      final List<File> newImages = [];
+      for (var image in images) {
+        String path = image.path;
+        if (image.path.toLowerCase().endsWith('.heic')) {
+          final jpgPath = await HeicToJpg.convert(image.path);
+          if (jpgPath != null) {
+            path = jpgPath;
+          } else {
+            // Skip if conversion fails
+            continue;
+          }
+        }
+        newImages.add(File(path));
+      }
       setState(() {
-        _selectedImages.addAll(images.map((image) => File(image.path)));
+        _selectedImages.addAll(newImages);
       });
     }
+  }
+
+  void _removeImage(int index) {
+    setState(() {
+      _selectedImages.removeAt(index);
+    });
   }
 
   Future<void> _postMoment() async {
@@ -178,19 +168,29 @@ class _AddMomentPageState extends State<AddMomentPage> {
     });
 
     try {
-      final moment = await _momentService.createMoment(
+      // Create the moment using MomentService
+      await _momentService.createMoment(
         content: _contentController.text,
-        address: _address ?? 'Unknown',
-        latitude: _latitude,
-        longitude: _longitude,
-        type: _selectedMomentType!.toLowerCase(),
+        address: _address ?? 'Unknown location',
+        latitude: _currentPosition?.latitude,
+        longitude: _currentPosition?.longitude,
+        type: _selectedMomentType!,
         categoryId: _selectedCategory!.category_id,
         isPublic: _isPublic,
         images: _selectedImages,
       );
 
       if (mounted) {
-        Navigator.pop(context, moment);
+        // Show success message
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Moment created successfully!'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        // Return 'refresh' to indicate that the moments page should refresh
+        Navigator.pop(context, 'refresh');
       }
     } catch (e) {
       setState(() {
@@ -218,9 +218,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
         backgroundColor: button,
         elevation: 0,
         title: const Text(
-
           'Create a new post',
-
           style: TextStyle(
             fontFamily: 'Oktah',
             fontWeight: FontWeight.w900,
@@ -252,8 +250,9 @@ class _AddMomentPageState extends State<AddMomentPage> {
                       contentController: _contentController,
                       selectedImages: _selectedImages,
                       onPickImages: _pickImages,
+                      onRemoveImage: _removeImage, // Add this callback
                       avatarPath:
-                          fullImageUrl(_currentUser!.u_avt), // Use fullImageUrl
+                          MomentService.fullImageUrl(_currentUser!.u_avt),
                       username: _currentUser!.u_name,
                       categories: _categories,
                       selectedCategory: _selectedCategory,
@@ -280,7 +279,9 @@ class _AddMomentPageState extends State<AddMomentPage> {
                       width: double.infinity,
                       margin: const EdgeInsets.only(top: 16.0),
                       child: ElevatedButton(
-                        onPressed: _postMoment,
+                        onPressed: _isLoading
+                            ? null
+                            : _postMoment, // Disable button when loading
                         style: ElevatedButton.styleFrom(
                           backgroundColor: button,
                           padding: const EdgeInsets.symmetric(vertical: 12.0),
@@ -288,15 +289,25 @@ class _AddMomentPageState extends State<AddMomentPage> {
                             borderRadius: BorderRadius.circular(25.0),
                           ),
                         ),
-                        child: const Text(
-                          'Post',
-                          style: TextStyle(
-                            fontFamily: 'Oktah',
-                            fontSize: 18,
-                            fontWeight: FontWeight.w700,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: _isLoading
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.white),
+                                ),
+                              )
+                            : const Text(
+                                'Post',
+                                style: TextStyle(
+                                  fontFamily: 'Oktah',
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.w700,
+                                  color: Colors.white,
+                                ),
+                              ),
                       ),
                     ),
                   ],
