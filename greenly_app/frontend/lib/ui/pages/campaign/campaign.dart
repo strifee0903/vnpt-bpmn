@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:greenly_app/ui/pages/campaign/campaign_detail_card.dart';
 import 'package:provider/provider.dart';
 import '../../../components/colors.dart'; // Import colors.dart
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'addcampaign/dynamic_flow_screen.dart'; // Import
+import 'package:greenly_app/models/campaign.dart' as model;
+import 'package:greenly_app/services/campaign_service.dart';
 import 'campaign_manager.dart'; // Import CampaignManager
-import 'addcampaign/step1.dart';
+import 'package:intl/intl.dart';
 
 class Campaign extends StatefulWidget {
   const Campaign({super.key});
@@ -13,39 +16,47 @@ class Campaign extends StatefulWidget {
   State<Campaign> createState() => _CampaignState();
 }
 
+String formatDate(String isoDate) {
+  final date = DateTime.parse(isoDate);
+  return DateFormat('dd/MM/yyyy').format(date);
+}
+
 class _CampaignState extends State<Campaign> {
   // Trạng thái tab được chọn
   int _selectedTab = 0; // 0: Created Campaigns, 1: Joined Campaigns
+  final CampaignService campaignService = CampaignService();
+  List<model.Campaign> campaigns = [];
+  @override
+  void initState() {
+    super.initState();
+    // Khởi tạo CampaignManager nếu cần
+    campaignService.getAllCampaigns().then((fetchedCampaigns) {
+      setState(() {
+        campaigns = fetchedCampaigns;
+      });
+    }).catchError((error) {
+      // Xử lý lỗi nếu có
+      print('Error fetching campaigns: $error');
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Được gọi lại khi widget được hiển thị lại sau khi quay lại
+    campaignService.getAllCampaigns().then((fetchedCampaigns) {
+      setState(() {
+        campaigns = fetchedCampaigns;
+      });
+    }).catchError((error) {
+      // Xử lý lỗi nếu có
+      print('Error fetching campaigns: $error');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     // Sample list of campaign entries
-    final List<Map<String, dynamic>> campaignEntries = [
-      {
-        'title': 'Eco-Friendly Planting',
-        'description': 'A campaign to plant trees in local parks.',
-        'status': 'Active',
-        'icon': FontAwesomeIcons.tree, // Custom icon for this campaign
-      },
-      {
-        'title': 'Trash Classification',
-        'description': 'Encouraging proper waste sorting.',
-        'status': 'Pending',
-        'icon': FontAwesomeIcons.recycle, // Custom icon for this campaign
-      },
-      {
-        'title': 'Trash Classification',
-        'description': 'Encouraging proper waste sorting.',
-        'status': 'Pending',
-        'icon': FontAwesomeIcons.recycle, // Custom icon for this campaign
-      },
-      {
-        'title': 'Trash Classification',
-        'description': 'Encouraging proper waste sorting.',
-        'status': 'Pending',
-        'icon': FontAwesomeIcons.recycle, // Custom icon for this campaign
-      },
-    ];
 
     // List of color pairs for each campaign entry (background and text color)
     final List<Map<String, Color>> entryColors = [
@@ -180,82 +191,101 @@ class _CampaignState extends State<Campaign> {
             ),
             Expanded(
               child: ListView.builder(
-                itemCount: campaignEntries.length,
+                itemCount: campaigns.length,
                 itemBuilder: (context, index) {
-                  final entry = campaignEntries[index];
+                  final campaign = campaigns[index];
                   final colors = entryColors[index % entryColors.length];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16.0),
-                    decoration: BoxDecoration(
-                      color: colors['background'],
-                      borderRadius: BorderRadius.circular(25),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color.fromARGB(255, 1, 15, 1)
-                              .withAlpha((0.1 * 255).toInt()),
-                          blurRadius: 30,
-                          offset: const Offset(0, 12),
+
+                  return GestureDetector(
+                    onTap: () {
+                      showDialog(
+                        context: context,
+                        builder: (_) => Center(
+                          child: CampaignDetailCard(campaign: campaign),
                         ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(18.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment
-                            .center, // Căn giữa theo chiều dọc
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  entry['title']!,
-                                  style: TextStyle(
-                                    fontSize: 20,
-                                    fontFamily: 'Oktah',
-                                    fontWeight: FontWeight.w700,
-                                    color: colors['text'],
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  entry['description']!,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontFamily: 'Oktah',
-                                    fontWeight: FontWeight.w500,
-                                    color: colors['text']!.withOpacity(0.7),
-                                  ),
-                                ),
-                                const SizedBox(height: 6),
-                                Text(
-                                  entry['status']!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontFamily: 'Oktah',
-                                    fontWeight: FontWeight.w500,
-                                    color: colors['text']!.withOpacity(0.5),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Center(
-                            // Đảm bảo icon ">" được căn giữa theo chiều dọc
-                            child: IconButton(
-                              icon: const Icon(
-                                Icons.chevron_right, // Nút ">" để xem/cài đặt
-                                size: 24,
-                              ),
-                              color: colors['text']!.withOpacity(0.7),
-                              onPressed: () {
-                                // Logic để xem hoặc cài đặt campaign
-                              },
-                              padding: EdgeInsets.zero,
-                            ),
+                      );
+                    },
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 16.0),
+                      decoration: BoxDecoration(
+                        color: colors['background'],
+                        borderRadius: BorderRadius.circular(25),
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color.fromARGB(255, 1, 15, 1)
+                                .withAlpha((0.1 * 255).toInt()),
+                            blurRadius: 30,
+                            offset: const Offset(0, 12),
                           ),
                         ],
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(18.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    campaign.title,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontFamily: 'Oktah',
+                                      fontWeight: FontWeight.w700,
+                                      color: colors['text'],
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    campaign.description,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontFamily: 'Oktah',
+                                      fontWeight: FontWeight.w500,
+                                      color: colors['text']!.withOpacity(0.7),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 6),
+                                  Text(
+                                    campaign.location ?? 'No location',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'Oktah',
+                                      fontWeight: FontWeight.w500,
+                                      color: colors['text']!.withOpacity(0.5),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'From ${formatDate(campaign.startDate)} to ${formatDate(campaign.endDate)}',
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      fontFamily: 'Oktah',
+                                      fontWeight: FontWeight.w400,
+                                      color: colors['text']!.withOpacity(0.5),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Center(
+                              child: IconButton(
+                                icon: const Icon(Icons.chevron_right, size: 24),
+                                color: colors['text']!.withOpacity(0.7),
+                                onPressed: () {
+                                  // TODO: Xem chi tiết campaign
+                                  // Navigator.push(...);
+                                },
+                                padding: EdgeInsets.zero,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   );

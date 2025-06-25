@@ -19,7 +19,7 @@ class Campaign {
 
   factory Campaign.fromJson(Map<String, dynamic> json) {
     return Campaign(
-      id: json['id'],
+      id: json['campaign_id'],
       title: json['title'],
       description: json['description'],
       location: json['location'],
