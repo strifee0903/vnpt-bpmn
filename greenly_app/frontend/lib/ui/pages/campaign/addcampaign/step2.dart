@@ -65,7 +65,9 @@ class _Step2State extends State<Step2> {
     super.initState();
     // Khởi tạo moment nếu cần
     int? id = context.read<CampaignManager>().campaignId;
+
     if (id != null) {
+      print('🔍 DEBUG - Campaign ID: $id');
       // Nếu có id, lấy thông tin moment từ service
       momentService.getMomentById(id).then((value) {
         setState(() {
