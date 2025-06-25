@@ -98,7 +98,7 @@ class _GreenMapState extends State<GreenMap> {
                 .putIfAbsent(point.toString(), () => [])
                 .add(moment);
           } else {
-            print( '❌ DEBUG - Moment with null coordinates found: $moment');
+            print('❌ DEBUG - Moment with null coordinates found: $moment');
           }
         }
 
@@ -138,6 +138,7 @@ class _GreenMapState extends State<GreenMap> {
   final Map<String, List<Moment>> _markerMomentMap = {};
 
   // Remove the old fetchMoments function since we're using fetchAllMoments
+
   void _removePanel() {
     panelOverlay?.remove();
     panelOverlay = null;
@@ -151,6 +152,13 @@ class _GreenMapState extends State<GreenMap> {
     _momentsFuture = fetchAllMoments();
     _getLocation();
     _loadPolygon();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ensure the map is centered on the current location if available
+    _momentsFuture = fetchAllMoments();
   }
 
   void _loadPolygon() async {
@@ -279,7 +287,7 @@ class _GreenMapState extends State<GreenMap> {
         final markerMoments = _markerMomentMap[point.point.toString()] ?? [];
 
         return Container(
-            decoration: BoxDecoration(
+          decoration: BoxDecoration(
             color: const Color(0xFFEEF5E6), // Màu xanh lá nhạt
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           ),
@@ -290,7 +298,8 @@ class _GreenMapState extends State<GreenMap> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const Text('📍 Bài viết ở địa điểm xanh',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 Flexible(
                   child: ListView.builder(
@@ -300,12 +309,12 @@ class _GreenMapState extends State<GreenMap> {
                       final moment = markerMoments[index];
                       fullImageUrl(moment.user.u_avt);
                       String? mediaUrl;
-          
+
                       if (moment.media.isNotEmpty) {
                         mediaUrl = fullImageUrl(moment.media.first.media_url);
                         print('   - Media URL: $mediaUrl');
                       }
-          
+
                       return MomentCard(
                         moment: moment,
                       );
@@ -322,7 +331,9 @@ class _GreenMapState extends State<GreenMap> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: const Text('Đóng', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                  child: const Text('Đóng',
+                      style:
+                          TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                 ),
               ],
             ),
@@ -348,7 +359,7 @@ class _GreenMapState extends State<GreenMap> {
         print(
             '📊 DEBUG - Cluster contains ${markerMoments.length} moments, ${cluster.markers.first}');
         return Container(
-            decoration: BoxDecoration(
+          decoration: BoxDecoration(
             color: const Color(0xFFEEF5E6), // Màu xanh lá nhạt
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           ),
@@ -358,7 +369,8 @@ class _GreenMapState extends State<GreenMap> {
               children: [
                 const SizedBox(height: 20),
                 const Text('📍 Các bài viết trong khu vực',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    style:
+                        TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
                 Flexible(
                   child: ListView.builder(
@@ -366,13 +378,12 @@ class _GreenMapState extends State<GreenMap> {
                     itemCount: markerMoments.length,
                     itemBuilder: (context, index) {
                       final moment = markerMoments[index];
-          
-                      if (moment.media.isNotEmpty) {
-                      }
-          
+
+                      if (moment.media.isNotEmpty) {}
+
                       return Container(
                         margin: const EdgeInsets.symmetric(
-                        horizontal: 0, vertical: 6),
+                            horizontal: 0, vertical: 6),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           color: const Color(0xFF708C5B).withOpacity(0.2),
@@ -385,7 +396,6 @@ class _GreenMapState extends State<GreenMap> {
                     },
                   ),
                 ),
-          
                 const SizedBox(height: 12),
                 ElevatedButton(
                   onPressed: () => Navigator.pop(context),
