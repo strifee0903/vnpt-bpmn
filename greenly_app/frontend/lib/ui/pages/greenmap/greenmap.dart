@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
-// import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:flutter/services.dart' show rootBundle;
-import 'package:geojson_vi/geojson_vi.dart';
-import 'dart:convert';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:greenly_app/services/moment_service.dart';
 import 'package:greenly_app/ui/moments/moments_card.dart';
+import 'package:greenly_app/ui/moments/moment_manager.dart';
 import 'package:greenly_app/models/moment.dart';
 import 'package:geocoding/geocoding.dart';
+import 'package:provider/provider.dart';
 
 String fullImageUrl(String? relativePath) {
   // Get the correct base URL for images (without /api)
@@ -55,89 +53,12 @@ class GreenMap extends StatefulWidget {
 
 class _GreenMapState extends State<GreenMap> {
   LatLng? currentLocation;
-  List<List<LatLng>> vietnamPolygons = [];
-  final MomentService _momentService = MomentService();
-  late Future<List<Moment>> _momentsFuture;
+  final MomentProvider _momentManager = MomentProvider();
 
-  Future<List<Moment>> fetchAllMoments() async {
-    print('📞 DEBUG - Fetching all moments...');
-    List<Moment> allMoments = [];
-    int page = 1;
-    int limit = 20;
-    bool hasMore = true;
-
-    // Clear existing markers before fetching new ones
-    _markers.clear();
-    _markerMomentMap.clear();
-
-    while (hasMore) {
-      try {
-        final moments =
-            await _momentService.getNewsFeedMoments(page: page, limit: limit);
-        print('📞 DEBUG - Page $page: fetched ${moments.length} moments');
-
-        allMoments.addAll(moments);
-
-        // Add markers for moments with valid coordinates
-        for (var moment in moments) {
-          if (moment.latitude != null && moment.longitude != null) {
-            final LatLng point = LatLng(moment.latitude!, moment.longitude!);
-            _markers.add(
-              Marker(
-                point: point,
-                width: 40,
-                height: 40,
-                child: const Icon(
-                  Icons.location_on,
-                  color: Color.fromARGB(255, 41, 149, 86),
-                  size: 35,
-                ),
-              ),
-            );
-            _markerMomentMap
-                .putIfAbsent(point.toString(), () => [])
-                .add(moment);
-          } else {
-            print('❌ DEBUG - Moment with null coordinates found: $moment');
-          }
-        }
-
-        // Check if we have more pages
-        if (moments.length < limit) {
-          hasMore = false;
-        } else {
-          page++;
-        }
-      } catch (e) {
-        print('❌ DEBUG - Error fetching page $page: $e');
-        hasMore = false;
-      }
-    }
-
-    print('✅ DEBUG - Successfully fetched ${allMoments.length} moments');
-    print('📊 DEBUG - Total markers created: ${_markers.length}');
-
-    // Force a rebuild to update the map
-    if (mounted) {
-      setState(() {});
-    }
-
-    return allMoments;
-  }
-
-  final List<LatLng> defaultMarkers = [
-    LatLng(21.0285, 105.8542), // Hà Nội
-    LatLng(10.762622, 106.660172), // Sài Gòn
-    LatLng(16.047079, 108.206230), // Đà Nẵng
-  ];
   final MapController _mapController = MapController();
   LatLng? selectedMarker;
   OverlayEntry? panelOverlay;
-
-  final List<Marker> _markers = [];
-  final Map<String, List<Moment>> _markerMomentMap = {};
-
-  // Remove the old fetchMoments function since we're using fetchAllMoments
+  bool _hasFetched = false;
 
   void _removePanel() {
     panelOverlay?.remove();
@@ -148,57 +69,22 @@ class _GreenMapState extends State<GreenMap> {
   @override
   void initState() {
     super.initState();
-    // Use fetchAllMoments instead of fetchMoments
-    _momentsFuture = fetchAllMoments();
     _getLocation();
-    _loadPolygon();
+    // context.read<MomentProvider>().fetchAllMoments();
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Ensure the map is centered on the current location if available
-    _momentsFuture = fetchAllMoments();
-  }
 
-  void _loadPolygon() async {
-    final polygon = await loadVietnamPolygons();
-    setState(() {
-      vietnamPolygons = polygon;
-    });
-  }
-
-  Future<List<List<LatLng>>> loadVietnamPolygons() async {
-    final String geojsonString =
-        await rootBundle.loadString('assets/vietnam.json');
-    final Map<String, dynamic> jsonMap = json.decode(geojsonString);
-
-    final feature = GeoJSONFeature.fromMap(jsonMap);
-    final geometry = feature.geometry;
-
-    final List<List<LatLng>> polygons = [];
-
-    if (geometry is GeoJSONMultiPolygon) {
-      for (final polygon in geometry.coordinates) {
-        final List<LatLng> polygonPoints = [];
-        for (final ring in polygon) {
-          for (final coord in ring) {
-            polygonPoints.add(LatLng(coord[1], coord[0]));
-          }
-        }
-        polygons.add(polygonPoints);
-      }
-    } else if (geometry is GeoJSONPolygon) {
-      final List<LatLng> polygonPoints = [];
-      for (final ring in geometry.coordinates) {
-        for (final coord in ring) {
-          polygonPoints.add(LatLng(coord[1], coord[0]));
-        }
-      }
-      polygons.add(polygonPoints);
+    // if (!_hasFetched) {
+    //   context.read<MomentProvider>().fetchAllMoments();
+    //   _hasFetched = true;
+    // }
+    if (mounted) {
+      Future.microtask(() => Provider.of<MomentProvider>(context, listen: false)
+          .fetchAllMoments());
     }
-
-    return polygons;
   }
 
   Future<void> _getLocation() async {
@@ -284,7 +170,10 @@ class _GreenMapState extends State<GreenMap> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        final markerMoments = _markerMomentMap[point.point.toString()] ?? [];
+        final markerMoments = context
+                .read<MomentProvider>()
+                .markerMomentMap[point.point.toString()] ??
+            [];
 
         return Container(
           decoration: BoxDecoration(
@@ -314,7 +203,6 @@ class _GreenMapState extends State<GreenMap> {
                         mediaUrl = fullImageUrl(moment.media.first.media_url);
                         print('   - Media URL: $mediaUrl');
                       }
-
                       return MomentCard(
                         moment: moment,
                       );
@@ -353,7 +241,11 @@ class _GreenMapState extends State<GreenMap> {
       builder: (context) {
         // Lọc các marker có chứa moment
         final markerMoments = cluster.markers
-            .expand((m) => _markerMomentMap[m.point.toString()] ?? [])
+            .expand((m) =>
+                context
+                    .read<MomentProvider>()
+                    .markerMomentMap[m.point.toString()] ??
+                [])
             .toList();
 
         print(
@@ -420,103 +312,77 @@ class _GreenMapState extends State<GreenMap> {
 
   @override
   Widget build(BuildContext context) {
+    if (ModalRoute.of(context)?.isCurrent == true) {
+      // Tab này đang active → fetch lại
+      // _momentsFuture = fetchAllMoments();
+    }
     const String mapboxAccessToken =
         'sk.eyJ1IjoidGFtbmdvLTE1OSIsImEiOiJjbWMwMjI0OWgwNW5pMmlzY2tqdDJ4bHN1In0.mBhsHjZ8iR2rGPWRYHjgjA';
     const String mapStyleId = 'streets-v11'; // hoặc satellite-v9
     const String username = 'mapbox'; // mặc định với style public
 
     return Scaffold(
-      body: GestureDetector(
-        onTap: _removePanel,
-        child: FutureBuilder<List<Moment>>(
-          future: _momentsFuture,
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Đang tải dữ liệu...'),
-                  ],
-                ),
-              );
-            }
+        body: GestureDetector(
+            onTap: _removePanel,
+            child: Consumer<MomentProvider>(
+              builder: (context, provider, _) {
+                print('🔍 markers count: ${provider.markers.length}');
+                for (var marker in provider.markers) {
+                  print('📍 Marker at: ${marker.point}');
+                }
 
-            if (snapshot.hasError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                return FlutterMap(
+                  mapController: _mapController,
+                  options: MapOptions(
+                    center: LatLng(16.047079, 108.206230),
+                    zoom: 6,
+                    onTap: (_, __) => _removePanel(),
+                  ),
                   children: [
-                    const Icon(Icons.error, size: 64, color: Colors.red),
-                    const SizedBox(height: 16),
-                    Text('Lỗi: ${snapshot.error}'),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _momentsFuture = fetchAllMoments();
-                        });
+                    TileLayer(
+                      urlTemplate:
+                          'https://api.mapbox.com/styles/v1/$username/$mapStyleId/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxAccessToken',
+                      additionalOptions: {
+                        'access_token': mapboxAccessToken,
                       },
-                      child: const Text('Thử lại'),
+                      userAgentPackageName: 'com.example.app',
+                    ),
+                    // MarkerLayer(
+                    //   markers: provider.markers,
+                    // ),
+                    MarkerClusterLayerWidget(
+                      options: MarkerClusterLayerOptions(
+                        maxClusterRadius: 45,
+                        disableClusteringAtZoom: 17,
+                        zoomToBoundsOnClick: false,
+                        spiderfyCluster: false,
+                        size: const Size(40, 40),
+                        markers: provider.markers,
+                        builder: (context, cluster) {
+                          return Container(
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.orange,
+                            ),
+                            child: Center(
+                              child: Text(
+                                '${cluster.length}',
+                                style: const TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          );
+                        },
+                        onClusterTap: (cluster) {
+                          _showClusterInfo(context, cluster);
+                        },
+                        onMarkerTap: (marker) {
+                          _showMarkerInfo(context, marker);
+                        },
+                      ),
                     ),
                   ],
-                ),
-              );
-            }
-
-            return FlutterMap(
-              mapController: _mapController,
-              options: MapOptions(
-                center: LatLng(16.047079, 108.206230),
-                zoom: 6,
-                onTap: (_, __) => _removePanel(),
-              ),
-              children: [
-                TileLayer(
-                  urlTemplate:
-                      'https://api.mapbox.com/styles/v1/$username/$mapStyleId/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxAccessToken',
-                  additionalOptions: {
-                    'access_token': mapboxAccessToken,
-                  },
-                  userAgentPackageName: 'com.example.app',
-                ),
-                MarkerClusterLayerWidget(
-                  options: MarkerClusterLayerOptions(
-                    maxClusterRadius: 45,
-                    disableClusteringAtZoom: 17,
-                    zoomToBoundsOnClick: false,
-                    spiderfyCluster: false,
-                    size: const Size(40, 40),
-                    markers: _markers,
-                    builder: (context, cluster) {
-                      return Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.orange,
-                        ),
-                        child: Center(
-                          child: Text(
-                            '${cluster.length}',
-                            style: const TextStyle(color: Colors.white),
-                          ),
-                        ),
-                      );
-                    },
-                    onClusterTap: (cluster) {
-                      _showClusterInfo(context, cluster);
-                    },
-                    onMarkerTap: (marker) {
-                      _showMarkerInfo(context, marker);
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-    );
+                );
+              },
+            )));
   }
 }
