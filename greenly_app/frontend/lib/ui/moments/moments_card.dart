@@ -75,7 +75,6 @@ class _MomentCardState extends State<MomentCard> {
     return moment.user.u_name;
   }
 
-
   void _handleUserTap(BuildContext context) {
     final authManager = Provider.of<AuthManager>(context, listen: false);
     final currentUser = authManager.loggedInUser;
@@ -241,9 +240,19 @@ class _MomentCardState extends State<MomentCard> {
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
-                              title: const Text('Delete Moment'),
+                              title: const Text('Delete Moment',
+                                  style: TextStyle(
+                                    fontFamily: 'Oktah',
+                                    fontWeight: FontWeight.w700,
+                                    color: Colors.red,
+                                    fontSize: 18,
+                                  )),
                               content: const Text(
-                                  'Are you sure you want to delete this moment?'),
+                                  'Are you sure you want to delete this moment?',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Color.fromARGB(221, 38, 68, 29),
+                                  )),
                               actions: [
                                 TextButton(
                                   onPressed: () => Navigator.pop(context),

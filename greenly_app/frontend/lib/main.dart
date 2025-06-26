@@ -40,11 +40,11 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 255, 158, 158),
+      seedColor: const Color(0xFF2E7D32),
       secondary: const Color(0xFFFFF8DC),
       surface: const Color.fromARGB(255, 255, 245, 245),
-      surfaceTint: const Color.fromARGB(255, 255, 158, 158),
-      primary: const Color.fromARGB(255, 255, 158, 158),
+      surfaceTint: const Color(0xFF2E7D32),
+      primary: const Color(0xFF2E7D32),
       onPrimary: Colors.white,
       onSecondary: Colors.black,
       onSurface: Colors.black,
@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
     final themeData = ThemeData(
       fontFamily: 'Lato',
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: color13,
+      scaffoldBackgroundColor: Color(0xFF2E7D32),
       useMaterial3: true,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.primary,
