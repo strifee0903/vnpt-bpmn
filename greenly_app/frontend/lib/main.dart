@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:greenly_app/shared/not_found_screen.dart';
+import 'package:greenly_app/ui/pages/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 
 import 'services/moment_service.dart';
@@ -114,8 +115,9 @@ class _MyAppState extends State<MyApp> {
                 '/greenLibrary': (ctx) => const SafeArea(child: GreenLibrary()),
                 '/campaign': (ctx) => const SafeArea(child: Campaign()),
                 '/moments': (ctx) => const SafeArea(child: MomentsPage()),
-                '/profile': (ctx) => const SafeArea(
-                    child: MainLayout(initialIndex: 3)), // Update to MainLayout
+                '/profile': (ctx) => const SafeArea(child: ProfileScreen()),
+                // '/profile': (ctx) => const SafeArea(
+                //     child: MainLayout(initialIndex: 3)), // Update to MainLayout
               },
               onGenerateRoute: (settings) {
                 print('🔴 Navigating to route: ${settings.name}');
@@ -129,9 +131,11 @@ class _MyAppState extends State<MyApp> {
                   case '/moments':
                     return ScaleRoute(page: const MomentsPage());
                   case '/profile':
-                    return ScaleRoute(
-                        page: const MainLayout(
-                            initialIndex: 3)); // Update to MainLayout
+                    return ScaleRoute(page: const ProfileScreen());
+                  // case '/profile':
+                  //   return ScaleRoute(
+                  //       page: const MainLayout(
+                  //           initialIndex: 3)); // Update to MainLayout
                   default:
                     print('🔴 Unknown route: ${settings.name}');
                     return SlideUpRoute(page: const NotFoundScreen());

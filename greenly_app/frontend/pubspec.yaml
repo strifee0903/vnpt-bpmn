@@ -60,6 +60,10 @@ flutter:
           weight: 700
         - asset: assets/fonts/Oktah/Trial-OktahRound-Medium.otf
           weight: 500
+    - family: Poetsen One
+      fonts:
+        - asset: assets/fonts/Poetsen_One/PoetsenOne-Regular.ttf
+          weight: 700
     - family: Lato
       fonts:
         - asset: assets/fonts/Lato-Regular.ttf

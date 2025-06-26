@@ -274,7 +274,7 @@ class _MomentsPageState extends State<MomentsPage> {
             color: momentProvider.typeFilter == value
                 ? Colors.white
                 : Colors.black,
-            fontFamily: 'Oktah',
+            fontFamily: 'Baloo Bhaijaan 2',
             fontSize: 13,
           ),
           backgroundColor: Colors.grey.shade200,
