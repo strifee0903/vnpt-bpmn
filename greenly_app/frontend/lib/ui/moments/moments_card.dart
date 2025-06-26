@@ -68,11 +68,11 @@ class _MomentCardState extends State<MomentCard> {
     if (currentUser != null &&
         currentUser.u_id == moment.user.u_id &&
         userProvider.currentUser != null) {
-      return userProvider.currentUser!.u_name ?? moment.user.u_name ?? '';
+      return userProvider.currentUser!.u_name;
     }
 
     // Ngược lại dùng tên từ moment
-    return moment.user.u_name ?? '';
+    return moment.user.u_name;
   }
 
 
@@ -107,23 +107,31 @@ class _MomentCardState extends State<MomentCard> {
     setState(() => _isLikeLoading = true);
 
     final momentService = Provider.of<MomentService>(context, listen: false);
+    final momentProvider = Provider.of<MomentProvider>(context, listen: false);
+
     try {
       final result = moment.isLikedByCurrentUser
           ? await momentService.unlikeMoment(moment.id)
           : await momentService.likeMoment(moment.id);
 
-      final updatedMoment = moment.copyWith(
-        isLikedByCurrentUser: result['isLiked'],
-        likeCount: result['likeCount'],
+      // Cập nhật trạng thái trong MomentProvider
+      momentProvider.updateMomentLikeStatus(
+        moment.id,
+        result['isLiked'],
+        result['likeCount'],
       );
 
+      // Cập nhật trạng thái cục bộ
       setState(() {
-        moment = updatedMoment;
+        moment = moment.copyWith(
+          isLikedByCurrentUser: result['isLiked'],
+          likeCount: result['likeCount'],
+        );
         _isLikeLoading = false;
       });
 
-      // Gọi callback để cập nhật lên parent
-      widget.onUpdateMoment?.call(updatedMoment);
+      // Gọi callback nếu có
+      widget.onLikeToggle?.call();
     } catch (e) {
       setState(() => _isLikeLoading = false);
       ScaffoldMessenger.of(context).showSnackBar(

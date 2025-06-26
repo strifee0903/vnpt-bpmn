@@ -114,39 +114,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
   
-  Widget _buildChip(String label, String value, Icon icon) {
-    return Consumer<MomentProvider>(
-      builder: (context, momentProvider, child) {
-        return ChoiceChip(
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              icon,
-              const SizedBox(width: 4),
-              Text(label),
-            ],
-          ),
-          selected: momentProvider.typeFilter == value,
-          onSelected: (_) {
-            momentProvider.setTypeFilter(value);
-          },
-          selectedColor: button,
-          labelStyle: TextStyle(
-            color: momentProvider.typeFilter == value
-                ? Colors.white
-                : Colors.black,
-            fontFamily: 'Oktah',
-            fontSize: 13,
-          ),
-          backgroundColor: Colors.grey.shade200,
-          shape: StadiumBorder(
-            side: BorderSide(color: Colors.grey.shade400),
-          ),
-        );
-      },
-    );
-  }
-
   Widget _buildPrivacySwitch(MomentProvider momentProvider) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
@@ -195,7 +162,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final momentProvider = Provider.of<MomentProvider>(context);
+    Provider.of<MomentProvider>(context);
+    return Consumer<MomentProvider>(
+    builder: (context, momentProvider, child) {
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -289,12 +258,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     // Filter icon button
                     Container(
-                      width: 56,
-                      height: 56,
+                      width: 50,
+                      height: 50,
                       decoration: BoxDecoration(
                         color: _showFilterBar
                             ? button
-                            : Colors.grey.withAlpha(200),
+                            : Colors.grey.withAlpha(100),
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
@@ -309,7 +278,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         icon: Icon(
                           _showFilterBar
                               ? Icons.filter_alt
-                              : Icons.filter_alt_off,
+                              : Icons.filter_4_rounded,
                           color: Colors.white,
                           size: 28,
                         ),
@@ -352,5 +321,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ),
       ),
     );
+  });
   }
 }

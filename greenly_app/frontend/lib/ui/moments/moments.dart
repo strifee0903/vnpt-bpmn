@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../components/colors.dart';
-import '../../services/moment_service.dart';
-import '../../models/moment.dart';
 import 'moment_manager.dart';
 import 'moments_card.dart';
 import 'add_moment_place.dart';
@@ -159,11 +157,11 @@ class _MomentsPageState extends State<MomentsPage> {
                 children: [
                   // Filter icon button
                   Container(
-                    width: 56,
-                    height: 56,
+                    width: 50,
+                    height: 50,
                     decoration: BoxDecoration(
                       color:
-                          _showFilterBar ? button : Colors.grey.withAlpha(200),
+                          _showFilterBar ? button : Colors.grey.withAlpha(100),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
@@ -178,7 +176,7 @@ class _MomentsPageState extends State<MomentsPage> {
                       icon: Icon(
                         _showFilterBar
                             ? Icons.filter_alt
-                            : Icons.filter_alt_off,
+                            : Icons.filter_4_rounded,
                         color: Colors.white,
                         size: 28,
                       ),
