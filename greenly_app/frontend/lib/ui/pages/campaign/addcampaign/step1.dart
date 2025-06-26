@@ -1,4 +1,3 @@
-import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'package:greenly_app/ui/pages/campaign/campaign_manager.dart';

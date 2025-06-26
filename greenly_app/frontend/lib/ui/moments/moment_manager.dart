@@ -14,7 +14,6 @@ class MomentProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _hasMore = true;
   String _typeFilter = 'all';
-  bool _isFetched = false;
 
   // State for ProfileScreen
   List<Moment> _profileMoments = [];
@@ -261,7 +260,6 @@ class MomentProvider with ChangeNotifier {
       }
     }
 
-    _isFetched = true;
     _markers = newMarkers; // 👈 Gán lại list mới
     _markerMomentMap = newMarkerMomentMap; // 👈 Gán lại map mới
     notifyListeners();

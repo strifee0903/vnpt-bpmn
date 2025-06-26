@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/pages/campaign/campaign_detail_card.dart';
 import 'package:provider/provider.dart';
 import '../../../components/colors.dart'; // Import colors.dart
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'addcampaign/dynamic_flow_screen.dart'; // Import
 import 'package:greenly_app/models/campaign.dart' as model;
 import 'package:greenly_app/services/campaign_service.dart';

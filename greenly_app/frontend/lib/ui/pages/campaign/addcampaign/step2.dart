@@ -73,7 +73,7 @@ class _Step2State extends State<Step2> {
         setState(() {
           moment = value;
           contentController.text = moment?.content ?? '';
-          selectedImage = (moment?.media != null && moment!.media!.isNotEmpty)
+          selectedImage = (moment?.media != null && moment!.media.isNotEmpty)
               ? File(moment!.media.first.media_url)
               : null;
         });

@@ -1,7 +1,6 @@
 import 'category.dart';
 import 'media.dart';
 import 'user.dart';
-import 'package:intl/intl.dart';
 
 class Moment {
   final int id;

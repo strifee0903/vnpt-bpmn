@@ -6,7 +6,6 @@ import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'package:greenly_app/services/moment_service.dart';
 import 'package:greenly_app/ui/moments/moments_card.dart';
 import 'package:greenly_app/ui/moments/moment_manager.dart';
-import 'package:greenly_app/models/moment.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:provider/provider.dart';
 
@@ -53,12 +52,10 @@ class GreenMap extends StatefulWidget {
 
 class _GreenMapState extends State<GreenMap> {
   LatLng? currentLocation;
-  final MomentProvider _momentManager = MomentProvider();
 
   final MapController _mapController = MapController();
   LatLng? selectedMarker;
   OverlayEntry? panelOverlay;
-  bool _hasFetched = false;
 
   void _removePanel() {
     panelOverlay?.remove();
