@@ -27,8 +27,7 @@ async function createCampaign(req, res, next) {
         return res.status(201).json(
             JSend.success({
                 message: 'Campaign created successfully!',
-                campaign_id: result.campaign_id,
-                moment_id: result.moment_id
+                ...result
             })
         );
     } catch (error) {
