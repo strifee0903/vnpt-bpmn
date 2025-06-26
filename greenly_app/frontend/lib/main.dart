@@ -3,7 +3,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:greenly_app/shared/not_found_screen.dart';
 import 'package:provider/provider.dart';
 
-import 'components/colors.dart';
 import 'services/moment_service.dart';
 import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
