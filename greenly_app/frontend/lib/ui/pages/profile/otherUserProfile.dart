@@ -135,7 +135,7 @@ class _OtherUserProfileScreenState extends State<OtherUserProfileScreen> {
       selectedColor: button,
       labelStyle: TextStyle(
         color: _typeFilter == value ? Colors.white : Colors.black,
-        fontFamily: 'Oktah',
+        fontFamily: 'Baloo Bhaijaan 2',
         fontSize: 13,
       ),
       backgroundColor: Colors.grey.shade200,

@@ -214,7 +214,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
         title: const Text(
           'Edit Post',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'Baloo Bhaijaan 2',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -263,7 +263,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                         ?.u_name ??
                                     'User',
                                 style: const TextStyle(
-                                  fontFamily: 'Oktah',
+                                  fontFamily: 'Baloo Bhaijaan 2',
                                   fontWeight: FontWeight.w700,
                                   fontSize: 18,
                                 ),
@@ -281,7 +281,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                     child: Text(
                                       _addressController.text,
                                       style: const TextStyle(
-                                        fontFamily: 'Oktah',
+                                        fontFamily: 'Baloo Bhaijaan 2',
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.grey,
@@ -308,7 +308,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                             hint: const Text(
                               'Moment Type',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'Baloo Bhaijaan 2',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -319,7 +319,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                       child: Text(
                                         type.capitalize(),
                                         style: const TextStyle(
-                                          fontFamily: 'Oktah',
+                                          fontFamily: 'Baloo Bhaijaan 2',
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -340,7 +340,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                             hint: const Text(
                               'Category',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'Baloo Bhaijaan 2',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -351,7 +351,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                 child: Text(
                                   category.category_name,
                                   style: const TextStyle(
-                                    fontFamily: 'Oktah',
+                                    fontFamily: 'Baloo Bhaijaan 2',
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -375,7 +375,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                         Text(
                           _isPublic ? 'Public' : 'Private',
                           style: const TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -401,7 +401,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                         border: InputBorder.none,
                       ),
                       style: const TextStyle(
-                        fontFamily: 'Oktah',
+                        fontFamily: 'Baloo Bhaijaan 2',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -413,7 +413,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                       const Text(
                         'Current Images',
                         style: TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -472,7 +472,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                       const Text(
                         'New Images',
                         style: TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -550,7 +550,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                               Text(
                                 'Tap to add photos',
                                 style: TextStyle(
-                                  fontFamily: 'Oktah',
+                                  fontFamily: 'Baloo Bhaijaan 2',
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                   color: Colors.grey,
@@ -578,7 +578,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                           : const Text(
                               'Save Changes',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'Baloo Bhaijaan 2',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,

@@ -107,7 +107,7 @@ class _AddMomentPlaceState extends State<AddMomentPlace> {
                         child: Text(
                           currentUser?.u_name ?? 'Unknown User',
                           style: const TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontWeight: FontWeight.w700,
                             fontSize: 18,
                           ),
@@ -135,7 +135,7 @@ class _AddMomentPlaceState extends State<AddMomentPlace> {
                         const Text(
                           'Share your moment...',
                           style: TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 15,
                             fontWeight: FontWeight.w500,
                             color: Colors.black54,

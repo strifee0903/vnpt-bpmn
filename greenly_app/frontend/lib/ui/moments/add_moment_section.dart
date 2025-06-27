@@ -71,7 +71,7 @@ class AddPostSection extends StatelessWidget {
                   Text(
                     username.isNotEmpty ? username : 'Anonymous',
                     style: const TextStyle(
-                      fontFamily: 'Oktah',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
                     ),
@@ -89,7 +89,7 @@ class AddPostSection extends StatelessWidget {
                         child: Text(
                           address ?? 'Fetching location...',
                           style: const TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -116,7 +116,7 @@ class AddPostSection extends StatelessWidget {
                 hint: const Text(
                   'Moment Type',
                   style: TextStyle(
-                      fontFamily: 'Oktah',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontSize: 14,
                       fontWeight: FontWeight.w500),
                 ),
@@ -126,7 +126,7 @@ class AddPostSection extends StatelessWidget {
                     child: Text(
                       type,
                       style: const TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
                     ),
@@ -144,7 +144,7 @@ class AddPostSection extends StatelessWidget {
                 hint: const Text(
                   'Category',
                   style: TextStyle(
-                      fontFamily: 'Oktah',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontSize: 14,
                       fontWeight: FontWeight.w500),
                 ),
@@ -154,7 +154,7 @@ class AddPostSection extends StatelessWidget {
                     child: Text(
                       category.category_name,
                       style: const TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
                     ),
@@ -178,7 +178,7 @@ class AddPostSection extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                fontFamily: 'Oktah',
+                fontFamily: 'Baloo Bhaijaan 2',
               ),
             ),
             Switch(
@@ -201,7 +201,7 @@ class AddPostSection extends StatelessWidget {
             border: InputBorder.none,
           ),
           style: const TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'Baloo Bhaijaan 2',
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -231,7 +231,7 @@ class AddPostSection extends StatelessWidget {
                         Text(
                           'Tap to add photos',
                           style: TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -324,7 +324,7 @@ class AddPostSection extends StatelessWidget {
                                   Text(
                                     'Add more',
                                     style: TextStyle(
-                                      fontFamily: 'Oktah',
+                                      fontFamily: 'Baloo Bhaijaan 2',
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenly_app/components/paths.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/moment.dart';
@@ -80,10 +81,16 @@ class _MomentCardState extends State<MomentCard> {
     final currentUser = authManager.loggedInUser;
 
     if (currentUser != null && currentUser.u_id == moment.user.u_id) {
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (_) => MainLayout(initialIndex: 3),
+      //   ),
+      // );
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => MainLayout(initialIndex: 3),
+          builder: (_) => ProfileScreen(),
         ),
       );
     } else {
@@ -194,7 +201,7 @@ class _MomentCardState extends State<MomentCard> {
                           Text(
                             _getCurrentUserName(),
                             style: const TextStyle(
-                              fontFamily: 'Oktah',
+                              fontFamily: 'Lato',
                               fontWeight: FontWeight.w700,
                               fontSize: 18,
                             ),
@@ -242,7 +249,7 @@ class _MomentCardState extends State<MomentCard> {
                             builder: (context) => AlertDialog(
                               title: const Text('Delete Moment',
                                   style: TextStyle(
-                                    fontFamily: 'Oktah',
+                                    fontFamily: 'Lato',
                                     fontWeight: FontWeight.w700,
                                     color: Colors.red,
                                     fontSize: 18,
@@ -334,7 +341,7 @@ class _MomentCardState extends State<MomentCard> {
               child: Text(
                 moment.content,
                 style: const TextStyle(
-                  fontFamily: 'Oktah',
+                  fontFamily: 'Lato',
                   fontSize: 17,
                   fontWeight: FontWeight.w500,
                   color: Colors.black87,
