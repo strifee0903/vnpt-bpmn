@@ -204,6 +204,8 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushNamed(context, '/greenLibrary');
             } else if (title == 'Campaign') {
               Navigator.pushNamed(context, '/campaign');
+            }else if (title == 'Contribution') {
+              Navigator.pushNamed(context, '/groupChat'); 
             }
           },
           child: Stack(

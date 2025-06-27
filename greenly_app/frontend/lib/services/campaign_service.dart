@@ -88,13 +88,62 @@ class CampaignService {
     }
   }
 
+// Kiểm tra trạng thái tham gia của user với campaign
+  Future<bool> getParticipationStatus(int campaignId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie') ?? '';
+      final uri = Uri.parse('$baseUrl/campaign/$campaignId/participants');
+      final response = await http.get(
+        uri,
+        headers: {
+          'Cookie': sessionCookie,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final participants = jsonData['data']['participants'] ?? [];
+        final userId = prefs.getString(
+            'user_id'); // Giả sử user_id được lưu trong SharedPreferences
+        if (userId == null) {
+          print('⚠️ User ID not found in SharedPreferences');
+          return false;
+        }
+        // Kiểm tra xem user có trong danh sách participants với status = 1 không
+        return participants.any((participant) =>
+            participant['u_id'].toString() == userId &&
+            participant['status'] == 1);
+      } else {
+        print('❌ Lỗi kiểm tra trạng thái: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      print('⚠️ Lỗi kiểm tra trạng thái: $e');
+      return false;
+    }
+  }
+
   // Tham gia / rời chiến dịch
   Future<bool> postAction(int campaignId, String action) async {
     try {
-      final uri = Uri.parse('$baseUrl/$campaignId/$action');
-      final response = await http.post(uri);
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie') ?? '';
+      final uri = Uri.parse('$baseUrl/campaign/$campaignId/$action');
+      final response = await http.post(
+        uri,
+        headers: {
+          'Cookie': sessionCookie,
+        },
+      );
 
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        print('✅ $action campaign successfully: $campaignId');
+        return true;
+      } else {
+        print('❌ Lỗi khi $action (${response.statusCode}): ${response.body}');
+        return false;
+      }
     } catch (e) {
       print('⚠️ Lỗi khi $action: $e');
       return false;

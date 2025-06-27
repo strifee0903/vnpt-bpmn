@@ -114,6 +114,7 @@ async function leaveCampaign(req, res, next) {
             ...result
         }));
     } catch (err) {
+        console.error('Leave campaign error:', err); // Log for debugging
         if (err.message === 'Campaign not found') {
             return next(new ApiError(404, 'Campaign not found.'));
         }
@@ -123,9 +124,12 @@ async function leaveCampaign(req, res, next) {
         if (err.message === 'Already left this campaign') {
             return next(new ApiError(400, 'You have already left this campaign.'));
         }
+        if (err.message === 'Host cannot leave their own campaign') {
+            return next(new ApiError(403, 'You are the host of this campaign and cannot leave.'));
+        }
         return next(new ApiError(500, 'Error leaving campaign.'));
     }
-}
+};
 
 async function getParticipants(req, res, next) {
     try {
