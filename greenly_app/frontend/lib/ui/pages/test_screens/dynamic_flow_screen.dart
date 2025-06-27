@@ -24,6 +24,19 @@
 //     loadProcess();
 //   }
 
+// <<<<<<< HEAD
+//   Future<void> loadProcess() async {
+//     final (loadedSteps, loadedFlows) =
+//         await processService.fetchProcess("Process_17501703319112");
+//     print('Loaded Steps: ${loadedSteps.length}, Flows: ${loadedFlows.length}');
+//     for (var step in loadedSteps) {
+//       print('Step: ${step.stepId}, Type: ${step.type}');
+//     }
+//     for (var flow in loadedFlows) {
+//       print(
+//           'Flow: ${flow.flowId}, Source: ${flow.sourceRef}, Target: ${flow.targetRef}');
+//     }
+// =======
 //   Future<void> loadProcess() async {
 //     final (loadedSteps, loadedFlows) = await processService.fetchProcess();
 //     print('Loaded Steps: ${loadedSteps.length}, Flows: ${loadedFlows.length}');
@@ -34,6 +47,7 @@
 //       print(
 //           'Flow: ${flow.flowId}, Source: ${flow.sourceRef}, Target: ${flow.targetRef}');
 //     }
+// >>>>>>> 059dac5bfe1cf0b772b020c48a5f9c3589c1fea5
 
 //     steps = loadedSteps;
 //     flows = loadedFlows;
