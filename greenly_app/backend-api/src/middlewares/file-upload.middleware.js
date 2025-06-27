@@ -13,7 +13,7 @@ const storage = multer.diskStorage({
 });
 
 function fileUpload(req, res, next) {
-    const upload = multer({ storage: storage }).single('u_avt');
+    const upload = multer({ storage: storage }).single('file');
 
     upload(req, res, function (err) {
         if (err instanceof multer.MulterError) {

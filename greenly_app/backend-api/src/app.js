@@ -50,6 +50,7 @@ const categoriesRouter = require('./routes/category.router');
 const moment = require('./routes/moment.router');
 const voteRouter = require('./routes/vote.router');
 const campaignRouter = require('./routes/campaign.router');
+const libraryRouter = require('./routes/library.router');
 
 usersRouter.setup(app);
 bpmnRouter.setup(app);
@@ -58,6 +59,7 @@ categoriesRouter.setup(app);
 moment.setup(app);
 voteRouter.setup(app);
 campaignRouter.setup(app);
+libraryRouter.setup(app);
 
 // Handle 404 response
 app.use(resourceNotFound);

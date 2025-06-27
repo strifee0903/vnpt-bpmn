@@ -218,6 +218,13 @@ const imageUrl = computed(() => {
             >
           </router-link>
         </li>
+        <li class="nav-item">
+          <router-link to="/thuvien" custom v-slot="{ isActive, navigate }">
+            <a class="nav-link" :class="{ active: isActive }" @click="navigate"
+              >Thư viện</a
+            >
+          </router-link>
+        </li>
       </ul>
 
       <!-- User Dropdown -->
