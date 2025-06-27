@@ -78,6 +78,9 @@ CREATE TABLE moment (
     FOREIGN KEY (category_id) REFERENCES category(category_id) on delete cascade
 );
 select * from moment;
+EXPLAIN SELECT * FROM moment WHERE u_id = 1 AND is_public = true ORDER BY created_at DESC;
+
+
 create view view_moments as 
 	select 
 		u.u_name, 
@@ -234,6 +237,24 @@ CREATE TABLE participation (
 	FOREIGN KEY (u_id) REFERENCES users(u_id)
 );
 select * from participation;
+
+
+-- ========================================
+-- BẢNG messages: Lưu trữ tin nhắn trong chiến dịch
+-- Mỗi tin nhắn liên kết đến một chiến dịch và người gửi
+-- ========================================
+
+CREATE TABLE messages (
+    message_id INT PRIMARY KEY AUTO_INCREMENT,
+    campaign_id INT,
+    sender_id INT,
+    content TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id),
+    FOREIGN KEY (sender_id) REFERENCES users(u_id)
+);
+
+select * from messages;
 
 -- ========================================
 -- BẢNG notification: Gửi thông báo cho người dùng (ví dụ: được cộng điểm, nhắc nhở tham gia chiến dịch)

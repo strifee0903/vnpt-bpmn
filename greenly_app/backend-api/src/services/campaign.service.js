@@ -9,8 +9,14 @@ function participationRepository() {
     return knex('participation');
 };
 
+function messageRepository(){
+    return knex('messages');
+};
+
 async function createCampaign(u_id, data) {
     return await knex.transaction(async trx => {
+        const now = new Date();
+
         // 1. Tạo chiến dịch
         const campaign = {
             u_id,
@@ -30,16 +36,39 @@ async function createCampaign(u_id, data) {
             u_id,
             moment_content: `${data.title}\n\n${data.description}`,
             moment_address: data.location,
-            moment_type: 'event', 
+            moment_type: 'event',
             is_public: true,
-            category_id: data.category_id || null, // nếu có
+            category_id: data.category_id || null,
         };
 
         const [moment_id] = await trx('moment').insert(moment);
 
-        return { campaign_id, moment_id };
+        // 3. Tự động join participation table (creator là host)
+        await trx('participation').insert({
+            u_id,
+            campaign_id,
+            status: 1,
+            joined_at: now,
+        });
+
+        // 4. Tạo welcome message trong group chat
+        const welcomeMessage = {
+            campaign_id,
+            sender_id: u_id,
+            content: `Welcome to the campaign "${data.title}"! As the host, I've created this group chat for all participants to communicate and coordinate activities.`,
+            created_at: now
+        };
+
+        await trx('messages').insert(welcomeMessage);
+
+        return {
+            campaign_id,
+            moment_id,
+            joined: true,
+            message: 'Campaign created successfully! You are now the host and have joined the group chat.'
+        };
     });
-}
+};
 
 async function getAllCampaigns(query) {
     try {

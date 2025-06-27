@@ -7,6 +7,7 @@ class AddPostSection extends StatelessWidget {
   final TextEditingController contentController;
   final List<File> selectedImages;
   final VoidCallback onPickImages;
+  final Function(int)? onRemoveImage; // Add callback for removing images
   final String avatarPath;
   final String username;
   final List<Category> categories;
@@ -23,6 +24,7 @@ class AddPostSection extends StatelessWidget {
     required this.contentController,
     required this.selectedImages,
     required this.onPickImages,
+    this.onRemoveImage, 
     required this.avatarPath,
     required this.username,
     required this.categories,
@@ -69,7 +71,7 @@ class AddPostSection extends StatelessWidget {
                   Text(
                     username.isNotEmpty ? username : 'Anonymous',
                     style: const TextStyle(
-                      fontFamily: 'Oktah',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
                     ),
@@ -87,7 +89,7 @@ class AddPostSection extends StatelessWidget {
                         child: Text(
                           address ?? 'Fetching location...',
                           style: const TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -114,7 +116,7 @@ class AddPostSection extends StatelessWidget {
                 hint: const Text(
                   'Moment Type',
                   style: TextStyle(
-                      fontFamily: 'Oktah',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontSize: 14,
                       fontWeight: FontWeight.w500),
                 ),
@@ -124,7 +126,7 @@ class AddPostSection extends StatelessWidget {
                     child: Text(
                       type,
                       style: const TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
                     ),
@@ -142,7 +144,7 @@ class AddPostSection extends StatelessWidget {
                 hint: const Text(
                   'Category',
                   style: TextStyle(
-                      fontFamily: 'Oktah',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontSize: 14,
                       fontWeight: FontWeight.w500),
                 ),
@@ -152,7 +154,7 @@ class AddPostSection extends StatelessWidget {
                     child: Text(
                       category.category_name,
                       style: const TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
                     ),
@@ -176,7 +178,7 @@ class AddPostSection extends StatelessWidget {
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                fontFamily: 'Oktah',
+                fontFamily: 'Baloo Bhaijaan 2',
               ),
             ),
             Switch(
@@ -199,7 +201,7 @@ class AddPostSection extends StatelessWidget {
             border: InputBorder.none,
           ),
           style: const TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'Baloo Bhaijaan 2',
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -207,7 +209,7 @@ class AddPostSection extends StatelessWidget {
 
         const SizedBox(height: 16.0),
 
-        // Image Picker
+        // Image Picker with Delete functionality
         GestureDetector(
           onTap: onPickImages,
           child: Container(
@@ -229,7 +231,7 @@ class AddPostSection extends StatelessWidget {
                         Text(
                           'Tap to add photos',
                           style: TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -241,20 +243,98 @@ class AddPostSection extends StatelessWidget {
                 : SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
                     child: Row(
-                      children: selectedImages.map((image) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(18.0),
-                            child: Image.file(
-                              image,
+                      children: [
+                        // Display selected images with delete buttons
+                        ...selectedImages.asMap().entries.map((entry) {
+                          int index = entry.key;
+                          File image = entry.value;
+
+                          return Container(
+                            margin: const EdgeInsets.all(8.0),
+                            child: Stack(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: BorderRadius.circular(18.0),
+                                  child: Image.file(
+                                    image,
+                                    width: 150,
+                                    height: 150,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                // Delete button positioned at top-right corner
+                                Positioned(
+                                  top: 5,
+                                  right: 5,
+                                  child: GestureDetector(
+                                    onTap: () => onRemoveImage?.call(index),
+                                    child: Container(
+                                      padding: const EdgeInsets.all(4),
+                                      decoration: BoxDecoration(
+                                        color: Colors.red.withOpacity(0.8),
+                                        shape: BoxShape.circle,
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color:
+                                                Colors.black.withOpacity(0.3),
+                                            blurRadius: 4,
+                                            offset: const Offset(0, 2),
+                                          ),
+                                        ],
+                                      ),
+                                      child: const Icon(
+                                        Icons.close,
+                                        color: Colors.white,
+                                        size: 16,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+
+                        // Add more photos button
+                        if (selectedImages.isNotEmpty)
+                          GestureDetector(
+                            onTap: onPickImages,
+                            child: Container(
                               width: 150,
                               height: 150,
-                              fit: BoxFit.cover,
+                              margin: const EdgeInsets.all(8.0),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade200,
+                                borderRadius: BorderRadius.circular(18.0),
+                                border: Border.all(
+                                  color: Colors.grey.shade400,
+                                  style: BorderStyle.solid,
+                                  width: 2,
+                                ),
+                              ),
+                              child: const Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(
+                                    Icons.add_photo_alternate,
+                                    size: 40,
+                                    color: Colors.grey,
+                                  ),
+                                  SizedBox(height: 8),
+                                  Text(
+                                    'Add more',
+                                    style: TextStyle(
+                                      fontFamily: 'Baloo Bhaijaan 2',
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w500,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        );
-                      }).toList(),
+                      ],
                     ),
                   ),
           ),

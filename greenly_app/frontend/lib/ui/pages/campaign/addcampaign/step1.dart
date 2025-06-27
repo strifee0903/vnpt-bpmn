@@ -1,11 +1,12 @@
-import 'dart:ffi';
 import 'package:flutter/material.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'package:greenly_app/ui/pages/campaign/campaign_manager.dart';
 import 'package:provider/provider.dart';
 import '../../../../components/colors.dart';
 import 'package:greenly_app/services/campaign_service.dart';
+import 'package:greenly_app/services/category_service.dart';
 import 'package:greenly_app/models/campaign.dart';
+import 'package:greenly_app/models/category.dart';
 
 class Step1 extends StatefulWidget {
   final VoidCallback onNext;
@@ -27,20 +28,21 @@ class Step1 extends StatefulWidget {
 
 class _Step1State extends State<Step1> {
   final CampaignService campaignService = CampaignService();
+  final CategoryService categoryService = CategoryService();
   final TextEditingController nameController = TextEditingController();
   final TextEditingController descriptionController = TextEditingController();
   final TextEditingController locationController = TextEditingController();
   DateTime? selectedStartDate;
   DateTime? selectedEndDate;
-  String? selectedCategory; // Biến để lưu category được chọn
+  Category? selectedCategory; // Biến để lưu category được chọn
 
   // Danh sách category
-  final List<String> categories = [
-    'Waste Sorting',
-    'Tree Planting',
-    'Recycling',
-    'Water Conservation',
-    'Renewable Energy',
+  final List<Category> categories = [
+    // 'Waste Sorting',
+    // 'Tree Planting',
+    // 'Recycling',
+    // 'Water Conservation',
+    // 'Renewable Energy',
   ];
 
   void showSuccessDialog() {
@@ -65,7 +67,7 @@ class _Step1State extends State<Step1> {
       location: locationController.text.trim(),
       startDate: selectedStartDate!.toIso8601String(),
       endDate: selectedEndDate!.toIso8601String(),
-      categoryId: 49,
+      categoryId: selectedCategory?.category_id ?? 49,
     );
 
     try {
@@ -82,6 +84,19 @@ class _Step1State extends State<Step1> {
       widget.onComplete('Có lỗi xảy ra khi tạo chiến dịch: $e');
       return 0; // Trả về 0 nếu có lỗi
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // Lấy danh sách category từ CampaignService
+    categoryService.getAllCategories().then((value) {
+      setState(() {
+        categories.addAll(value);
+      });
+    }).catchError((error) {
+      print('⚠️ Lỗi lấy danh sách category: $error');
+    });
   }
 
   @override
@@ -164,7 +179,7 @@ class _Step1State extends State<Step1> {
                   ),
                 ),
                 const SizedBox(height: 8.0),
-                DropdownButtonFormField<String>(
+                DropdownButtonFormField<Category>(
                   value: selectedCategory,
                   isExpanded: true,
                   hint: const Text(
@@ -175,11 +190,11 @@ class _Step1State extends State<Step1> {
                       fontWeight: FontWeight.w500,
                     ),
                   ),
-                  items: categories.map((String category) {
-                    return DropdownMenuItem<String>(
+                  items: categories.map((Category category) {
+                    return DropdownMenuItem<Category>(
                       value: category,
                       child: Text(
-                        category,
+                        category.category_name,
                         style: const TextStyle(
                           fontFamily: 'Oktah',
                           fontSize: 14,
@@ -189,21 +204,20 @@ class _Step1State extends State<Step1> {
                     );
                   }).toList(),
                   selectedItemBuilder: (BuildContext context) {
-                    return categories.map<Widget>((String category) {
+                    return categories.map<Widget>((Category category) {
                       return Text(
-                        category,
+                        category.category_name,
                         style: const TextStyle(
                           fontFamily: 'Oktah',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
-                        overflow: TextOverflow
-                            .ellipsis, // Cắt ngắn với "..." khi hiển thị trên box
-                        maxLines: 1, // Giới hạn 1 dòng
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       );
                     }).toList();
                   },
-                  onChanged: (String? newValue) {
+                  onChanged: (Category? newValue) {
                     setState(() {
                       selectedCategory = newValue;
                     });
@@ -398,6 +412,7 @@ class _Step1State extends State<Step1> {
                     fontWeight: FontWeight.w500,
                   ),
                   decoration: InputDecoration(
+                    hintText: 'Enter location (street, district, city)',
                     border: OutlineInputBorder(
                       borderSide: const BorderSide(color: fieldborder),
                       borderRadius: BorderRadius.circular(18.0),

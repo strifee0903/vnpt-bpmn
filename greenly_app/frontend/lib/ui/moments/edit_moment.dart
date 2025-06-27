@@ -12,6 +12,7 @@ import '../../services/category_service.dart';
 import '../../services/moment_service.dart';
 import '../../services/user_service.dart';
 import '../auth/auth_manager.dart';
+import 'moment_manager.dart';
 
 class EditMomentScreen extends StatefulWidget {
   final Moment moment;
@@ -174,21 +175,38 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
         categoryId: _selectedCategory?.category_id ?? 1,
         isPublic: _isPublic,
         images: _newImages,
-        mediaIdsToDelete:_mediaIdsToDelete.isNotEmpty ? _mediaIdsToDelete : null,
+        mediaIdsToDelete:
+        _mediaIdsToDelete.isNotEmpty ? _mediaIdsToDelete : null,
       );
 
       if (mounted) {
+        // Cập nhật dữ liệu trong MomentProvider
+        Provider.of<MomentProvider>(context, listen: false)
+            .updateMomentLocally(updatedMoment);
+
+        // Làm mới các feed
+        await Provider.of<MomentProvider>(context, listen: false)
+            .refreshAllFeeds();
+
+        // Thoát màn hình và truyền dữ liệu cập nhật
+        print(
+            '‼️‼️‼️‼️Popping EditMomentScreen with updated moment: ${updatedMoment.id}');
         Navigator.pop(context, updatedMoment);
+      } else {
+        print('‼️‼️‼️‼️Widget is not mounted, cannot pop');
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to update moment: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to update moment: $e')),
+        );
+      }
     } finally {
-      setState(() => _isLoading = false);
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -196,7 +214,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
         title: const Text(
           'Edit Post',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'Baloo Bhaijaan 2',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -245,7 +263,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                         ?.u_name ??
                                     'User',
                                 style: const TextStyle(
-                                  fontFamily: 'Oktah',
+                                  fontFamily: 'Baloo Bhaijaan 2',
                                   fontWeight: FontWeight.w700,
                                   fontSize: 18,
                                 ),
@@ -263,7 +281,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                     child: Text(
                                       _addressController.text,
                                       style: const TextStyle(
-                                        fontFamily: 'Oktah',
+                                        fontFamily: 'Baloo Bhaijaan 2',
                                         fontSize: 14,
                                         fontWeight: FontWeight.w400,
                                         color: Colors.grey,
@@ -290,7 +308,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                             hint: const Text(
                               'Moment Type',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'Baloo Bhaijaan 2',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -301,7 +319,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                       child: Text(
                                         type.capitalize(),
                                         style: const TextStyle(
-                                          fontFamily: 'Oktah',
+                                          fontFamily: 'Baloo Bhaijaan 2',
                                           fontSize: 14,
                                           fontWeight: FontWeight.w500,
                                         ),
@@ -322,7 +340,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                             hint: const Text(
                               'Category',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'Baloo Bhaijaan 2',
                                 fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -333,7 +351,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                                 child: Text(
                                   category.category_name,
                                   style: const TextStyle(
-                                    fontFamily: 'Oktah',
+                                    fontFamily: 'Baloo Bhaijaan 2',
                                     fontSize: 14,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -357,7 +375,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                         Text(
                           _isPublic ? 'Public' : 'Private',
                           style: const TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 16,
                             fontWeight: FontWeight.w500,
                           ),
@@ -383,7 +401,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                         border: InputBorder.none,
                       ),
                       style: const TextStyle(
-                        fontFamily: 'Oktah',
+                        fontFamily: 'Baloo Bhaijaan 2',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -395,7 +413,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                       const Text(
                         'Current Images',
                         style: TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -454,7 +472,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                       const Text(
                         'New Images',
                         style: TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
@@ -532,7 +550,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                               Text(
                                 'Tap to add photos',
                                 style: TextStyle(
-                                  fontFamily: 'Oktah',
+                                  fontFamily: 'Baloo Bhaijaan 2',
                                   fontSize: 14,
                                   fontWeight: FontWeight.w400,
                                   color: Colors.grey,
@@ -560,7 +578,7 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
                           : const Text(
                               'Save Changes',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'Baloo Bhaijaan 2',
                                 fontSize: 18,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
@@ -602,6 +620,8 @@ class _EditMomentScreenState extends State<EditMomentScreen> {
     try {
       await _momentService.deleteMoment(widget.moment.id);
       if (mounted) {
+        await Provider.of<MomentProvider>(context, listen: false)
+            .refreshAllFeeds();
         Navigator.pop(context, 'deleted');
       }
     } catch (e) {

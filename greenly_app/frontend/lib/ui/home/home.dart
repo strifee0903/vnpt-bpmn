@@ -85,7 +85,7 @@ class _HomePageState extends State<HomePage> {
                                     'Share Your Moment',
                                     style: TextStyle(
                                       fontSize: 18,
-                                      fontFamily: 'Oktah',
+                                      fontFamily: 'Manrope',
                                       fontWeight: FontWeight.w700,
                                       color: Colors.black,
                                     ),
@@ -95,7 +95,7 @@ class _HomePageState extends State<HomePage> {
                                     'Capture your favorite memories',
                                     style: TextStyle(
                                       fontSize: 12,
-                                      fontFamily: 'Oktah',
+                                      fontFamily: 'Manrope',
                                       fontWeight: FontWeight.w500,
                                       color: Colors.black54,
                                     ),
@@ -136,7 +136,7 @@ class _HomePageState extends State<HomePage> {
                   style: TextStyle(
                     fontSize: 21,
                     fontWeight: FontWeight.bold,
-                    fontFamily: 'Oktah',
+                    fontFamily: 'Manrope',
                   ),
                 ),
               ),
@@ -239,7 +239,7 @@ class _HomePageState extends State<HomePage> {
                   title,
                   style: TextStyle(
                     fontSize: 18,
-                    fontFamily: 'Oktah',
+                    fontFamily: 'Manrope',
                     fontWeight: FontWeight.w900,
                     color: textColor,
                   ),

@@ -65,13 +65,15 @@ class _Step2State extends State<Step2> {
     super.initState();
     // Khởi tạo moment nếu cần
     int? id = context.read<CampaignManager>().campaignId;
+
     if (id != null) {
+      print('🔍 DEBUG - Campaign ID: $id');
       // Nếu có id, lấy thông tin moment từ service
       momentService.getMomentById(id).then((value) {
         setState(() {
           moment = value;
           contentController.text = moment?.content ?? '';
-          selectedImage = (moment?.media != null && moment!.media!.isNotEmpty)
+          selectedImage = (moment?.media != null && moment!.media.isNotEmpty)
               ? File(moment!.media.first.media_url)
               : null;
         });

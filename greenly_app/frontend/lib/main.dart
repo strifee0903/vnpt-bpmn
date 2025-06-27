@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:greenly_app/ui/user/not_found_screen.dart';
+import 'package:greenly_app/shared/not_found_screen.dart';
+import 'package:greenly_app/ui/pages/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 
-import 'components/colors.dart';
 import 'services/moment_service.dart';
 import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
+import 'ui/moments/moment_manager.dart';
+import 'ui/pages/profile/user_manager.dart';
 import 'ui/slpash_screen.dart';
 import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
 import 'ui/pages/mydiary/mydiary.dart'; // Import MyDiary
@@ -38,11 +40,11 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     final colorScheme = ColorScheme.fromSeed(
-      seedColor: const Color.fromARGB(255, 255, 158, 158),
+      seedColor: const Color(0xFF2E7D32),
       secondary: const Color(0xFFFFF8DC),
       surface: const Color.fromARGB(255, 255, 245, 245),
-      surfaceTint: const Color.fromARGB(255, 255, 158, 158),
-      primary: const Color.fromARGB(255, 255, 158, 158),
+      surfaceTint: const Color(0xFF2E7D32),
+      primary: const Color(0xFF2E7D32),
       onPrimary: Colors.white,
       onSecondary: Colors.black,
       onSurface: Colors.black,
@@ -51,7 +53,7 @@ class _MyAppState extends State<MyApp> {
     final themeData = ThemeData(
       fontFamily: 'Lato',
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: color13,
+      scaffoldBackgroundColor: Color(0xFF2E7D32),
       useMaterial3: true,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.primary,
@@ -73,6 +75,8 @@ class _MyAppState extends State<MyApp> {
       providers: [
         ChangeNotifierProvider(create: (ctx) => AuthManager()),
         Provider(create: (_) => MomentService()),
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => MomentProvider()),
       ],
       child: Builder(builder: (context) {
         final authManager = Provider.of<AuthManager>(context, listen: false);
@@ -111,8 +115,9 @@ class _MyAppState extends State<MyApp> {
                 '/greenLibrary': (ctx) => const SafeArea(child: GreenLibrary()),
                 '/campaign': (ctx) => const SafeArea(child: Campaign()),
                 '/moments': (ctx) => const SafeArea(child: MomentsPage()),
-                '/profile': (ctx) => const SafeArea(
-                    child: MainLayout(initialIndex: 3)), // Update to MainLayout
+                '/profile': (ctx) => const SafeArea(child: ProfileScreen()),
+                // '/profile': (ctx) => const SafeArea(
+                //     child: MainLayout(initialIndex: 3)), // Update to MainLayout
               },
               onGenerateRoute: (settings) {
                 print('🔴 Navigating to route: ${settings.name}');
@@ -126,9 +131,11 @@ class _MyAppState extends State<MyApp> {
                   case '/moments':
                     return ScaleRoute(page: const MomentsPage());
                   case '/profile':
-                    return ScaleRoute(
-                        page: const MainLayout(
-                            initialIndex: 3)); // Update to MainLayout
+                    return ScaleRoute(page: const ProfileScreen());
+                  // case '/profile':
+                  //   return ScaleRoute(
+                  //       page: const MainLayout(
+                  //           initialIndex: 3)); // Update to MainLayout
                   default:
                     print('🔴 Unknown route: ${settings.name}');
                     return SlideUpRoute(page: const NotFoundScreen());

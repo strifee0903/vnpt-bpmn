@@ -11,9 +11,9 @@ class CampaignService {
 
   // Tạo chiến dịch
   Future<int?> createCampaign(Campaign campaign) async {
-    final prefs = await SharedPreferences.getInstance();
-    final sessionCookie = prefs.getString('session_cookie') ?? '';
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie') ?? '';
       final uri = Uri.parse('$baseUrl/campaign/create');
       final request = http.MultipartRequest('POST', uri);
 
@@ -26,7 +26,7 @@ class CampaignService {
 
       if (response.statusCode == 201) {
         final jsonData = json.decode(response.body);
-        return jsonData['data']['campaign_id'];
+        return jsonData['data']['moment_id'];
       } else {
         print('❌ Tạo thất bại (${response.statusCode}): ${response.body}');
         return null;
@@ -40,12 +40,23 @@ class CampaignService {
   // Lấy tất cả campaign
   Future<List<Campaign>> getAllCampaigns({int page = 1, int limit = 10}) async {
     try {
-      final uri = Uri.parse('$baseUrl/all?page=$page&limit=$limit');
-      final response = await http.get(uri);
-
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie') ?? '';
+      final uri = Uri.parse('$baseUrl/campaign/all?page=$page&limit=$limit');
+      // final response = await http.get(uri);
+      final response = await http.get(
+        uri,
+        headers: {
+          'Cookie': sessionCookie, // Add cookie to get like status
+        },
+      );
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        final List campaignsJson = jsonData['data'] ?? [];
+        final List campaignsJson = jsonData['data']['campaigns'] ?? [];
+        print('📦 Campaigns fetched: ${campaignsJson.length}');
+        for (var item in campaignsJson) {
+          print('📦 Raw item: $item');
+        }
 
         return campaignsJson.map((json) => Campaign.fromJson(json)).toList();
       } else {

@@ -5,6 +5,7 @@ import 'package:http_parser/http_parser.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/moment.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:mime/mime.dart';
 
 const defaultUrl = 'http://192.168.1.7:3000/api';
 
@@ -44,7 +45,7 @@ class MomentService {
     final sessionCookie = prefs.getString('session_cookie') ?? '';
 
     final requestUrl = '$baseUrl/moment/new';
-    print('🌐 DEBUG - Request URL: $requestUrl');
+    print('🌐🌐🌐 DEBUG - Request URL: $requestUrl');
 
     try {
       // MultipartRequest (upload ảnh + text)
@@ -65,10 +66,13 @@ class MomentService {
 
       // Thêm các ảnh
       for (var image in images) {
+        final mimeType = lookupMimeType(image.path) ?? 'image/jpeg';
+        final mimeTypeData = mimeType.split('/');
+        print('📷 Uploading image: ${image.path}, MIME type: $mimeType');
         request.files.add(await http.MultipartFile.fromPath(
           'images',
           image.path,
-          contentType: MediaType('image', 'jpeg'),
+          contentType: MediaType(mimeTypeData[0], mimeTypeData[1]),
         ));
       }
 
@@ -76,8 +80,8 @@ class MomentService {
       final response = await request.send();
       final responseBody = await response.stream.bytesToString();
 
-      print('📡 DEBUG - Response status: ${response.statusCode}');
-      print('📡 DEBUG - Response body: $responseBody');
+      print('📡🌐 DEBUG - Response status: ${response.statusCode}');
+      print('📡🌐 DEBUG - Response body: $responseBody');
 
       if (response.statusCode == 201) {
         final jsonResponse = jsonDecode(responseBody);

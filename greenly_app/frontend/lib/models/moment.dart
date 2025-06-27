@@ -40,6 +40,9 @@ class Moment {
     try {
       final momentId = json['moment_id'];
       final createdAtStr = json['created_at'] ?? DateTime.now().toString();
+      final createdAt =
+          DateTime.parse(createdAtStr).toUtc().add(const Duration(hours: 7));
+
       final userData = json['user'] ??
           {
             'u_id': json['u_id'] ?? 1,
@@ -67,7 +70,7 @@ class Moment {
         latitude: json['latitude']?.toDouble(),
         longitude: json['longitude']?.toDouble(),
         type: json['moment_type']?.toString() ?? 'diary',
-        createdAt: DateTime.parse(createdAtStr),
+        createdAt: createdAt,
         user: User.fromJson(userData),
         category: Category.fromJson(categoryData),
         media: mediaData.map((e) => Media.fromJson(e)).toList(),
