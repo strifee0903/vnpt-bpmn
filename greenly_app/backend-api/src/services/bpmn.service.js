@@ -1,6 +1,7 @@
 const e = require("express");
 const knex = require("../database/knex");
 const JSend = require("../jsend");
+const { updateProcessID } = require("./library.service");
 const { XMLParser, XMLBuilder } = require("fast-xml-parser");
 require("dotenv").config();
 
@@ -247,11 +248,18 @@ const updateProcess = async (process_id, name, xml_content, type) => {
       });
       // Step 5: Recreate the process with createBpmn
       console.log(`Recreating process ${process_id}...`);
-      await createBpmn({ process_id, name, xml_content, type });
-
+      const oldProcessId = process_id;
+      const { process_id: newProcessId } = await createBpmn({
+        process_id: oldProcessId,
+        name,
+        xml_content,
+        type,
+      });
+      await updateProcessID(oldProcessId, newProcessId);
       console.log(`Process ${process_id} updated successfully.`);
     } else {
       await createBpmn({ process_id, name, xml_content, type });
+
       console.log(`Process ${process_id} created successfully.`);
     }
   } catch (error) {

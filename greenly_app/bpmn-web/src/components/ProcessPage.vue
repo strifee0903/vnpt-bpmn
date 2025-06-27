@@ -189,6 +189,29 @@ const createNewProcess = async () => {
       </bpmn:definitions>`
 
     await modeler.value.importXML(emptyDiagram)
+    setTimeout(() => {
+      const idInput = document.getElementById('bio-properties-panel-id')
+      if (idInput) {
+        idInput.setAttribute('readonly', true)
+        idInput.style.backgroundColor = '#e9ecef'
+        idInput.title = 'Không thể chỉnh sửa ID của process'
+      }
+    }, 200)
+    setTimeout(() => {
+      const idError = document.querySelector('.bio-properties-panel-error')
+      if (idError && idError.innerText.includes('ID must be unique')) {
+        idError.style.display = 'none'
+      }
+    }, 200)
+    // Gắn class "open" vào tất cả các header group của properties panel
+    const header = document.querySelector('.bio-properties-panel-group-header')
+    if (header) {
+      header.classList.add('open')
+    }
+    const entry = document.querySelector('.bio-properties-panel-group-entries')
+    if (entry) {
+      entry.classList.add('open')
+    }
 
     notify('Tạo mới quy trình trống thành công')
     console.log('Tạo mới quy trình trống thành công')
@@ -203,7 +226,28 @@ const loadProcess = async (id) => {
     const res = await axios.get(`/api/v1/bpmn/${id}`)
     processName.value = res.data.data.name
     await modeler.value.importXML(res.data.data.xml_content)
-
+    setTimeout(() => {
+      const idInput = document.getElementById('bio-properties-panel-id')
+      if (idInput) {
+        idInput.setAttribute('readonly', true)
+        idInput.style.backgroundColor = '#e9ecef'
+        idInput.title = 'Không thể chỉnh sửa ID của process'
+      }
+    }, 200)
+    setTimeout(() => {
+      const idError = document.querySelector('.bio-properties-panel-error')
+      if (idError && idError.innerText.includes('ID must be unique')) {
+        idError.style.display = 'none'
+      }
+    }, 200)
+    const header = document.querySelector('.bio-properties-panel-group-header')
+    if (header) {
+      header.classList.add('open')
+    }
+    const entry = document.querySelector('.bio-properties-panel-group-entries')
+    if (entry) {
+      entry.classList.add('open')
+    }
     notify(`Tải quy trình ${processName.value} thành công`)
   } catch (err) {
     notify(`Lỗi tải quy trình ${id}: ${err.message}`)
