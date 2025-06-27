@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -7,6 +5,7 @@ import '../../../components/colors.dart';
 import 'addcampaign/dynamic_flow_screen.dart';
 import 'package:greenly_app/models/campaign.dart' as model;
 import 'package:greenly_app/services/campaign_service.dart';
+import 'package:greenly_app/services/user_service.dart';
 import 'campaign_detail_card.dart';
 import 'campaign_manager.dart';
 import 'package:intl/intl.dart';
@@ -26,9 +25,10 @@ String formatDate(String isoDate) {
 class _CampaignState extends State<Campaign> {
   int _selectedTab = 0; // 0: Created Campaigns, 1: Joined Campaigns
   final CampaignService campaignService = CampaignService();
+  final UserService userService = UserService();
   List<model.Campaign> campaigns = [];
   String? _currentUserId;
-  Map<int, bool> _participationStatus = {};
+  String? _errorMessage;
 
   @override
   void initState() {
@@ -37,48 +37,64 @@ class _CampaignState extends State<Campaign> {
     _fetchCampaigns();
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _fetchCampaigns();
-  }
-
   Future<void> _fetchUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final authUserRaw = prefs.getString('auth_user');
-    if (authUserRaw != null) {
-      final decoded = jsonDecode(authUserRaw);
+    try {
+      final user = await userService.getCurrentUser();
       if (mounted) {
         setState(() {
-          _currentUserId = decoded['u_id'].toString();
+          _currentUserId = user?.u_id.toString();
           print('✅ Current User ID: $_currentUserId');
+        });
+      }
+    } catch (e) {
+      print('⚠️ Failed to fetch user: $e');
+      if (mounted) {
+        setState(() {
+          _currentUserId = null;
+          _errorMessage = 'Failed to load user data. Please log in again.';
         });
       }
     }
   }
 
   Future<void> _fetchCampaigns() async {
-    final fetchedCampaigns = await campaignService.getAllCampaigns();
-    final campaignManager =
-        Provider.of<CampaignManager>(context, listen: false);
+    try {
+      final fetchedCampaigns = await campaignService.getAllCampaigns();
+      final campaignManager =
+          Provider.of<CampaignManager>(context, listen: false);
 
-    if (mounted) {
-      final statusMap = <int, bool>{};
+      if (mounted) {
+        final statusMap = <int, bool>{};
+        for (final campaign in fetchedCampaigns) {
+          final isJoined =
+              await campaignManager.getParticipationStatus(campaign.id);
+          statusMap[campaign.id] = isJoined;
+        }
 
-      for (final campaign in fetchedCampaigns) {
-        final isJoined =
-            await campaignManager.getParticipationStatus(campaign.id);
-        statusMap[campaign.id] = isJoined;
+        setState(() {
+          campaigns = _selectedTab == 0
+              ? fetchedCampaigns // Show all campaigns in "Created" tab
+              : fetchedCampaigns.where((c) => statusMap[c.id] == true).toList();
+          campaignManager.updateParticipationStatus(statusMap);
+          _errorMessage = campaigns.isEmpty && _selectedTab == 0
+              ? 'You have not created any campaigns.'
+              : campaigns.isEmpty && _selectedTab == 1
+                  ? 'You have not joined any campaigns.'
+                  : null;
+          print('👽👽👽 Fetched Campaigns: ${campaigns.map((c) => {
+                'campaign_id': c.id,
+                'u_id': c.user?.u_id,
+                'is_joined': statusMap[c.id]
+              })}');
+        });
       }
-
-      setState(() {
-        campaigns = fetchedCampaigns;
-        _participationStatus = statusMap;
-        print('👽👽👽 Fetched Campaigns: ${campaigns.map((c) => {
-              'campaign_id': c.id,
-              'u_id': c.user?.u_id
-            })}');
-      });
+    } catch (e) {
+      print('⚠️ Failed to fetch campaigns: $e');
+      if (mounted) {
+        setState(() {
+          _errorMessage = 'Failed to load campaigns: $e';
+        });
+      }
     }
   }
 
@@ -115,6 +131,14 @@ class _CampaignState extends State<Campaign> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            if (_errorMessage != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Text(
+                  _errorMessage!,
+                  style: const TextStyle(color: Colors.red),
+                ),
+              ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 2.0),
               child: SizedBox(
@@ -139,6 +163,7 @@ class _CampaignState extends State<Campaign> {
                     onTap: () {
                       setState(() {
                         _selectedTab = 0;
+                        _fetchCampaigns();
                       });
                     },
                     child: _selectedTab == 0
@@ -177,6 +202,7 @@ class _CampaignState extends State<Campaign> {
                     onTap: () {
                       setState(() {
                         _selectedTab = 1;
+                        _fetchCampaigns();
                       });
                     },
                     child: _selectedTab == 1
@@ -211,33 +237,39 @@ class _CampaignState extends State<Campaign> {
               ],
             ),
             Expanded(
-              child: ListView.builder(
-                itemCount: campaigns.length,
-                itemBuilder: (context, index) {
-                  final campaign = campaigns[index];
-                  final colors = entryColors[index % entryColors.length];
-                  final isCreator = _currentUserId != null &&
-                      campaign.user?.u_id.toString() == _currentUserId;
+              child: campaigns.isEmpty
+                  ? Center(
+                      child: Text(_errorMessage ?? 'No campaigns available'))
+                  : ListView.builder(
+                      itemCount: campaigns.length,
+                      itemBuilder: (context, index) {
+                        final campaign = campaigns[index];
+                        final colors = entryColors[index % entryColors.length];
+                        final isCreator = _currentUserId != null &&
+                            campaign.user?.u_id.toString() == _currentUserId;
+                        final campaignManager =
+                            Provider.of<CampaignManager>(context, listen: true);
+                        final isJoined =
+                            campaignManager.participationStatus[campaign.id] ??
+                                false;
 
-                  return FutureBuilder<bool>(
-                    future: campaignManager.getParticipationStatus(campaign.id),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Center(child: CircularProgressIndicator());
-                      }
-                      final isJoined =
-                          _participationStatus[campaign.id] ?? false;
+                        // // Double-check participation status with backend if needed
+                        // void verifyParticipationStatus() async {
+                        //   final updatedIsJoined = await campaignManager
+                        //       .getParticipationStatus(campaign.id);
+                        //   if (updatedIsJoined != isJoined) {
+                        //     setState(() {
+                        //       _fetchCampaigns(); // Refresh campaigns if status mismatches
+                        //     });
+                        //   }
+                        // }
 
-                      return GestureDetector(
-                        onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (_) => Center(
-                              child: CampaignDetailCard(campaign: campaign),
-                            ),
-                          );
-                        },
-                        child: Container(
+                        // WidgetsBinding.instance.addPostFrameCallback((_) {
+                        //   if (isJoined)
+                        //     verifyParticipationStatus(); // Verify if "Leave" is shown
+                        // });
+
+                        return Container(
                           margin: const EdgeInsets.only(bottom: 16.0),
                           decoration: BoxDecoration(
                             color: colors['background'],
@@ -323,11 +355,8 @@ class _CampaignState extends State<Campaign> {
                                                       .joinCampaign(
                                                           campaign.id);
                                               if (success) {
-                                                final newStatus =
-                                                    isJoined ? false : true;
                                                 setState(() {
-                                                  _participationStatus[
-                                                      campaign.id] = newStatus;
+                                                  _fetchCampaigns(); // Reload campaigns
                                                 });
                                               } else {
                                                 ScaffoldMessenger.of(context)
@@ -344,7 +373,7 @@ class _CampaignState extends State<Campaign> {
                                             },
                                       style: TextButton.styleFrom(
                                         backgroundColor: isCreator
-                                            ? Colors.grey // Grey for Hosting
+                                            ? Colors.grey
                                             : isJoined
                                                 ? Colors.red
                                                 : button,
@@ -386,12 +415,9 @@ class _CampaignState extends State<Campaign> {
                               ],
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                },
-              ),
+                        );
+                      },
+                    ),
             ),
           ],
         ),
