@@ -100,7 +100,7 @@ class ProcessService {
   Future<(List<model.Step>, List<model.Flow>)> fetchProcess() async {
     try {
       final uri = Uri.parse(
-          '$baseUrl/v1/bpmn/details/Process_17501703319112'); // Sửa endpoint để lấy theo processId
+          '$baseUrl/v1/bpmn/details/Process_1751011178846'); // Sửa endpoint để lấy theo processId
       print('😵‍💫😵‍💫😵‍💫Fetching process details from: ${uri.toString()}');
       final response = await http.get(uri);
 

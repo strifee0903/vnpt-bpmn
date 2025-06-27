@@ -9,6 +9,8 @@ import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
 import 'ui/moments/moment_manager.dart';
+import 'ui/pages/campaign/campaign_manager.dart';
+import 'ui/pages/group_chat_screen.dart';
 import 'ui/pages/profile/user_manager.dart';
 import 'ui/slpash_screen.dart';
 import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
@@ -77,6 +79,7 @@ class _MyAppState extends State<MyApp> {
         Provider(create: (_) => MomentService()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => MomentProvider()),
+        ChangeNotifierProvider(create: (_)=> CampaignManager())
       ],
       child: Builder(builder: (context) {
         final authManager = Provider.of<AuthManager>(context, listen: false);
@@ -116,6 +119,7 @@ class _MyAppState extends State<MyApp> {
                 '/campaign': (ctx) => const SafeArea(child: Campaign()),
                 '/moments': (ctx) => const SafeArea(child: MomentsPage()),
                 '/profile': (ctx) => const SafeArea(child: ProfileScreen()),
+                '/groupChat': (context) => const GroupChatPage(),
                 // '/profile': (ctx) => const SafeArea(
                 //     child: MainLayout(initialIndex: 3)), // Update to MainLayout
               },

@@ -185,10 +185,13 @@ async function leaveCampaign(u_id, campaign_id) {
         throw new Error('Campaign not found');
     }
 
-    // 2. Kiểm tra trạng thái hiện tại
-    const existing = await participationRepository()
-        .where({ u_id, campaign_id })
-        .first();
+    // 2. Kiểm tra nếu user là host
+    if (campaign.u_id === u_id) {
+        throw new Error('Host cannot leave their own campaign');
+    }
+
+    // 3. Kiểm tra trạng thái hiện tại
+    const existing = await participationRepository().where({ u_id, campaign_id }).first();
 
     if (!existing) {
         throw new Error('Cannot leave - not joined yet');

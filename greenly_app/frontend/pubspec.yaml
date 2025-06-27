@@ -38,8 +38,6 @@ dependencies:
   flutter_vector_icons: ^2.0.0
   mime: ^1.0.4
   heic_to_jpg: 0.2.0
-  flutter_chat_ui: ^1.6.10
-  flutter_chat_types: ^3.6.2
   weather_animation: ^1.0.4
   lottie: ^3.1.0
   
