@@ -18,12 +18,13 @@ const Color barkBrown = Color(0xFF5D4037); // Earthy accent
 const Color skyLight = Color(0xFFE8F5E9); // Light background
 
 // Text colors
-const Color textNatureDark = Color(0xFF263238); // Dark gray-green
+const Color textNatureDark = Color.fromARGB(255, 6, 46, 12); // Dark gray-green
 const Color textNatureLight = Color(0xFFECEFF1); // Light text
 
 // Buttons & accents
 const Color buttonPrimary = ecoGreen;
 const Color buttonSecondary = Color(0xFF81C784); // Soft green
+const Color button1 = Color.fromARGB(255, 18, 46, 19); 
 
 // const color1 = Color(0xFFb77a8f);
 // const color2 = Color(0xFFefdad7);

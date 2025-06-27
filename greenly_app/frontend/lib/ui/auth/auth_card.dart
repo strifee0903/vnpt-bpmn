@@ -1,6 +1,8 @@
 import 'dart:developer' show log;
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../../components/colors.dart';
 import '../../shared/dialog_utils.dart';
 import 'auth_manager.dart';
 
@@ -32,19 +34,12 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
   late AnimationController _animationController;
   late Animation<double> _slideAnimation;
 
-  // Green color palette
-  static const Color primaryGreen = Color(0xFF4CAF50);
-  static const Color lightGreen = Color(0xFF81C784);
-  static const Color darkGreen = Color(0xFF2E7D32);
-  static const Color backgroundGreen = Color(0xFFF1F8E9);
-  static const Color softGreen = Color(0xFFE8F5E8);
-
   @override
   void initState() {
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 300),
+      duration: const Duration(milliseconds: 500),
     );
     _slideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
@@ -71,10 +66,10 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: primaryGreen,
+              primary: mistWhite,
               onPrimary: Colors.white,
               surface: Colors.white,
-              onSurface: darkGreen,
+              onSurface: deepForest,
             ),
           ),
           child: child!,
@@ -217,110 +212,81 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
 
     return Container(
       width: double.infinity,
-      height:
-          _authMode == AuthMode.login ? size.height * 0.65 : size.height * 0.75,
       decoration: BoxDecoration(
-        color: Colors.white,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(30),
           topRight: Radius.circular(30),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: primaryGreen.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, -5),
-          ),
-        ],
       ),
-      child: SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0, 0.3),
-          end: Offset.zero,
-        ).animate(_slideAnimation),
-        child: FadeTransition(
-          opacity: _slideAnimation,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // Mode indicator
-                  Container(
-                    width: 60,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: softGreen,
-                      borderRadius: BorderRadius.circular(2),
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Title
-                  // Text(
-                  //   _authMode == AuthMode.signup
-                  //       ? "Join the Green Community"
-                  //       : "Welcome Back!",
-                  //   style: const TextStyle(
-                  //     fontSize: 24,
-                  //     fontWeight: FontWeight.bold,
-                  //     color: darkGreen,
-                  //   ),
-                  // ),
-                  // const SizedBox(height: 8),
-                  Text(
-                    _authMode == AuthMode.signup
-                        ? "Start your eco-friendly journey"
-                        : "Welcome back!",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: primaryGreen.withOpacity(0.7),
-                    ),
-                  ),
-                  const SizedBox(height: 15),
-
-                  // Form fields
-                  if (_authMode == AuthMode.signup) ...[
-                    _buildUsernameField(),
-                    const SizedBox(height: 16),
-                  ],
-                  _buildEmailField(),
-                  const SizedBox(height: 16),
-                  _buildPasswordField(),
-                  if (_authMode == AuthMode.signup) ...[
-                    const SizedBox(height: 16),
-                    _buildBirthdayField(),
-                    const SizedBox(height: 16),
-                    _buildAddressField(),
-                  ],
-                  const SizedBox(height: 25),
-
-                  // Submit button
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _isSubmitting,
-                    builder: (context, isSubmitting, child) {
-                      return isSubmitting
-                          ? Container(
-                              height: 50,
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                  valueColor: AlwaysStoppedAnimation<Color>(
-                                      primaryGreen),
-                                ),
-                              ),
-                            )
-                          : _buildSubmitButton();
-                    },
-                  ),
-                  const SizedBox(height: 10),
-
-                  // Auth mode switch
-                  _buildAuthModeSwitchButton(),
-                ],
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 25),
+        child: Form(
+          key: _formKey,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Mode indicator
+              Container(
+                width: 60,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 15),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(2),
+                ),
               ),
-            ),
+
+              // Title
+              Text(
+                _authMode == AuthMode.signup
+                    ? "Tham gia Greenly"
+                    : "Chào mừng trở lại",
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+              const SizedBox(height: 8),
+              
+              // Form fields
+              if (_authMode == AuthMode.signup) ...[
+                _buildUsernameField(),
+                const SizedBox(height: 16),
+              ],
+              _buildEmailField(),
+              const SizedBox(height: 16),
+              _buildPasswordField(),
+              if (_authMode == AuthMode.signup) ...[
+                const SizedBox(height: 16),
+                _buildBirthdayField(),
+                const SizedBox(height: 16),
+                _buildAddressField(),
+              ],
+              const SizedBox(height: 30),
+
+              // Submit button
+              ValueListenableBuilder<bool>(
+                valueListenable: _isSubmitting,
+                builder: (context, isSubmitting, child) {
+                  return isSubmitting
+                      ? Container(
+                          height: 50,
+                          child: Center(
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            ),
+                          ),
+                        )
+                      : _buildSubmitButton();
+                },
+              ),
+              const SizedBox(height: 15),
+
+              // Auth mode switch
+              _buildAuthModeSwitchButton(),
+            ],
           ),
         ),
       ),
@@ -329,7 +295,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
 
   Widget _buildUsernameField() {
     return _buildTextField(
-      hintText: "Choose a username",
+      hintText: "Tên người dùng",
       icon: Icons.person_outline,
       onSaved: (value) => _authData['uName'] = value!,
     );
@@ -337,7 +303,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
 
   Widget _buildAddressField() {
     return _buildTextField(
-      hintText: "Your address",
+      hintText: "Địa chỉ",
       icon: Icons.location_on_outlined,
       onSaved: (value) => _authData['uAddress'] = value!,
     );
@@ -345,7 +311,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
 
   Widget _buildEmailField() {
     return _buildTextField(
-      hintText: "Email address",
+      hintText: "Email",
       icon: Icons.email_outlined,
       controller: _emailController,
       onSaved: (value) => _authData['uEmail'] = value!,
@@ -354,15 +320,13 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
 
   Widget _buildBirthdayField() {
     return _buildTextField(
-      hintText: "Select your birthday",
+      hintText: "Ngày sinh",
       icon: Icons.cake_outlined,
       controller: _birthdayController,
-      onSaved: (value) {
-        _authData['uBirthday'] = value!;
-      },
+      onSaved: (value) => _authData['uBirthday'] = value!,
       suffixIcon: Icon(
         Icons.calendar_today_outlined,
-        color: primaryGreen.withOpacity(0.7),
+        color: Colors.white.withOpacity(0.8),
         size: 20,
       ),
       readOnly: true,
@@ -372,7 +336,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
 
   Widget _buildPasswordField() {
     return _buildTextField(
-      hintText: "Password",
+      hintText: "Mật khẩu (8 ký tự trở lên)",
       icon: Icons.lock_outline,
       obscureText: _obscurePassword,
       controller: _passwordController,
@@ -382,7 +346,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
           _obscurePassword
               ? Icons.visibility_off_outlined
               : Icons.visibility_outlined,
-          color: primaryGreen.withOpacity(0.7),
+          color: Colors.white.withOpacity(0.8),
           size: 20,
         ),
         onPressed: () {
@@ -400,10 +364,10 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
       children: [
         Text(
           _authMode == AuthMode.login
-              ? "New to Greenly? "
-              : "Already have an account? ",
+              ? "Chưa có tài khoản? "
+              : "Đã có tài khoản? ",
           style: TextStyle(
-            color: darkGreen.withOpacity(0.7),
+            color: Colors.white.withOpacity(0.8),
             fontSize: 14,
           ),
         ),
@@ -413,11 +377,11 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
             padding: const EdgeInsets.symmetric(horizontal: 8),
           ),
           child: Text(
-            _authMode == AuthMode.login ? 'Sign Up' : 'Login',
-            style: const TextStyle(
-              color: primaryGreen,
+            _authMode == AuthMode.login ? 'Đăng Ký' : 'Đăng Nhập',
+            style: TextStyle(
+              color: Colors.white,
               fontSize: 14,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
@@ -430,34 +394,31 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [primaryGreen, lightGreen],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
+        color: Colors.white.withOpacity(0.9),
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
-            color: primaryGreen.withOpacity(0.3),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
-      child: TextButton(
-        onPressed: _submit,
-        style: TextButton.styleFrom(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
-          ),
-        ),
-        child: Text(
-          _authMode == AuthMode.login ? 'LOGIN' : 'SIGN UP',
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            letterSpacing: 1,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          borderRadius: BorderRadius.circular(25),
+          onTap: _submit,
+          child: Center(
+            child: Text(
+              _authMode == AuthMode.login ? 'ĐĂNG NHẬP' : 'ĐĂNG KÝ',
+              style: TextStyle(
+                color: Colors.blue[800],
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1,
+              ),
+            ),
           ),
         ),
       ),
@@ -476,10 +437,10 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: backgroundGreen.withOpacity(0.3),
+        color: Colors.white.withOpacity(0.15),
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: softGreen,
+          color: Colors.white.withOpacity(0.3),
           width: 1.5,
         ),
       ),
@@ -488,20 +449,20 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
         obscureText: obscureText,
         readOnly: readOnly,
         onTap: onTap,
-        cursorColor: primaryGreen,
-        style: const TextStyle(
+        cursorColor: Colors.white,
+        style: TextStyle(
           fontSize: 16,
-          color: darkGreen,
+          color: Colors.white,
         ),
         decoration: InputDecoration(
           prefixIcon: Icon(
             icon,
-            color: primaryGreen.withOpacity(0.7),
+            color: Colors.white.withOpacity(0.7),
             size: 22,
           ),
           hintText: hintText,
           hintStyle: TextStyle(
-            color: darkGreen.withOpacity(0.5),
+            color: Colors.white.withOpacity(0.5),
             fontSize: 14,
           ),
           suffixIcon: suffixIcon,

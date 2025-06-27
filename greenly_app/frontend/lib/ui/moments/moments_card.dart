@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/moment.dart';
 import '../../services/moment_service.dart';
-import '../../shared/main_layout.dart';
 import '../auth/auth_manager.dart';
 import '../pages/profile/otherUserProfile.dart';
 import '../pages/profile/user_manager.dart';

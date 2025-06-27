@@ -1,5 +1,8 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'auth_card.dart';
+import 'package:weather_animation/weather_animation.dart';
+import 'package:lottie/lottie.dart';
 
 class AuthScreen extends StatelessWidget {
   static const routeName = '/auth';
@@ -14,117 +17,180 @@ class AuthScreen extends StatelessWidget {
         height: size.height,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
             colors: [
-              Color(0xFFE8F5E8), // Light mint green
-              Color(0xFFF0F8F0), // Very light green
-              Color(0xFFE0F2E0), // Soft green
+              Color(0xFFE3F2FD),
+              Color(0xFFBBDEFB),
+              Color(0xFF90CAF9),
             ],
           ),
         ),
         child: Stack(
           children: [
-            // Background decorative elements
+            // Cloud 1 with rain
             Positioned(
-              top: -50,
-              right: -50,
-              child: Container(
+              top: size.height * 0.1,
+              left: -50,
+              child: SizedBox(
+                width: 200,
+                height: 300,
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned(
+                      top: 0,
+                      child: SizedBox(
+                        width: 200,
+                        height: 150,
+                        child: Lottie.asset(
+                          'assets/animations/cloud.json',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 130,
+                      child: SizedBox(
+                        width: 200,
+                        height: 170,
+                        child: RainWidget(
+                          rainConfig: RainConfig(
+                            count: 40,
+                            lengthDrop: 10,
+                            widthDrop: 2,
+                            color: Color.fromARGB(180, 255, 255, 255),
+                            isRoundedEndsDrop: true,
+                            fallRangeMinDurMill: 800,
+                            fallRangeMaxDurMill: 2000,
+                            slideX: 20,
+                            slideY: 100,
+                            slideDurMill: 800,
+                            slideCurve: Curves.linear,
+                            fallCurve: Curves.easeIn,
+                            fadeCurve: Curves.easeOut,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Cloud 2 with rain
+            Positioned(
+              top: size.height * 0.05,
+              right: -30,
+              child: SizedBox(
                 width: 150,
-                height: 150,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF81C784).withOpacity(0.1),
+                height: 250,
+                child: Stack(
+                  alignment: Alignment.topCenter,
+                  children: [
+                    Positioned(
+                      top: 0,
+                      child: SizedBox(
+                        width: 150,
+                        height: 120,
+                        child: Lottie.asset(
+                          'assets/animations/cloud.json',
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                    ),
+                    Positioned(
+                      top: 105,
+                      child: SizedBox(
+                        width: 150,
+                        height: 150,
+                        child: RainWidget(
+                          rainConfig: RainConfig(
+                            count: 30,
+                            lengthDrop: 8,
+                            widthDrop: 2,
+                            color: Color.fromARGB(180, 255, 255, 255),
+                            isRoundedEndsDrop: true,
+                            fallRangeMinDurMill: 700,
+                            fallRangeMaxDurMill: 1800,
+                            slideX: 15,
+                            slideY: 80,
+                            slideDurMill: 700,
+                            slideCurve: Curves.linear,
+                            fallCurve: Curves.easeIn,
+                            fadeCurve: Curves.easeOut,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
+
+            // App logo (optional, bạn có thể bật lại nếu muốn)
+            // Positioned(
+            //   top: 50,
+            //   left: 0,
+            //   right: 0,
+            //   child: Center(
+            //     child: Container(
+            //       width: 80,
+            //       height: 80,
+            //       decoration: BoxDecoration(
+            //         shape: BoxShape.circle,
+            //         color: Colors.white.withOpacity(0.2),
+            //         boxShadow: [
+            //           BoxShadow(
+            //             color: Colors.white.withOpacity(0.3),
+            //             blurRadius: 10,
+            //             spreadRadius: 2,
+            //           ),
+            //         ],
+            //       ),
+            //       child: Stack(
+            //         alignment: Alignment.center,
+            //         children: [
+            //           Icon(
+            //             Icons.water_drop,
+            //             color: Colors.white.withOpacity(0.9),
+            //             size: 50,
+            //           ),
+            //           Positioned(
+            //             bottom: 10,
+            //             child: Text(
+            //               'Greenly',
+            //               style: TextStyle(
+            //                 color: Colors.white,
+            //                 fontSize: 12,
+            //                 fontWeight: FontWeight.bold,
+            //               ),
+            //             ),
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
+
+            // Auth card section
             Positioned(
-              top: size.height * 0.15,
-              left: -30,
-              child: Container(
-                width: 100,
-                height: 100,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF4CAF50).withOpacity(0.08),
-                ),
-              ),
-            ),
-            Positioned(
-              bottom: size.height * 0.1,
-              right: -40,
-              child: Container(
-                width: 120,
-                height: 120,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: const Color(0xFF66BB6A).withOpacity(0.1),
-                ),
-              ),
-            ),
-            // Main content
-            SafeArea(
+              bottom: 0,
+              left: 0,
+              right: 0,
               child: Column(
                 children: [
-                  // Header section with logo and title
                   Container(
-                    height: size.height * 0.25,
                     width: size.width,
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Logo icon
-                        Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: const Color(0xFF4CAF50),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color(0xFF4CAF50).withOpacity(0.3),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.eco,
-                            color: Colors.white,
-                            size: 40,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-                        // App name
-                        const Text(
-                          'Greenly',
-                          style: TextStyle(
-                            fontSize: 32,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFF2E7D32),
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Live Green, Live Better',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: const Color(0xFF4CAF50).withOpacity(0.8),
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
+                    height: size.height * 0.65,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.25),
+                      borderRadius: const BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
                     ),
-                  ),
-                  // Auth card section
-                  Expanded(
-                    child: Container(
-                      width: size.width,
-                      padding: const EdgeInsets.only(top: 20),
-                      child: const AuthCard(),
-                    ),
+                    child: const AuthCard(),
                   ),
                 ],
               ),
