@@ -412,6 +412,7 @@ class _Step1State extends State<Step1> {
                     fontWeight: FontWeight.w500,
                   ),
                   decoration: InputDecoration(
+                    hintText: 'Enter location (street, district, city)',
                     border: OutlineInputBorder(
                       borderSide: const BorderSide(color: fieldborder),
                       borderRadius: BorderRadius.circular(18.0),
