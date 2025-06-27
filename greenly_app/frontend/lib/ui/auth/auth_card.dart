@@ -66,9 +66,9 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: const ColorScheme.light(
-              primary: mistWhite,
-              onPrimary: Colors.white,
-              surface: Colors.white,
+              primary: Color.fromARGB(255, 168, 219, 171),
+              onPrimary: deepForest,
+              surface: mistWhite,
               onSurface: deepForest,
             ),
           ),
@@ -208,8 +208,6 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -229,7 +227,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
               Container(
                 width: 60,
                 height: 4,
-                margin: const EdgeInsets.only(bottom: 15),
+                margin: const EdgeInsets.only(bottom: 8),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.7),
                   borderRadius: BorderRadius.circular(2),
@@ -242,9 +240,9 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
                     ? "Tham gia Greenly"
                     : "Chào mừng trở lại",
                 style: TextStyle(
-                  fontSize: 24,
+                  fontSize: 22,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: deepForest.withAlpha(180),
                 ),
               ),
               const SizedBox(height: 8),
@@ -252,18 +250,18 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
               // Form fields
               if (_authMode == AuthMode.signup) ...[
                 _buildUsernameField(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
               ],
               _buildEmailField(),
-              const SizedBox(height: 16),
+              const SizedBox(height: 14),
               _buildPasswordField(),
               if (_authMode == AuthMode.signup) ...[
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 _buildBirthdayField(),
-                const SizedBox(height: 16),
+                const SizedBox(height: 14),
                 _buildAddressField(),
               ],
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
 
               // Submit button
               ValueListenableBuilder<bool>(
@@ -282,7 +280,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
                       : _buildSubmitButton();
                 },
               ),
-              const SizedBox(height: 15),
+              const SizedBox(height: 10),
 
               // Auth mode switch
               _buildAuthModeSwitchButton(),
@@ -326,7 +324,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
       onSaved: (value) => _authData['uBirthday'] = value!,
       suffixIcon: Icon(
         Icons.calendar_today_outlined,
-        color: Colors.white.withOpacity(0.8),
+        color: deepForest.withAlpha(100),
         size: 20,
       ),
       readOnly: true,
@@ -346,7 +344,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
           _obscurePassword
               ? Icons.visibility_off_outlined
               : Icons.visibility_outlined,
-          color: Colors.white.withOpacity(0.8),
+          color: deepForest.withAlpha(100),
           size: 20,
         ),
         onPressed: () {
@@ -367,8 +365,8 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
               ? "Chưa có tài khoản? "
               : "Đã có tài khoản? ",
           style: TextStyle(
-            color: Colors.white.withOpacity(0.8),
-            fontSize: 14,
+            color: mistWhite,
+            fontSize: 15,
           ),
         ),
         TextButton(
@@ -379,8 +377,8 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
           child: Text(
             _authMode == AuthMode.login ? 'Đăng Ký' : 'Đăng Nhập',
             style: TextStyle(
-              color: Colors.white,
-              fontSize: 14,
+              color: mistWhite,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -394,7 +392,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
       width: double.infinity,
       height: 50,
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.9),
+        color: deepForest.withAlpha(100),
         borderRadius: BorderRadius.circular(25),
         boxShadow: [
           BoxShadow(
@@ -413,7 +411,7 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
             child: Text(
               _authMode == AuthMode.login ? 'ĐĂNG NHẬP' : 'ĐĂNG KÝ',
               style: TextStyle(
-                color: Colors.blue[800],
+                color: mistWhite,
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1,
@@ -437,10 +435,10 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
   }) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.15),
+        color: const Color.fromARGB(255, 2, 77, 38).withAlpha(20),
         borderRadius: BorderRadius.circular(15),
         border: Border.all(
-          color: Colors.white.withOpacity(0.3),
+          color: deepForest.withAlpha(30),
           width: 1.5,
         ),
       ),
@@ -449,20 +447,20 @@ class _AuthCardState extends State<AuthCard> with TickerProviderStateMixin {
         obscureText: obscureText,
         readOnly: readOnly,
         onTap: onTap,
-        cursorColor: Colors.white,
+        cursorColor: deepForest,
         style: TextStyle(
           fontSize: 16,
-          color: Colors.white,
+          color: deepForest,
         ),
         decoration: InputDecoration(
           prefixIcon: Icon(
             icon,
-            color: Colors.white.withOpacity(0.7),
+            color: deepForest.withAlpha(100),
             size: 22,
           ),
           hintText: hintText,
           hintStyle: TextStyle(
-            color: Colors.white.withOpacity(0.5),
+            color: deepForest.withAlpha(100),
             fontSize: 14,
           ),
           suffixIcon: suffixIcon,

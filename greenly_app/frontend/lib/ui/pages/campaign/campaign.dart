@@ -1,5 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../components/colors.dart';
 import 'addcampaign/dynamic_flow_screen.dart';
 import 'package:greenly_app/models/campaign.dart' as model;
@@ -24,10 +27,13 @@ class _CampaignState extends State<Campaign> {
   int _selectedTab = 0; // 0: Created Campaigns, 1: Joined Campaigns
   final CampaignService campaignService = CampaignService();
   List<model.Campaign> campaigns = [];
+  String? _currentUserId;
+  Map<int, bool> _participationStatus = {};
 
   @override
   void initState() {
     super.initState();
+    _fetchUserId();
     _fetchCampaigns();
   }
 
@@ -37,11 +43,43 @@ class _CampaignState extends State<Campaign> {
     _fetchCampaigns();
   }
 
+  Future<void> _fetchUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final authUserRaw = prefs.getString('auth_user');
+    if (authUserRaw != null) {
+      final decoded = jsonDecode(authUserRaw);
+      if (mounted) {
+        setState(() {
+          _currentUserId = decoded['u_id'].toString();
+          print('✅ Current User ID: $_currentUserId');
+        });
+      }
+    }
+  }
+
   Future<void> _fetchCampaigns() async {
     final fetchedCampaigns = await campaignService.getAllCampaigns();
-    setState(() {
-      campaigns = fetchedCampaigns;
-    });
+    final campaignManager =
+        Provider.of<CampaignManager>(context, listen: false);
+
+    if (mounted) {
+      final statusMap = <int, bool>{};
+
+      for (final campaign in fetchedCampaigns) {
+        final isJoined =
+            await campaignManager.getParticipationStatus(campaign.id);
+        statusMap[campaign.id] = isJoined;
+      }
+
+      setState(() {
+        campaigns = fetchedCampaigns;
+        _participationStatus = statusMap;
+        print('👽👽👽 Fetched Campaigns: ${campaigns.map((c) => {
+              'campaign_id': c.id,
+              'u_id': c.user?.u_id
+            })}');
+      });
+    }
   }
 
   @override
@@ -95,7 +133,8 @@ class _CampaignState extends State<Campaign> {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0, vertical: 8.0),
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
@@ -104,7 +143,8 @@ class _CampaignState extends State<Campaign> {
                     },
                     child: _selectedTab == 0
                         ? Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 35.0, vertical: 10.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 35.0, vertical: 10.0),
                             decoration: BoxDecoration(
                               color: button,
                               borderRadius: BorderRadius.circular(17.0),
@@ -131,7 +171,8 @@ class _CampaignState extends State<Campaign> {
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 8.0),
+                  padding: const EdgeInsets.symmetric(
+                      horizontal: 15.0, vertical: 8.0),
                   child: GestureDetector(
                     onTap: () {
                       setState(() {
@@ -140,7 +181,8 @@ class _CampaignState extends State<Campaign> {
                     },
                     child: _selectedTab == 1
                         ? Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 35.0, vertical: 10.0),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 35.0, vertical: 10.0),
                             decoration: BoxDecoration(
                               color: button,
                               borderRadius: BorderRadius.circular(17.0),
@@ -174,6 +216,8 @@ class _CampaignState extends State<Campaign> {
                 itemBuilder: (context, index) {
                   final campaign = campaigns[index];
                   final colors = entryColors[index % entryColors.length];
+                  final isCreator = _currentUserId != null &&
+                      campaign.user?.u_id.toString() == _currentUserId;
 
                   return FutureBuilder<bool>(
                     future: campaignManager.getParticipationStatus(campaign.id),
@@ -181,17 +225,18 @@ class _CampaignState extends State<Campaign> {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      final isJoined = snapshot.data ?? false;
+                      final isJoined =
+                          _participationStatus[campaign.id] ?? false;
 
                       return GestureDetector(
                         onTap: () {
-                      showDialog(
-                        context: context,
-                        builder: (_) => Center(
-                          child: CampaignDetailCard(campaign: campaign),
-                        ),
-                      );
-                    },
+                          showDialog(
+                            context: context,
+                            builder: (_) => Center(
+                              child: CampaignDetailCard(campaign: campaign),
+                            ),
+                          );
+                        },
                         child: Container(
                           margin: const EdgeInsets.only(bottom: 16.0),
                           decoration: BoxDecoration(
@@ -199,7 +244,8 @@ class _CampaignState extends State<Campaign> {
                             borderRadius: BorderRadius.circular(25),
                             boxShadow: [
                               BoxShadow(
-                                color: const Color.fromARGB(255, 1, 15, 1).withAlpha((0.1 * 255).toInt()),
+                                color: const Color.fromARGB(255, 1, 15, 1)
+                                    .withAlpha((0.1 * 255).toInt()),
                                 blurRadius: 30,
                                 offset: const Offset(0, 12),
                               ),
@@ -213,7 +259,8 @@ class _CampaignState extends State<Campaign> {
                               children: [
                                 Expanded(
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Text(
                                         campaign.title,
@@ -233,7 +280,8 @@ class _CampaignState extends State<Campaign> {
                                           fontSize: 16,
                                           fontFamily: 'Oktah',
                                           fontWeight: FontWeight.w500,
-                                          color: colors['text']!.withOpacity(0.7),
+                                          color:
+                                              colors['text']!.withOpacity(0.7),
                                         ),
                                       ),
                                       const SizedBox(height: 6),
@@ -243,7 +291,8 @@ class _CampaignState extends State<Campaign> {
                                           fontSize: 12,
                                           fontFamily: 'Oktah',
                                           fontWeight: FontWeight.w500,
-                                          color: colors['text']!.withOpacity(0.5),
+                                          color:
+                                              colors['text']!.withOpacity(0.5),
                                         ),
                                       ),
                                       const SizedBox(height: 4),
@@ -253,7 +302,8 @@ class _CampaignState extends State<Campaign> {
                                           fontSize: 12,
                                           fontFamily: 'Oktah',
                                           fontWeight: FontWeight.w400,
-                                          color: colors['text']!.withOpacity(0.5),
+                                          color:
+                                              colors['text']!.withOpacity(0.5),
                                         ),
                                       ),
                                     ],
@@ -262,32 +312,51 @@ class _CampaignState extends State<Campaign> {
                                 Column(
                                   children: [
                                     TextButton(
-                                      onPressed: () async {
-                                        final success = isJoined
-                                            ? await campaignManager.leaveCampaign(campaign.id)
-                                            : await campaignManager.joinCampaign(campaign.id);
-                                        if (success) {
-                                          setState(() {}); // Refresh UI
-                                        } else {
-                                          ScaffoldMessenger.of(context).showSnackBar(
-                                            SnackBar(
-                                              content: Text(
-                                                isJoined
-                                                    ? 'Failed to leave campaign'
-                                                    : 'Failed to join campaign',
-                                              ),
-                                            ),
-                                          );
-                                        }
-                                      },
+                                      onPressed: isCreator
+                                          ? null // Disable button for creator
+                                          : () async {
+                                              final success = isJoined
+                                                  ? await campaignManager
+                                                      .leaveCampaign(
+                                                          campaign.id)
+                                                  : await campaignManager
+                                                      .joinCampaign(
+                                                          campaign.id);
+                                              if (success) {
+                                                final newStatus =
+                                                    isJoined ? false : true;
+                                                setState(() {
+                                                  _participationStatus[
+                                                      campaign.id] = newStatus;
+                                                });
+                                              } else {
+                                                ScaffoldMessenger.of(context)
+                                                    .showSnackBar(
+                                                  SnackBar(
+                                                    content: Text(
+                                                      isJoined
+                                                          ? 'Failed to leave campaign'
+                                                          : 'Failed to join campaign',
+                                                    ),
+                                                  ),
+                                                );
+                                              }
+                                            },
                                       style: TextButton.styleFrom(
-                                        backgroundColor: isJoined ? Colors.red : button,
+                                        backgroundColor: isCreator
+                                            ? Colors.grey // Grey for Hosting
+                                            : isJoined
+                                                ? Colors.red
+                                                : button,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(10.0),
+                                          borderRadius:
+                                              BorderRadius.circular(10.0),
                                         ),
                                       ),
                                       child: Text(
-                                        isJoined ? 'Leave' : 'Join',
+                                        isCreator
+                                            ? 'Hosting'
+                                            : (isJoined ? 'Leave' : 'Join'),
                                         style: const TextStyle(
                                           fontFamily: 'Oktah',
                                           fontWeight: FontWeight.w700,
@@ -297,13 +366,15 @@ class _CampaignState extends State<Campaign> {
                                     ),
                                     Center(
                                       child: IconButton(
-                                        icon: const Icon(Icons.chevron_right, size: 24),
+                                        icon: const Icon(Icons.chevron_right,
+                                            size: 24),
                                         color: colors['text']!.withOpacity(0.7),
                                         onPressed: () {
                                           showDialog(
                                             context: context,
                                             builder: (_) => Center(
-                                              child: CampaignDetailCard(campaign: campaign),
+                                              child: CampaignDetailCard(
+                                                  campaign: campaign),
                                             ),
                                           );
                                         },
@@ -340,7 +411,8 @@ class _CampaignState extends State<Campaign> {
             );
           },
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
+            padding:
+                const EdgeInsets.symmetric(horizontal: 15.0, vertical: 10.0),
             backgroundColor: button,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(20.0),

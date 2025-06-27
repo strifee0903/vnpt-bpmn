@@ -238,7 +238,7 @@ CREATE TABLE participation (
 );
 select * from participation;
 
-
+update participation set status = 1 where u_id = 2 and campaign_id = 3; 
 -- ========================================
 -- BẢNG messages: Lưu trữ tin nhắn trong chiến dịch
 -- Mỗi tin nhắn liên kết đến một chiến dịch và người gửi
@@ -267,12 +267,11 @@ select * from messages;
 --     FOREIGN KEY (acc_id) REFERENCES accounts(acc_id)
 -- );
 
-
--- Table for processes
 CREATE TABLE processes (
     process_id VARCHAR(100) PRIMARY KEY,
     name VARCHAR(255),
-    xml_content TEXT
+    xml_content TEXT,
+    type enum('static', 'dynamic') default 'static'
 );
 
 -- Table for steps (tasks, events, gateways, etc.)
@@ -307,20 +306,18 @@ CREATE TABLE custom_properties (
     FOREIGN KEY (step_id) REFERENCES steps(step_id)
 );
 
+
+CREATE TABLE library(
+  library_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
+  library_name varchar(255) NOT NULL,
+  description varchar(255) NOT NULL,
+  process_id VARCHAR(100),
+  category_id INT,
+  FOREIGN KEY (category_id) REFERENCES category(category_id),
+  file text NOT NULL
+);
+
 /***********************************************************************************************************/
-
-
-INSERT INTO users (role_id, u_name, u_birthday, u_address) VALUES
-(1, 'Alice Nguyen', '1995-06-15', '123 Green St, Can Tho'),
-(2, 'Bob Tran', '1998-03-22', '456 Eco Ave, HCMC'),
-(3, 'Charlie Le', '1990-09-01', '789 Recycle Rd, Hanoi'),
-(2, 'Duyen Pham', '2000-01-01', '101 River St, Da Nang'),
-(1, 'Emily Dao', '1985-12-12', '202 Forest Ln, Hue'),
-(3, 'Frank Vu', '1992-07-07', '303 Ocean Dr, Nha Trang'),
-(2, 'Giang Ho', '2002-08-08', '404 Bamboo Way, Haiphong'),
-(1, 'Helen Bui', '1999-05-05', '505 Lotus St, Dalat'),
-(2, 'Ivy Vo', '1993-11-11', '606 Solar Blvd, Vung Tau'),
-(3, 'Jacky Ngo', '1997-04-04', '707 Wind Rd, Bien Hoa');
 
 INSERT INTO category (category_name) VALUES
 ('Nhặt rác'),
@@ -334,56 +331,6 @@ INSERT INTO category (category_name) VALUES
 ('Sống xanh'),
 ('Làm sạch bãi biển');
 
-INSERT INTO vote (moment_id, vote_state, acc_id) VALUES
-(1, TRUE, 2),
-(1, TRUE, 3),
-(2, TRUE, 1),
-(2, FALSE, 4),
-(3, TRUE, 5),
-(3, TRUE, 6),
-(4, TRUE, 7),
-(5, FALSE, 8),
-(6, TRUE, 9),
-(7, TRUE, 10);
 
-INSERT INTO moment (
-    u_id,
-    moment_content,
-    moment_address,
-    latitude,
-    longitude,
-    moment_type,
-    is_public,
-    category_id
-) VALUES
--- Bài viết 1
-(1, 'Hôm nay trời Cần Thơ thật đẹp!', 'Bến Ninh Kiều, Cần Thơ', 10.0340, 105.7882, 'diary', TRUE, 9),
 
--- Bài viết 2
-(1, 'Tham gia sự kiện xanh tại công viên Lưu Hữu Phước.', 'Công viên Lưu Hữu Phước, Cần Thơ', 10.0355, 105.7800, 'event', TRUE, 4),
 
--- Bài viết 3
-(1, 'Báo cáo tình trạng rác thải tại phường An Cư.', 'Phường An Cư, Ninh Kiều, Cần Thơ', 10.0400, 105.7850, 'report', FALSE, 3),
-
--- Bài viết 4
-(1, 'Dạo chơi buổi sáng ở hồ Xáng Thổi.', 'Hồ Xáng Thổi, Cần Thơ', 10.0325, 105.7820, 'diary', TRUE, 2),
-
--- Bài viết 5
-(1, 'Tham quan chợ nổi Cái Răng vào lúc bình minh.', 'Chợ nổi Cái Răng, Cần Thơ', 10.0100, 105.7650, 'event', TRUE,1);
-INSERT INTO media (moment_id, media_url) VALUES
--- Media cho moment_id 1 (1 media)
-(10, 'public/images/default_category_img.jpg'),
-
--- Media cho moment_id 2 (2 media)
-(11, 'public/images/default_category_img_3.jpg'),
-(11, 'public/images/default_category_img_2.jpg'),
-
--- Media cho moment_id 3 (1 media)
-(12, 'public/images/default_category_img_2.jpg'),
-
--- Media cho moment_id 4 (2 media)
-(13, 'public/images/default_category_img_3.jpg'),
-(13, 'public/images/default_category_img_2.jpg'),
-
--- Media cho moment_id 5 (1 media)
-(14, 'public/images/default_category_img_2.jpg');
