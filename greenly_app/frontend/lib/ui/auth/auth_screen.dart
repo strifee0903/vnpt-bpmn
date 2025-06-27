@@ -30,30 +30,29 @@ class AuthScreen extends StatelessWidget {
           children: [
             // Cloud 1 with rain
             Positioned(
-              top: size.height * 0.1,
-              left: -50,
+              top: size.height * 0.01,
+              left: size.width * 0.2 -
+                  100, // Center theo chiều ngang (vì width: 200)
               child: SizedBox(
                 width: 200,
                 height: 300,
                 child: Stack(
-                  alignment: Alignment.topCenter,
                   children: [
-                    Positioned(
-                      top: 0,
-                      child: SizedBox(
-                        width: 200,
-                        height: 150,
-                        child: Lottie.asset(
-                          'assets/animations/cloud.json',
-                          fit: BoxFit.contain,
-                        ),
+                    // Đám mây căn top-center
+                    Align(
+                      child: Lottie.asset(
+                        'assets/animations/cloud.json',
+                        width: 260,
+                        fit: BoxFit.contain,
                       ),
                     ),
+                    // Mưa nằm ngay dưới đám mây
                     Positioned(
-                      top: 130,
+                      top: -30, // vừa sát đáy đám mây
+                      left: -100, // đẩy nhẹ để canh giữa nếu mưa nhỏ hơn
                       child: SizedBox(
-                        width: 200,
-                        height: 170,
+                        width: 100,
+                        height: 100,
                         child: RainWidget(
                           rainConfig: RainConfig(
                             count: 40,
@@ -63,8 +62,6 @@ class AuthScreen extends StatelessWidget {
                             isRoundedEndsDrop: true,
                             fallRangeMinDurMill: 800,
                             fallRangeMaxDurMill: 2000,
-                            slideX: 20,
-                            slideY: 100,
                             slideDurMill: 800,
                             slideCurve: Curves.linear,
                             fallCurve: Curves.easeIn,
@@ -80,7 +77,7 @@ class AuthScreen extends StatelessWidget {
 
             // Cloud 2 with rain
             Positioned(
-              top: size.height * 0.05,
+              top: 0,
               right: -30,
               child: SizedBox(
                 width: 150,
@@ -88,8 +85,7 @@ class AuthScreen extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.topCenter,
                   children: [
-                    Positioned(
-                      top: 0,
+                    Center(
                       child: SizedBox(
                         width: 150,
                         height: 120,
@@ -100,22 +96,21 @@ class AuthScreen extends StatelessWidget {
                       ),
                     ),
                     Positioned(
-                      top: 105,
+                      top: -60, // vừa sát đáy đám mây
+                      left: -100, // đẩy nhẹ để canh giữa nếu mưa nhỏ hơn
                       child: SizedBox(
-                        width: 150,
-                        height: 150,
+                        width: 100,
+                        height: 100,
                         child: RainWidget(
                           rainConfig: RainConfig(
-                            count: 30,
-                            lengthDrop: 8,
+                            count: 40,
+                            lengthDrop: 10,
                             widthDrop: 2,
                             color: Color.fromARGB(180, 255, 255, 255),
                             isRoundedEndsDrop: true,
-                            fallRangeMinDurMill: 700,
-                            fallRangeMaxDurMill: 1800,
-                            slideX: 15,
-                            slideY: 80,
-                            slideDurMill: 700,
+                            fallRangeMinDurMill: 800,
+                            fallRangeMaxDurMill: 2000,
+                            slideDurMill: 800,
                             slideCurve: Curves.linear,
                             fallCurve: Curves.easeIn,
                             fadeCurve: Curves.easeOut,

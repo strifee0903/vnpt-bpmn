@@ -5,7 +5,7 @@ const { XMLParser, XMLBuilder } = require("fast-xml-parser");
 require("dotenv").config();
 
 const createBpmn = async (process) => {
-  const { process_id, name, xml_content } = process;
+  const { process_id, name, xml_content, type } = process;
 
   const parser = new XMLParser({
     ignoreAttributes: false,
@@ -54,9 +54,16 @@ const createBpmn = async (process) => {
     type: "sequenceFlow",
   }));
 
+  const processData = {
+    process_id,
+    name,
+    xml_content,
+    type: type === "dynamic" ? "dynamic" : undefined, // undefined => dùng default trong DB
+  };
+
   // Transaction
   return await knex.transaction(async (trx) => {
-    await trx("processes").insert({ process_id, name, xml_content });
+    await trx("processes").insert(processData);
     if (steps.length > 0) await trx("steps").insert(steps);
     if (flows.length > 0) await trx("flows").insert(flows);
 
@@ -160,8 +167,8 @@ const createBpmn = async (process) => {
 //   return process.build(json);
 // };
 
-const getAllProcessesWithDetails = async () => {
-  const processes = await knex("processes");
+const getAllProcessesWithDetails = async (type = "static") => {
+  const processes = await knex("processes").where({ type });
   const result = [];
 
   for (const proc of processes) {
@@ -201,20 +208,17 @@ const getProcessXml = async (process_id) => {
 //   return elements;
 // };
 
-const getAllProcessesXml = async (req, res) => {
-  const all = await knex("processes");
-  // const allXml = all.map(row => row.xml_content).join("\n");
+const getAllProcessesXml = async (type = "static") => {
+  const all = await knex("processes").where({ type });
 
-  return all.map((row) => {
-    return {
-      process_id: row.process_id,
-      name: row.name,
-      xml_content: row.xml_content,
-    };
-  });
+  return all.map((row) => ({
+    process_id: row.process_id,
+    name: row.name,
+    xml_content: row.xml_content,
+  }));
 };
 
-const updateProcess = async (process_id, name, xml_content) => {
+const updateProcess = async (process_id, name, xml_content, type) => {
   try {
     const process = await knex("processes").where({ process_id }).first();
 
@@ -243,11 +247,11 @@ const updateProcess = async (process_id, name, xml_content) => {
       });
       // Step 5: Recreate the process with createBpmn
       console.log(`Recreating process ${process_id}...`);
-      await createBpmn({ process_id, name, xml_content });
+      await createBpmn({ process_id, name, xml_content, type });
 
       console.log(`Process ${process_id} updated successfully.`);
     } else {
-      await createBpmn({ process_id, name, xml_content });
+      await createBpmn({ process_id, name, xml_content, type });
       console.log(`Process ${process_id} created successfully.`);
     }
   } catch (error) {

@@ -155,7 +155,7 @@ const selectProcess = (proc) => {
 }
 const fetchProcesses = async () => {
   try {
-    const res = await axios.get('/api/v1/bpmn/allxml')
+    const res = await axios.get('/api/v1/bpmn/allxml?type=dynamic') // Thêm type=dynamic vào query
     processes.value = res.data.data // [{ process_id, xml_content }]
     console.log('Danh sách quy trình:', res.data.data)
     console.log('Danh sách quy trình:', processes.value)
@@ -253,7 +253,14 @@ const exportXML = async () => {
       return
     }
 
-    const requiredNames = ['Bắt đầu', 'Kết thúc', 'Bước 1', 'Bước 2', 'Bước 3']
+    const requiredNames = [
+      'Bắt đầu',
+      'Kết thúc',
+      'Nhập thông tin chiến dịch',
+      'Chia sẻ chiến dịch',
+      'Mời tham gia',
+      'Trang mới',
+    ]
 
     for (const name of requiredNames) {
       const used = elements.filter((el) => el.name === name)
@@ -284,6 +291,7 @@ const exportXML = async () => {
       process_id: processId,
       name: processName,
       xml_content: xml,
+      type: 'dynamic', // Hoặc 'static' tùy theo logic của bạn
     }
     console.log('Properties to save:', properties)
 
@@ -305,6 +313,8 @@ const exportXML = async () => {
     console.log('BPMN process saved successfully:', result)
     notify('Quy trình đã được lưu thành công: ' + processName)
     fetchProcesses() // Refresh the process list
+    selectedProcessId.value = processId // Cập nhật ID quy trình đã lưu
+    loadProcess(processId) // Tải lại quy trình đã lưu
     return result
   } catch (err) {
     notify('Lỗi khi lưu quy trình: ' + err.message)
@@ -333,6 +343,7 @@ const update = async () => {
     const properties = {
       name: processName,
       xml_content: xml,
+      type: 'dynamic', // Hoặc 'static' tùy theo logic của bạn
     }
     console.log('Properties to save:', properties)
     console.log('Properties to save:', selectedProcessId.value)

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenly_app/components/paths.dart';
 import 'package:greenly_app/models/process.dart' as model;
 import 'package:greenly_app/services/process_service.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
@@ -12,37 +13,34 @@ class DynamicFlowPage extends StatefulWidget {
 }
 
 class _DynamicFlowPageState extends State<DynamicFlowPage> {
+  final processService = ProcessService();
+
+  List<model.Process> dynamicProcesses = [];
+  model.Process? selectedProcess;
+
   List<model.Step> steps = [];
   List<model.Flow> flows = [];
   List<model.Step> orderedSteps = [];
   int currentIndex = 0;
 
-  final processService = ProcessService();
-
   @override
   void initState() {
     super.initState();
-    loadProcess();
+    loadDynamicProcesses();
   }
 
-  Future<void> loadProcess() async {
-    final (loadedSteps, loadedFlows) = await processService.fetchProcess();
-    print('Loaded Steps: ${loadedSteps.length}, Flows: ${loadedFlows.length}');
-    for (var step in loadedSteps) {
-      print('Step: ${step.stepId}, Type: ${step.type}');
-    }
-    for (var flow in loadedFlows) {
-      print(
-          'Flow: ${flow.flowId}, Source: ${flow.sourceRef}, Target: ${flow.targetRef}');
-    }
+  Future<void> loadDynamicProcesses() async {
+    dynamicProcesses = await processService.fetchAllDynamicProcesses();
+    setState(() {});
+  }
 
+  Future<void> loadProcess(String processId) async {
+    final (loadedSteps, loadedFlows) =
+        await processService.fetchProcess(processId);
     steps = loadedSteps;
     flows = loadedFlows;
     orderedSteps = buildExecutionOrder();
-    print('Ordered Steps: ${orderedSteps.length}');
-    for (var step in orderedSteps) {
-      print('Ordered Step: ${step.stepId}, Type: ${step.type}');
-    }
+    currentIndex = 0;
     setState(() {});
   }
 
@@ -81,7 +79,6 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
           ordered.add(nextStep);
         }
 
-        // Nếu bước hiện tại là endEvent thì dừng
         if (steps.any((s) => s.stepId == current && s.type == 'endEvent')) {
           break;
         }
@@ -96,24 +93,13 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
 
   void goToNext() {
     if (currentIndex < orderedSteps.length - 1) {
-      // Kiểm tra xem bước hiện tại có phải là endEvent không
-      if (orderedSteps[currentIndex].type == 'endEvent') {
-        // Nếu là endEvent thì không cho đi tiếp
-        return;
-      }
-      // Nếu không phải là endEvent thì cho phép đi tiếp
-      // và tăng currentIndex
-      print(
-          'Current Index: $currentIndex, Next Step: ${orderedSteps[currentIndex + 1].stepId}');
+      if (orderedSteps[currentIndex].type == 'endEvent') return;
       setState(() => currentIndex++);
     }
   }
 
   void goToPrevious() {
     if (currentIndex > 0) {
-      // Giảm currentIndex nếu không phải là bước đầu tiên
-      print(
-          'Current Index: $currentIndex, Previous Step: ${orderedSteps[currentIndex - 1].stepId}');
       setState(() => currentIndex--);
     }
   }
@@ -125,11 +111,83 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
     );
   }
 
+  void resetProcess() {
+    selectedProcess = null;
+    orderedSteps = [];
+    steps = [];
+    flows = [];
+    currentIndex = 0;
+    setState(() {});
+  }
+
+  void showProcessSelectorDialog() {
+    model.Process? selected;
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Chọn quy trình động',
+              style: TextStyle(
+                  fontSize: 18, color: Color.fromARGB(255, 12, 51, 35))),
+          content: DropdownButtonFormField<model.Process>(
+            isExpanded: true,
+            hint: const Text('Chọn 1 quy trình'),
+            items: dynamicProcesses.map((p) {
+              return DropdownMenuItem<model.Process>(
+                value: p,
+                child: Text(p.name),
+              );
+            }).toList(),
+            onChanged: (value) {
+              selected = value;
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Huỷ'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (selected != null) {
+                  Navigator.pop(context);
+                  selectedProcess = selected;
+                  await loadProcess(selected!.processId);
+                }
+              },
+              child: const Text('Xác nhận'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (orderedSteps.isEmpty) {
-      return const Scaffold(body: Center(child: Text('dataLoading...')));
+    if (selectedProcess == null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text("Chiến dịch xanh")),
+        body: Center(
+          child: ElevatedButton.icon(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: button,
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            ),
+            icon: const Icon(Icons.playlist_add_check,
+                color: Colors.white, size: 24),
+            label: const Text("Chọn quy trình để bắt đầu",
+                style: TextStyle(fontSize: 18, color: Colors.white)),
+            onPressed: showProcessSelectorDialog,
+          ),
+        ),
+      );
     }
+    if (orderedSteps.isEmpty) {
+      return const Scaffold(body: Center(child: Text('Đang tải quy trình...')));
+    }
+
     final step = orderedSteps[currentIndex];
     final screenBuilder = screenRegistry[step.name];
 
@@ -140,18 +198,14 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
                 if (currentIndex < orderedSteps.length - 1) {
                   goToNext();
                 } else {
-                  // Nếu đã đến bước cuối cùng, có thể hiển thị thông báo hoặc làm gì đó
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(content: Text('Đã đến bước cuối cùng')),
                   );
                 }
               },
-              // () => currentIndex > 0 ? Navigator.pop(context) : null,
               () => currentIndex == 0 ? Navigator.pop(context) : goToPrevious(),
-              // goToPrevious,
-              currentIndex == orderedSteps.length - 1 ? true : false,
+              currentIndex == orderedSteps.length - 1,
               (String message) {
-                // ✅ onComplete callback
                 showDialog(
                   context: context,
                   builder: (_) => AlertDialog(
@@ -159,11 +213,9 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
                     content: Text(message),
                     actions: [
                       TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
+                        onPressed: () => Navigator.pop(context),
                         child: const Text('OK'),
-                      )
+                      ),
                     ],
                   ),
                 );

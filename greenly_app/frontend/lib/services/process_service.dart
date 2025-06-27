@@ -97,10 +97,11 @@ class ProcessService {
     return response;
   }
 
-  Future<(List<model.Step>, List<model.Flow>)> fetchProcess() async {
+  Future<(List<model.Step>, List<model.Flow>)> fetchProcess(
+      String processId) async {
     try {
       final uri = Uri.parse(
-          '$baseUrl/v1/bpmn/details/Process_17501703319112'); // Sửa endpoint để lấy theo processId
+          '$baseUrl/v1/bpmn/details/$processId'); // Sửa endpoint để lấy theo processId
       print('😵‍💫😵‍💫😵‍💫Fetching process details from: ${uri.toString()}');
       final response = await http.get(uri);
 
@@ -111,46 +112,7 @@ class ProcessService {
 
       final Map<String, dynamic> jsonResponse =
           jsonDecode(response.body)['data'];
-      // {
-      //   "process_id": "Process_17501703319112",
-      //   "name": "Quy trình tạo chiến dịch",
-      //   "steps": [
-      //     {
-      //       "step_id": "Activity_188mawf",
-      //       "process_id": "Process_17501703319112",
-      //       "name": "Bước 1",
-      //       "type": "userTask"
-      //     },
-      //     {
-      //       "step_id": "Event_0kl0q76",
-      //       "process_id": "Process_17501703319112",
-      //       "name": "Bắt đầu",
-      //       "type": "startEvent"
-      //     },
-      //     {
-      //       "step_id": "Event_1kk9eqf",
-      //       "process_id": "Process_17501703319112",
-      //       "name": "Kết thúc",
-      //       "type": "endEvent"
-      //     }
-      //   ],
-      //   "flows": [
-      //     {
-      //       "flow_id": "Flow_07hfvld",
-      //       "process_id": "Process_17501703319112",
-      //       "source_ref": "Event_0kl0q76",
-      //       "target_ref": "Activity_188mawf",
-      //       "type": "sequenceFlow"
-      //     },
-      //     {
-      //       "flow_id": "Flow_1m8wbms",
-      //       "process_id": "Process_17501703319112",
-      //       "source_ref": "Activity_188mawf",
-      //       "target_ref": "Event_1kk9eqf",
-      //       "type": "sequenceFlow"
-      //     }
-      //   ]
-      // };
+
       final data = jsonResponse;
       final steps =
           (data['steps'] as List).map((e) => model.Step.fromJson(e)).toList();
@@ -160,6 +122,23 @@ class ProcessService {
     } catch (e) {
       print('Error fetching process: $e');
       return (<model.Step>[], <model.Flow>[]);
+    }
+  }
+
+  Future<List<model.Process>> fetchAllDynamicProcesses() async {
+    try {
+      final uri = Uri.parse('$baseUrl/v1/bpmn/all?type=dynamic');
+      final response = await http.get(uri);
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to load dynamic processes: ${response.body}');
+      }
+
+      final List<dynamic> jsonList = jsonDecode(response.body)['data'];
+      return jsonList.map((e) => model.Process.fromJson(e)).toList();
+    } catch (e) {
+      print('Error fetching dynamic processes: $e');
+      return [];
     }
   }
 }
