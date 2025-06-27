@@ -44,7 +44,7 @@ class _MyAppState extends State<MyApp> {
       secondary: const Color(0xFFFFF8DC),
       surface: const Color.fromARGB(255, 255, 245, 245),
       surfaceTint: const Color(0xFF2E7D32),
-      primary: const Color(0xFF2E7D32),
+      primary: const Color.fromARGB(255, 121, 204, 126),
       onPrimary: Colors.white,
       onSecondary: Colors.black,
       onSurface: Colors.black,
@@ -53,7 +53,7 @@ class _MyAppState extends State<MyApp> {
     final themeData = ThemeData(
       fontFamily: 'Lato',
       colorScheme: colorScheme,
-      scaffoldBackgroundColor: Color(0xFF2E7D32),
+      scaffoldBackgroundColor: Color.fromARGB(255, 255, 255, 255),
       useMaterial3: true,
       appBarTheme: AppBarTheme(
         backgroundColor: colorScheme.primary,

@@ -25,7 +25,8 @@ class _DynamicFlowPageState extends State<DynamicFlowPage> {
   }
 
   Future<void> loadProcess() async {
-    final (loadedSteps, loadedFlows) = await processService.fetchProcess();
+    final (loadedSteps, loadedFlows) =
+        await processService.fetchProcess("Process_17501703319112");
     print('Loaded Steps: ${loadedSteps.length}, Flows: ${loadedFlows.length}');
     for (var step in loadedSteps) {
       print('Step: ${step.stepId}, Type: ${step.type}');
