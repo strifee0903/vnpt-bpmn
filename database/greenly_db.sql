@@ -224,6 +224,7 @@ CREATE TABLE campaign (
     FOREIGN KEY (category_id) REFERENCES category(category_id) on delete cascade
 );
 select * from campaign;
+drop table campaign;
 -- ========================================
 -- BẢNG participation: Theo dõi người dùng tham gia chiến dịch
 -- ========================================
@@ -310,12 +311,13 @@ CREATE TABLE custom_properties (
 CREATE TABLE library(
   library_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   library_name varchar(255) NOT NULL,
-  description varchar(255) NOT NULL,
+  description TEXT not null,
   process_id VARCHAR(100),
   category_id INT,
   FOREIGN KEY (category_id) REFERENCES category(category_id),
   file text NOT NULL
 );
+drop table library;
 
 /***********************************************************************************************************/
 

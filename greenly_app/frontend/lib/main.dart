@@ -118,8 +118,9 @@ class _MyAppState extends State<MyApp> {
                 '/greenLibrary': (ctx) => const SafeArea(child: GreenLibrary()),
                 '/campaign': (ctx) => const SafeArea(child: Campaign()),
                 '/moments': (ctx) => const SafeArea(child: MomentsPage()),
-                '/profile': (ctx) => const SafeArea(child: ProfileScreen()),
+                // '/profile': (ctx) => const SafeArea(child: ProfileScreen()),
                 '/groupChat': (context) => const GroupChatPage(),
+                ProfileScreen.routeName: (ctx) => const SafeArea(child: MainLayout(initialIndex: 3,)),
                 // '/profile': (ctx) => const SafeArea(
                 //     child: MainLayout(initialIndex: 3)), // Update to MainLayout
               },
@@ -134,12 +135,15 @@ class _MyAppState extends State<MyApp> {
                     return FadeSlideRoute(page: const GreenLibrary());
                   case '/moments':
                     return ScaleRoute(page: const MomentsPage());
-                  case '/profile':
-                    return ScaleRoute(page: const ProfileScreen());
                   // case '/profile':
-                  //   return ScaleRoute(
-                  //       page: const MainLayout(
-                  //           initialIndex: 3)); // Update to MainLayout
+                  //   return ScaleRoute(page: const ProfileScreen());
+                  case ProfileScreen.routeName:
+                    return FadeSlideRoute(page: const MainLayout(
+                      initialIndex: 3,
+                    ));
+                    // return ScaleRoute(
+                    //     page: const MainLayout(
+                    //         initialIndex: 3)); // Update to MainLayout
                   default:
                     print('🔴 Unknown route: ${settings.name}');
                     return SlideUpRoute(page: const NotFoundScreen());

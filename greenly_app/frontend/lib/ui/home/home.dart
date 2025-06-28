@@ -185,13 +185,14 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: null,
         onPressed: () {
           Navigator.push(
             context,
             MaterialPageRoute(
               builder: (_) => RoomChatPage(
-                campaignId: 2,
-                userId: 1,
+                campaignId: 1,
+                userId: 3,
                 username: "binhluanvien",
               ),
             ),

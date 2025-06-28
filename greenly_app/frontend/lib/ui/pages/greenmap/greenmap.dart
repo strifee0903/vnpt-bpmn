@@ -236,8 +236,8 @@ class _GreenMapState extends State<GreenMap> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
       builder: (context) {
-        // Lọc các marker có chứa moment
-        final markerMoments = cluster.markers
+        // Get all moments from markers and remove duplicates
+        final allMoments = cluster.markers
             .expand((m) =>
                 context
                     .read<MomentProvider>()
@@ -245,11 +245,20 @@ class _GreenMapState extends State<GreenMap> {
                 [])
             .toList();
 
+        // Remove duplicates based on moment ID (assuming moments have an id field)
+        final uniqueMoments = <String, dynamic>{};
+        for (var moment in allMoments) {
+          uniqueMoments[moment.id.toString()] =
+              moment; // Adjust 'id' to your moment's ID field
+        }
+        final markerMoments = uniqueMoments.values.toList();
+
         print(
-            '📊 DEBUG - Cluster contains ${markerMoments.length} moments, ${cluster.markers.first}');
+            '📊 DEBUG - Cluster contains ${markerMoments.length} unique moments');
+
         return Container(
           decoration: BoxDecoration(
-            color: const Color(0xFFEEF5E6), // Màu xanh lá nhạt
+            color: const Color(0xFFEEF5E6),
             borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           ),
           child: Padding(
@@ -267,9 +276,6 @@ class _GreenMapState extends State<GreenMap> {
                     itemCount: markerMoments.length,
                     itemBuilder: (context, index) {
                       final moment = markerMoments[index];
-
-                      if (moment.media.isNotEmpty) {}
-
                       return Container(
                         margin: const EdgeInsets.symmetric(
                             horizontal: 0, vertical: 6),
@@ -278,9 +284,7 @@ class _GreenMapState extends State<GreenMap> {
                           color: const Color(0xFF708C5B).withOpacity(0.2),
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        child: MomentCard(
-                          moment: moment,
-                        ),
+                        child: MomentCard(moment: moment),
                       );
                     },
                   ),
@@ -307,6 +311,87 @@ class _GreenMapState extends State<GreenMap> {
     );
   }
 
+  // void _showClusterInfo(BuildContext context, MarkerClusterNode cluster) async {
+  //   await showModalBottomSheet(
+  //     context: context,
+  //     isScrollControlled: true,
+  //     shape: const RoundedRectangleBorder(
+  //       borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+  //     ),
+  //     builder: (context) {
+  //       // Lọc các marker có chứa moment
+  //       final markerMoments = cluster.markers
+  //           .expand((m) =>
+  //               context
+  //                   .read<MomentProvider>()
+  //                   .markerMomentMap[m.point.toString()] ??
+  //               [])
+  //           .toList();
+
+  //       print(
+  //           '📊 DEBUG - Cluster contains ${markerMoments.length} moments, ${cluster.markers.first}');
+  //       return Container(
+  //         decoration: BoxDecoration(
+  //           color: const Color(0xFFEEF5E6), // Màu xanh lá nhạt
+  //           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+  //         ),
+  //         child: Padding(
+  //           padding: const EdgeInsets.all(16),
+  //           child: Column(
+  //             children: [
+  //               const SizedBox(height: 20),
+  //               const Text('📍 Các bài viết trong khu vực',
+  //                   style:
+  //                       TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+  //               const SizedBox(height: 12),
+  //               Flexible(
+  //                 child: ListView.builder(
+  //                   shrinkWrap: true,
+  //                   itemCount: markerMoments.length,
+  //                   itemBuilder: (context, index) {
+  //                     final moment = markerMoments[index];
+
+  //                     if (moment.media.isNotEmpty) {}
+
+  //                     return Container(
+  //                       margin: const EdgeInsets.symmetric(
+  //                           horizontal: 0, vertical: 6),
+  //                       padding: const EdgeInsets.all(12),
+  //                       decoration: BoxDecoration(
+  //                         color: const Color(0xFF708C5B).withOpacity(0.2),
+  //                         borderRadius: BorderRadius.circular(10),
+  //                       ),
+  //                       child: MomentCard(
+  //                         moment: moment,
+  //                       ),
+  //                     );
+  //                   },
+  //                 ),
+  //               ),
+  //               const SizedBox(height: 12),
+  //               ElevatedButton(
+  //                 onPressed: () => Navigator.pop(context),
+  //                 style: ElevatedButton.styleFrom(
+  //                   backgroundColor: const Color(0xFF708C5B).withOpacity(0.8),
+  //                   foregroundColor: Colors.white,
+  //                   shape: RoundedRectangleBorder(
+  //                     borderRadius: BorderRadius.circular(10),
+  //                   ),
+  //                 ),
+  //                 child: const Text('Đóng',
+  //                     style:
+  //                         TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+  //               ),
+  //             ],
+  //           ),
+  //         ),
+  //       );
+  //     },
+  //   );
+  // }
+
+  
+  
   @override
   Widget build(BuildContext context) {
     if (ModalRoute.of(context)?.isCurrent == true) {
