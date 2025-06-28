@@ -9,6 +9,51 @@ const defaultUrl = 'http://192.168.1.7:3000/api';
 class CampaignService {
   static final String baseUrl = dotenv.env['BASE_URL'] ?? defaultUrl;
 
+  Future<bool> getParticipationStatus(int campaignId) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final sessionCookie = prefs.getString('session_cookie') ?? '';
+      final userId = prefs.getString('user_id');
+      print('🗄️ Checking SharedPreferences in getParticipationStatus:');
+      print('🗄️ user_id: $userId');
+      print('🗄️ session_cookie: $sessionCookie');
+      if (userId == null) {
+        print('⚠️ User ID not found in SharedPreferences');
+        return false;
+      }
+
+      final uri = Uri.parse('$baseUrl/campaign/$campaignId/participants');
+      print('🌐 Fetching participation status for campaign $campaignId: $uri');
+      final response = await http.get(
+        uri,
+        headers: {
+          'Cookie': sessionCookie,
+        },
+      );
+
+      print('📡 Response status: ${response.statusCode}');
+      print('📡 Response body: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final jsonData = json.decode(response.body);
+        final participants = jsonData['data']['participants'] ?? [];
+        print('👥 Participants list: $participants');
+        final isJoined = participants.any((participant) =>
+            participant['u_id'].toString() == userId &&
+            participant['status'] == 1);
+        print('✅ Participation status for campaign $campaignId: $isJoined');
+        return isJoined;
+      } else {
+        print(
+            '❌ Error fetching participation status: ${response.statusCode} - ${response.body}');
+        return false;
+      }
+    } catch (e) {
+      print('⚠️ Error checking participation status: $e');
+      return false;
+    }
+  }
+
   // Tạo chiến dịch
   Future<int?> createCampaign(Campaign campaign) async {
     try {
@@ -85,42 +130,6 @@ class CampaignService {
     } catch (e) {
       print('⚠️ Exception: $e');
       return null;
-    }
-  }
-
-// Kiểm tra trạng thái tham gia của user với campaign
-  Future<bool> getParticipationStatus(int campaignId) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final sessionCookie = prefs.getString('session_cookie') ?? '';
-      final uri = Uri.parse('$baseUrl/campaign/$campaignId/participants');
-      final response = await http.get(
-        uri,
-        headers: {
-          'Cookie': sessionCookie,
-        },
-      );
-
-      if (response.statusCode == 200) {
-        final jsonData = json.decode(response.body);
-        final participants = jsonData['data']['participants'] ?? [];
-        final userId = prefs.getString(
-            'user_id'); // Giả sử user_id được lưu trong SharedPreferences
-        if (userId == null) {
-          print('⚠️ User ID not found in SharedPreferences');
-          return false;
-        }
-        // Kiểm tra xem user có trong danh sách participants với status = 1 không
-        return participants.any((participant) =>
-            participant['u_id'].toString() == userId &&
-            participant['status'] == 1);
-      } else {
-        print('❌ Lỗi kiểm tra trạng thái: ${response.statusCode}');
-        return false;
-      }
-    } catch (e) {
-      print('⚠️ Lỗi kiểm tra trạng thái: $e');
-      return false;
     }
   }
 

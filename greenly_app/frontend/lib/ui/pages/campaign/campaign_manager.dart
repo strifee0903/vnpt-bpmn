@@ -1,12 +1,11 @@
 import 'package:flutter/foundation.dart';
-
-import '../../../services/campaign_service.dart';
+import 'package:greenly_app/services/campaign_service.dart';
 
 class CampaignManager extends ChangeNotifier {
   final CampaignService _campaignService = CampaignService();
   int? _campaignId;
-  Map<int, bool> _participationStatus =
-      {}; // Lưu trạng thái tham gia của từng campaign
+  Map<int, bool> _participationStatus = {}; // Initialize as empty map
+
   int? get campaignId => _campaignId;
   Map<int, bool> get participationStatus => _participationStatus;
 
@@ -17,37 +16,55 @@ class CampaignManager extends ChangeNotifier {
 
   void reset() {
     _campaignId = null;
+    _participationStatus.clear(); // Clear participation status
     notifyListeners();
   }
 
-  // Lấy trạng thái tham gia của campaign
+  void updateParticipationStatus(Map<int, bool> statusMap) {
+    _participationStatus = statusMap; // Overwrite with new status
+    notifyListeners();
+  }
+
   Future<bool> getParticipationStatus(int campaignId) async {
-    if (_participationStatus.containsKey(campaignId)) {
-      return _participationStatus[campaignId]!;
+    try {
+      final isJoined =
+          await _campaignService.getParticipationStatus(campaignId);
+      _participationStatus[campaignId] = isJoined; // Update status immediately
+      notifyListeners();
+      print(
+          '🔄 Updated participation status for campaign $campaignId: $isJoined');
+      return isJoined;
+    } catch (e) {
+      print('⚠️ Error in getParticipationStatus: $e');
+      return false;
     }
-    final isJoined = await _campaignService.getParticipationStatus(campaignId);
-    _participationStatus[campaignId] = isJoined;
-    notifyListeners();
-    return isJoined;
   }
 
-  // Tham gia campaign
   Future<bool> joinCampaign(int campaignId) async {
-    final success = await _campaignService.joinCampaign(campaignId);
-    if (success) {
-      _participationStatus[campaignId] = true;
-      notifyListeners();
+    try {
+      final success = await _campaignService.joinCampaign(campaignId);
+      if (success) {
+        _participationStatus[campaignId] = true; // Update status on success
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      print('⚠️ Error in joinCampaign: $e');
+      return false;
     }
-    return success;
   }
 
-  // Rời campaign
   Future<bool> leaveCampaign(int campaignId) async {
-    final success = await _campaignService.leaveCampaign(campaignId);
-    if (success) {
-      _participationStatus[campaignId] = false;
-      notifyListeners();
+    try {
+      final success = await _campaignService.leaveCampaign(campaignId);
+      if (success) {
+        _participationStatus[campaignId] = false; // Update status on success
+        notifyListeners();
+      }
+      return success;
+    } catch (e) {
+      print('⚠️ Error in leaveCampaign: $e');
+      return false;
     }
-    return success;
   }
 }

@@ -206,6 +206,37 @@ async function leaveCampaign(u_id, campaign_id) {
     }
 };
 
+// async function getParticipants(campaign_id, query = {}) {
+//     // Kiểm tra campaign có tồn tại không
+//     const campaignExists = await knex('campaign').where({ campaign_id }).first();
+//     if (!campaignExists) {
+//         throw new Error('Campaign not found');
+//     }
+
+//     const { page = 1, limit = 10 } = query;
+//     const paginator = new Paginator(page, limit);
+
+//     // Lấy tổng số người tham gia
+//     const totalRecordsQuery = await participationRepository()
+//         .where({ campaign_id, status: 1 })
+//         .count('participation_id as count')
+//         .first();
+
+//     const totalRecords = parseInt(totalRecordsQuery?.count || 0);
+
+//     // Lấy danh sách người tham gia với phân trang
+//     const participants = await participationRepository()
+//         .where({ campaign_id, status: 1 })
+//         .join('users', 'users.u_id', 'participation.u_id')
+//         .select('users.u_id', 'users.u_name', 'users.u_avt', 'participation.joined_at')
+//         .offset(paginator.offset)
+//         .limit(paginator.limit);
+
+//     return {
+//         metadata: paginator.getMetadata(totalRecords),
+//         participants
+//     };
+// };
 async function getParticipants(campaign_id, query = {}) {
     // Kiểm tra campaign có tồn tại không
     const campaignExists = await knex('campaign').where({ campaign_id }).first();
@@ -228,16 +259,17 @@ async function getParticipants(campaign_id, query = {}) {
     const participants = await participationRepository()
         .where({ campaign_id, status: 1 })
         .join('users', 'users.u_id', 'participation.u_id')
-        .select('users.u_id', 'users.u_name', 'users.u_avt', 'participation.joined_at')
+        .select('users.u_id', 'users.u_name', 'users.u_avt', 'participation.joined_at', 'participation.status') // Thêm status
         .offset(paginator.offset)
         .limit(paginator.limit);
+
+    console.log('Participants:', participants); // Log để kiểm tra dữ liệu trả về
 
     return {
         metadata: paginator.getMetadata(totalRecords),
         participants
     };
-};
-
+  }
 
 module.exports={
     createCampaign,
