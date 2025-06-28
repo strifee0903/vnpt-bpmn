@@ -1,13 +1,10 @@
-// select_chat_room_screen.dart
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:greenly_app/models/moment.dart';
 import 'package:greenly_app/services/campaign_service.dart';
 import 'package:greenly_app/models/campaign.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
-
 import 'chat_room.dart';
 
 class SelectChatRoomScreen extends StatelessWidget {

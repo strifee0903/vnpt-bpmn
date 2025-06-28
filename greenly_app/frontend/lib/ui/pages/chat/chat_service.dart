@@ -1,7 +1,5 @@
 import 'package:greenly_app/models/moment.dart';
-
 import '../../../models/chat_message.dart';
-import '';
 
 class ChatRoomService {
   static final Map<int, List<ChatMessage>> _campaignMessages = {};
