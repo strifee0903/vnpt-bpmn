@@ -1,8 +1,11 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:greenly_app/components/colors.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:intl/intl.dart';
 import 'package:greenly_app/models/moment.dart';
+import '../../moments/moment_detail_screen.dart';
 
 class RoomChatPage extends StatefulWidget {
   final int campaignId;
@@ -53,13 +56,10 @@ class _RoomChatPageState extends State<RoomChatPage> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.campaignId != oldWidget.campaignId) {
-      // Rời phòng cũ
       socket.emit('leave_room', oldWidget.campaignId);
-      // Clear tin nhắn cũ
       setState(() {
         messages.clear();
       });
-      // Tham gia phòng mới
       socket.emit('join_room', widget.campaignId);
       socket.emit('load_messages', {
         'campaign_id': widget.campaignId,
@@ -77,7 +77,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
   }
 
   void _connectSocket() {
-    socket = IO.io('http://10.0.2.2:3000', <String, dynamic>{
+    socket = IO.io('http://192.168.1.5:3000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
@@ -103,6 +103,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
     });
 
     socket.on('load_messages_success', (data) {
+      print('📥 Loaded messages: $data');
       setState(() {
         messages = List<Map<String, dynamic>>.from(data);
       });
@@ -114,8 +115,6 @@ class _RoomChatPageState extends State<RoomChatPage> {
     socket.on('new_message', (data) {
       setState(() {
         messages.add(Map<String, dynamic>.from(data));
-        // _hasNewMessage = true;
-
         if (_isAtBottom) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToBottom();
@@ -132,7 +131,10 @@ class _RoomChatPageState extends State<RoomChatPage> {
       );
     });
 
-    socket.onDisconnect((_) => print('❌ Socket disconnected'));
+    // socket.onDisconnect((_) {
+    //   print('❌ Socket disconnected, attempting reconnect...');
+    //   socket.connect();
+    // });
   }
 
   void _scrollToBottom() {
@@ -169,21 +171,13 @@ class _RoomChatPageState extends State<RoomChatPage> {
   void dispose() {
     socket.disconnect();
     socket.dispose();
+    _scrollController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text('Chat chiến dịch ${widget.campaignId}'),
-      //   actions: [
-      //     Padding(
-      //       padding: const EdgeInsets.symmetric(horizontal: 12),
-      //       child: Center(child: Text('@${widget.username}')),
-      //     ),
-      //   ],
-      // ),
       body: Column(
         children: [
           Container(
@@ -227,103 +221,269 @@ class _RoomChatPageState extends State<RoomChatPage> {
           Expanded(
             child: Stack(children: [
               ListView.builder(
-                  controller: _scrollController,
-                  shrinkWrap: false,
-                  physics: AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(12),
-                  itemCount: messages.length,
-                  itemBuilder: (context, index) {
-                    final msg = messages[index];
-                    final isMe = msg['sender_id'] == widget.userId;
-                    final type = msg['type'] ?? 'text';
+                controller: _scrollController,
+                shrinkWrap: false,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(12),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
+                  final msg = messages[index];
+                  final isMe = msg['sender_id'] == widget.userId;
+                  final type = msg['type'] ?? 'text';
+                  print(
+                      '👽👽👽👽 Message $index: type=${msg['type']}, moment=${msg['moment']}');
 
-                    Widget messageWidget;
+                  Widget messageWidget = Container();
+                  if ( type == 'moment' && msg['moment'] != null) {
+                    final momentData = msg['moment'] is Map<String, dynamic>
+                        ? msg['moment']
+                        : null; // Ensure it's a map
+                    
+                    // if (momentData is String) {
+                    //   try {
+                    //     momentData = jsonDecode(momentData);
+                    //   } catch (e) {
+                    //     print('Error parsing moment data: $e');
+                    //     momentData = null;
+                    //   }
+                    // }
+                    // if (momentData != null) {
+                    //   final isShared = msg['shared_by'] != null;
+                    //   final sharedByName = msg['shared_by_name'] ?? 'Ẩn danh';
+                    //   final originalAuthorName =
+                    //       msg['original_author_name'] ?? 'Ẩn danh';
 
-                    if (type == 'moment' && msg['moment'] != null) {
-                      final moment = msg['moment'];
-                      messageWidget = Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: isMe
-                              ? Colors.green.shade100
-                              : Colors.grey.shade200,
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: isMe
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            if (!isMe)
+                    //   messageWidget = GestureDetector(
+                    //     onTap: () {
+                    //       Navigator.push(
+                    //         context,
+                    //         MaterialPageRoute(
+                    //           builder: (_) => MomentDetailScreen(
+                    //             momentId: momentData['moment_id'],
+                    //           ),
+                    //         ),
+                    //       );
+                    //     },
+                    //     child: Container(
+                    //       padding: const EdgeInsets.all(10),
+                    //       decoration: BoxDecoration(
+                    //         color: isMe
+                    //             ? Colors.green.shade100
+                    //             : Colors.grey.shade200,
+                    //         borderRadius: BorderRadius.circular(12),
+                    //       ),
+                    //       child: Column(
+                    //         crossAxisAlignment: isMe
+                    //             ? CrossAxisAlignment.end
+                    //             : CrossAxisAlignment.start,
+                    //         children: [
+                    //           if (isShared && !isMe)
+                    //             Text(
+                    //               '$sharedByName đã chia sẻ bài viết của $originalAuthorName',
+                    //               style: const TextStyle(
+                    //                 fontWeight: FontWeight.bold,
+                    //                 color: Colors.blue,
+                    //               ),
+                    //             ),
+                    //           if (!isShared && !isMe)
+                    //             Text(
+                    //               msg['username'] ?? 'Ẩn danh',
+                    //               style: const TextStyle(
+                    //                   fontWeight: FontWeight.bold),
+                    //             ),
+                    //           const SizedBox(height: 8),
+                    //           Container(
+                    //             padding: const EdgeInsets.all(8),
+                    //             decoration: BoxDecoration(
+                    //               border:
+                    //                   Border.all(color: Colors.grey.shade300),
+                    //               borderRadius: BorderRadius.circular(8),
+                    //             ),
+                    //             child: Column(
+                    //               crossAxisAlignment: CrossAxisAlignment.start,
+                    //               children: [
+                    //                 Text(
+                    //                   momentData['moment_content'] ??
+                    //                       '(Không có nội dung)',
+                    //                   style: const TextStyle(fontSize: 14),
+                    //                   maxLines: 2,
+                    //                   overflow: TextOverflow.ellipsis,
+                    //                 ),
+                    //                 const SizedBox(height: 4),
+                    //                 if (momentData['media'] != null &&
+                    //                     (momentData['media'] as List)
+                    //                         .isNotEmpty)
+                    //                   ClipRRect(
+                    //                     borderRadius: BorderRadius.circular(4),
+                    //                     child: Image.network(
+                    //                       momentData['media'][0]['media_url'],
+                    //                       height: 80,
+                    //                       width: double.infinity,
+                    //                       fit: BoxFit.cover,
+                    //                     ),
+                    //                   ),
+                    //                 const SizedBox(height: 4),
+                    //                 Text(
+                    //                   '${momentData['likeCount'] ?? 0} lượt thích',
+                    //                   style: const TextStyle(
+                    //                     fontSize: 12,
+                    //                     color: Colors.grey,
+                    //                   ),
+                    //                 ),
+                    //               ],
+                    //             ),
+                    //           ),
+                    //           const SizedBox(height: 4),
+                    //           Text(
+                    //             formatTime(msg['created_at']),
+                    //             style: const TextStyle(
+                    //               fontSize: 10,
+                    //               color: Colors.black45,
+                    //             ),
+                    //           ),
+                    //         ],
+                    //       ),
+                    //     ),
+                    //   );
+                    // }
+                    if (momentData != null) {
+                      final isShared = msg['shared_by'] != null;
+                      final sharedByName = msg['shared_by_name'] ?? 'Ẩn danh';
+                      final originalAuthorName = msg['original_author_name'] ?? 'Ẩn danh';
+
+                      messageWidget = GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => MomentDetailScreen(
+                                momentId: momentData['moment_id'],
+                              ),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: isMe ? Colors.green.shade100 : Colors.grey.shade200,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: isMe
+                                ? CrossAxisAlignment.end
+                                : CrossAxisAlignment.start,
+                            children: [
+                              if (isShared && !isMe)
+                                Text(
+                                  '$sharedByName đã chia sẻ bài viết của $originalAuthorName',
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                              if (!isShared && !isMe)
+                                Text(
+                                  msg['username'] ?? 'Ẩn danh',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  border: Border.all(color: Colors.grey.shade300),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      momentData['moment_content'] ?? '(Không có nội dung)',
+                                      style: const TextStyle(fontSize: 14),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    const SizedBox(height: 4),
+                                    if (momentData['media'] != null &&
+                                        (momentData['media'] as List).isNotEmpty)
+                                      ClipRRect(
+                                        borderRadius: BorderRadius.circular(4),
+                                        child: Image.network(
+                                          momentData['media'][0]['media_url'],
+                                          height: 80,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      '${momentData['likeCount'] ?? 0} lượt thích',
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 4),
                               Text(
-                                msg['username'] ?? 'Ẩn danh',
+                                formatTime(msg['created_at']),
                                 style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
+                                  fontSize: 10,
+                                  color: Colors.black45,
+                                ),
                               ),
-                            Text(
-                              '[Moment] ${moment['moment_content'] ?? '(Không có nội dung)'}',
-                              style: TextStyle(fontSize: 14),
-                            ),
-                            const SizedBox(height: 4),
-                            if (moment['media'] != null &&
-                                moment['media'].isNotEmpty)
-                              Image.network(
-                                moment['media'][0]['media_url'],
-                                height: 150,
-                                width: 200,
-                                fit: BoxFit.cover,
-                              ),
-                            Text(
-                              formatTime(msg['created_at']),
-                              style: const TextStyle(
-                                  fontSize: 10, color: Colors.black45),
-                            ),
-                          ],
-                        ),
-                      );
-                    } else {
-                      messageWidget = Container(
-                        padding: const EdgeInsets.all(10),
-                        decoration: BoxDecoration(
-                          color: isMe ? button : Colors.grey.shade300,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: isMe
-                              ? CrossAxisAlignment.end
-                              : CrossAxisAlignment.start,
-                          children: [
-                            if (!isMe)
-                              Text(
-                                msg['username'] ?? 'Ẩn danh',
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            Text(
-                              msg['content'] ?? '',
-                              style: TextStyle(
-                                color: isMe ? Colors.white : Colors.black87,
-                              ),
-                            ),
-                            Text(
-                              formatTime(msg['created_at']),
-                              style: const TextStyle(
-                                  fontSize: 10, color: Colors.black45),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
                       );
                     }
 
-                    return Align(
-                      alignment:
-                          isMe ? Alignment.centerRight : Alignment.centerLeft,
-                      child: Container(
-                        margin: const EdgeInsets.symmetric(vertical: 6),
-                        child: messageWidget,
+                  }
+
+                  else {
+                    messageWidget = Container(
+                      padding: const EdgeInsets.all(10),
+                      decoration: BoxDecoration(
+                        color: isMe ? button : Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: isMe
+                            ? CrossAxisAlignment.end
+                            : CrossAxisAlignment.start,
+                        children: [
+                          if (!isMe)
+                            Text(
+                              msg['username'] ?? 'Ẩn danh',
+                              style:
+                                  const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          Text(
+                            msg['content'] ?? '',
+                            style: TextStyle(
+                              color: isMe ? Colors.white : Colors.black87,
+                            ),
+                          ),
+                          Text(
+                            formatTime(msg['created_at']),
+                            style: const TextStyle(
+                                fontSize: 10, color: Colors.black45),
+                          ),
+                        ],
                       ),
                     );
-                  }),
+                  }
+
+                  return Align(
+                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(vertical: 6),
+                      child: messageWidget,
+                    ),
+                  );
+                },
+              ),
               if (_hasNewMessage)
                 Positioned(
                   bottom: 100,
@@ -338,8 +498,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                       });
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: button,
                         borderRadius: BorderRadius.circular(20),

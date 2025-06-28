@@ -11,6 +11,7 @@ import '../pages/profile/otherUserProfile.dart';
 import '../pages/profile/user_manager.dart';
 import 'edit_moment.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'moment_detail_screen.dart';
 import 'moment_manager.dart';
 
 class MomentCard extends StatefulWidget {
@@ -337,20 +338,45 @@ class _MomentCardState extends State<MomentCard> {
             ),
 
             // Status
+            // Padding(
+            //   padding: const EdgeInsets.symmetric(horizontal: 12.0),
+            //   child: Text(
+            //     moment.content,
+            //     style: const TextStyle(
+            //       fontFamily: 'Lato',
+            //       fontSize: 17,
+            //       fontWeight: FontWeight.w500,
+            //       color: Colors.black87,
+            //     ),
+            //     softWrap: true,
+            //     overflow: TextOverflow.visible,
+            //   ),
+            // ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
-              child: Text(
-                moment.content,
-                style: const TextStyle(
-                  fontFamily: 'Lato',
-                  fontSize: 17,
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
+              child: GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => MomentDetailScreen(momentId: moment.id),
+                    ),
+                  );
+                },
+                child: Text(
+                  moment.content,
+                  style: const TextStyle(
+                    fontFamily: 'Lato',
+                    fontSize: 17,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                  softWrap: true,
+                  overflow: TextOverflow.visible,
                 ),
-                softWrap: true,
-                overflow: TextOverflow.visible,
               ),
             ),
+
             const SizedBox(height: 10),
 
             // Image carousel
@@ -455,16 +481,24 @@ class _MomentCardState extends State<MomentCard> {
                       //     const Text('0', style: TextStyle(fontSize: 14)),
                       //   ],
                       // ),
+                      // Trong moments_card.dart
                       Row(
                         children: [
                           IconButton(
                             onPressed: () {
-                              // Điều hướng đến giao diện chọn phòng chat
+                              final authManager = Provider.of<AuthManager>(
+                                  context,
+                                  listen: false);
+                              final currentUser = authManager.loggedInUser;
+
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      SelectChatRoomScreen(moment: moment, userId: moment.user.u_id, username: moment.user.u_name,),
+                                  builder: (context) => SelectChatRoomScreen(
+                                    moment: moment,
+                                    userId: currentUser?.u_id ?? 0,
+                                    username: currentUser?.u_name ?? 'Ẩn danh',
+                                  ),
                                 ),
                               );
                             },

@@ -245,7 +245,9 @@ class _CampaignState extends State<Campaign> {
             Expanded(
               child: campaigns.isEmpty
                   ? Center(
-                      child: Text(_errorMessage ?? 'No campaigns available'))
+                    child: CircularProgressIndicator())
+                  // Center(
+                  //     child: Text(_errorMessage ?? 'No campaigns available'))
                   //           const Center(
                   //   child: CircularProgressIndicator(),
                   // )
