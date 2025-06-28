@@ -184,22 +184,6 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () {
-      //     Navigator.push(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (_) => RoomChatPage(
-      //           campaignId: 2,
-      //           userId: 1,
-      //           username: "binhluanvien",
-      //         ),
-      //       ),
-      //     );
-      //   },
-      //   backgroundColor: button,
-      //   child: const Icon(Icons.message, color: Colors.white),
-      // ),
     );
   }
 

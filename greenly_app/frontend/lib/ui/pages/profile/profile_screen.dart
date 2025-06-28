@@ -16,6 +16,7 @@ import 'user_manager.dart'; // Add this import
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+  static const routeName = '/profile';
 
   @override
   _ProfileScreenState createState() => _ProfileScreenState();

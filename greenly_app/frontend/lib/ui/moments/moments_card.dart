@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import '../../models/moment.dart';
 import '../../services/moment_service.dart';
+import '../../shared/main_layout.dart';
 import '../auth/auth_manager.dart';
 import '../pages/profile/otherUserProfile.dart';
 import '../pages/profile/user_manager.dart';
@@ -80,18 +81,18 @@ class _MomentCardState extends State<MomentCard> {
     final currentUser = authManager.loggedInUser;
 
     if (currentUser != null && currentUser.u_id == moment.user.u_id) {
-      // Navigator.push(
-      //   context,
-      //   MaterialPageRoute(
-      //     builder: (_) => MainLayout(initialIndex: 3),
-      //   ),
-      // );
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => ProfileScreen(),
+          builder: (_) => MainLayout(initialIndex: 3),
         ),
       );
+      // Navigator.push(
+      //   context,
+      //   MaterialPageRoute(
+      //     builder: (_) => ProfileScreen(),
+      //   ),
+      // );
     } else {
       Navigator.push(
         context,
