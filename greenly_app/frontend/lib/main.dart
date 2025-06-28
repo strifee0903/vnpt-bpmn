@@ -19,6 +19,7 @@ import 'ui/pages/campaign/campaign.dart'; // Import Campaign
 import 'ui/moments/moments.dart';
 import 'shared/main_layout.dart';
 import 'shared/route_animations.dart';
+import 'ui/pages/chat/chat_main.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -79,7 +80,7 @@ class _MyAppState extends State<MyApp> {
         Provider(create: (_) => MomentService()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => MomentProvider()),
-        ChangeNotifierProvider(create: (_)=> CampaignManager())
+        ChangeNotifierProvider(create: (_) => CampaignManager())
       ],
       child: Builder(builder: (context) {
         final authManager = Provider.of<AuthManager>(context, listen: false);
@@ -119,8 +120,12 @@ class _MyAppState extends State<MyApp> {
                 '/campaign': (ctx) => const SafeArea(child: Campaign()),
                 '/moments': (ctx) => const SafeArea(child: MomentsPage()),
                 // '/profile': (ctx) => const SafeArea(child: ProfileScreen()),
-                '/groupChat': (context) => const GroupChatPage(),
-                ProfileScreen.routeName: (ctx) => const SafeArea(child: MainLayout(initialIndex: 3,)),
+                '/groupChat': (context) => const ChatMain(),
+
+                ProfileScreen.routeName: (ctx) => const SafeArea(
+                        child: MainLayout(
+                      initialIndex: 3,
+                    )),
                 // '/profile': (ctx) => const SafeArea(
                 //     child: MainLayout(initialIndex: 3)), // Update to MainLayout
               },
@@ -138,12 +143,13 @@ class _MyAppState extends State<MyApp> {
                   // case '/profile':
                   //   return ScaleRoute(page: const ProfileScreen());
                   case ProfileScreen.routeName:
-                    return FadeSlideRoute(page: const MainLayout(
+                    return FadeSlideRoute(
+                        page: const MainLayout(
                       initialIndex: 3,
                     ));
-                    // return ScaleRoute(
-                    //     page: const MainLayout(
-                    //         initialIndex: 3)); // Update to MainLayout
+                  // return ScaleRoute(
+                  //     page: const MainLayout(
+                  //         initialIndex: 3)); // Update to MainLayout
                   default:
                     print('🔴 Unknown route: ${settings.name}');
                     return SlideUpRoute(page: const NotFoundScreen());

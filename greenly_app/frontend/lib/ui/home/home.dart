@@ -37,7 +37,6 @@ class _HomePageState extends State<HomePage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // Header with Farm Name and Weather Info (không có trong code hiện tại)
 
               // Greenly App Section with Overlay Box and Add Post
               Padding(
@@ -107,6 +106,7 @@ class _HomePageState extends State<HomePage> {
                             Transform.scale(
                               scale: 0.8,
                               child: FloatingActionButton(
+                                heroTag: 'moment',
                                 onPressed: () {
                                   Navigator.pushNamed(context,
                                       '/moments'); // Điều hướng trực tiếp đến Moments
@@ -172,7 +172,7 @@ class _HomePageState extends State<HomePage> {
                       const Color(0xFFFFFFFF),
                     ),
                     _buildOptionCard(
-                      'Contribution',
+                      'Group Chat',
                       'assets/images/contribution.png',
                       const Color(0xFFFFFFFF),
                       const Color(0xFFFFFFFF),
@@ -205,7 +205,7 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushNamed(context, '/greenLibrary');
             } else if (title == 'Campaign') {
               Navigator.pushNamed(context, '/campaign');
-            } else if (title == 'Contribution') {
+            } else if (title == 'Group Chat') {
               Navigator.pushNamed(context, '/groupChat');
             }
           },
