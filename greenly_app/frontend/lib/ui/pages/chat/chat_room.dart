@@ -33,7 +33,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
     super.initState();
     _connectSocket();
   }
-// 10.0.2.2
+  
   void _connectSocket() {
     socket = IO.io('http://10.0.2.2:3000', <String, dynamic>{
       'transports': ['websocket'],
