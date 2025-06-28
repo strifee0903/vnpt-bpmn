@@ -254,6 +254,9 @@ CREATE TABLE messages (
     FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id),
     FOREIGN KEY (sender_id) REFERENCES users(u_id)
 );
+ALTER TABLE messages
+  ADD COLUMN type ENUM('text', 'moment') DEFAULT 'text',
+  ADD COLUMN moment_json JSON NULL;
 
 select * from messages;
 
