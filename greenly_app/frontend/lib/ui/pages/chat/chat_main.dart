@@ -85,29 +85,26 @@ class _ChatMainState extends State<ChatMain> {
     //   ),
     // );
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        title: const Text(""),
-      ),
-      body: campaigns.isEmpty
-          ? const Center(
-              child: CircularProgressIndicator(),
-            )
-          : Column(
+      backgroundColor: Colors.white,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(top: 40, left: 8, right: 8),
+            child: Row(
               children: [
-                SizedBox(
-                  height: 110,
-                  child: Align(
-                    alignment: Alignment.center,
+                IconButton(
+                  icon: const Icon(Icons.arrow_back),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+                Expanded(
+                  child: SizedBox(
+                    height: 100,
                     child: ListView.builder(
                       scrollDirection: Axis.horizontal,
-                      padding: const EdgeInsets.all(8),
                       itemCount: campaigns.length,
                       itemBuilder: (context, index) {
                         final campaign = campaigns[index];
                         final isSelected = campaign.id == selectedCampaignId;
-
                         return GestureDetector(
                           onTap: () {
                             setState(() {
@@ -120,7 +117,7 @@ class _ChatMainState extends State<ChatMain> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 CircleAvatar(
-                                  radius: isSelected ? 30 : 25,
+                                  radius: isSelected ? 24 : 20,
                                   backgroundColor:
                                       isSelected ? button : Colors.grey[400],
                                   child: Text(
@@ -131,7 +128,7 @@ class _ChatMainState extends State<ChatMain> {
                                     ),
                                   ),
                                 ),
-                                const SizedBox(height: 6),
+                                const SizedBox(height: 4),
                                 SizedBox(
                                   width: 60,
                                   child: Text(
@@ -153,19 +150,21 @@ class _ChatMainState extends State<ChatMain> {
                     ),
                   ),
                 ),
-                const Divider(height: 1),
-                Expanded(
-                  child: selectedCampaignId == null
-                      ? const Center(child: Text("Chọn một chiến dịch"))
-                      : RoomChatPage(
-                          campaignId: selectedCampaignId!,
-                          userId: userId!,
-                          username: username!,
-                        ),
-                ),
-                const Divider(height: 10),
               ],
             ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: selectedCampaignId == null
+                ? const Center(child: Text("Chọn một chiến dịch"))
+                : RoomChatPage(
+                    campaignId: selectedCampaignId!,
+                    userId: userId!,
+                    username: username!,
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }
