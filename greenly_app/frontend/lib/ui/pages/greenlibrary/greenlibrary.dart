@@ -130,7 +130,7 @@ class _GreenLibraryState extends State<GreenLibrary> {
       backgroundColor: background,
       appBar: AppBar(
         backgroundColor: background,
-        elevation: 0, // Không có bóng đổ
+        elevation: 0,
         title: const Text(
           'Green Library',
           style: TextStyle(
@@ -141,16 +141,27 @@ class _GreenLibraryState extends State<GreenLibrary> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: ListView.builder(
-          itemCount: documents.length,
-          itemBuilder: (context, index) {
-            final document = documents[index];
-            return LibraryCard(
-              document: document,
-              // onTap: _showProcessDialog,
-            );
-          },
-        ),
+        child: documents.isEmpty
+            ? const Center(
+                child: Text(
+                  'Không có tài liệu',
+                  style: TextStyle(
+                    fontFamily: 'Montserrat',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 18,
+                  ),
+                ),
+              )
+            : ListView.builder(
+                itemCount: documents.length,
+                itemBuilder: (context, index) {
+                  final document = documents[index];
+                  return LibraryCard(
+                    document: document,
+                    // onTap: _showProcessDialog,
+                  );
+                },
+              ),
       ),
     );
   }

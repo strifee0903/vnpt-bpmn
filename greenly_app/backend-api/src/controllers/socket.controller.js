@@ -9,7 +9,10 @@ exports.initSocket = (io) => {
       console.log(`🔗 ${socket.id} joined room_${campaign_id}`);
       socket.join(`room_${campaign_id}`);
     });
-
+    socket.on("leave_room", (campaign_id) => {
+      console.log(`🚪 ${socket.id} left room ${campaign_id}`);
+      socket.leave(campaign_id.toString());
+    });
     // 📩 Gửi tin nhắn
     // socket.on("send_message", async (data) => {
     //   const { campaign_id, sender_id, content } = data;

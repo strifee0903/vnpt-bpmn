@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../components/colors.dart';
@@ -112,7 +113,12 @@ class _CampaignState extends State<Campaign> {
         'text': const Color.fromARGB(255, 0, 0, 0),
       },
     ];
-
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.white, // Set status bar color
+        statusBarIconBrightness: Brightness.light, // Dark icons for status bar
+      ),
+    );
     return Scaffold(
       backgroundColor: background,
       appBar: AppBar(
@@ -240,6 +246,9 @@ class _CampaignState extends State<Campaign> {
               child: campaigns.isEmpty
                   ? Center(
                       child: Text(_errorMessage ?? 'No campaigns available'))
+                  //           const Center(
+                  //   child: CircularProgressIndicator(),
+                  // )
                   : ListView.builder(
                       itemCount: campaigns.length,
                       itemBuilder: (context, index) {
