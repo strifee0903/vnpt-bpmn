@@ -5,9 +5,9 @@ exports.initSocket = (io) => {
   io.on("connection", (socket) => {
     console.log("📡 Socket connected:", socket.id);
     // 🟢 Join room
-    socket.on("join_campaign", (campaign_id) => {
-      console.log(`🔗 ${socket.id} joined campaign_${campaign_id}`);
-      socket.join(`campaign_${campaign_id}`);
+    socket.on("join_room", (campaign_id) => {
+      console.log(`🔗 ${socket.id} joined room_${campaign_id}`);
+      socket.join(`room_${campaign_id}`);
     });
 
     // 📩 Gửi tin nhắn
@@ -31,7 +31,7 @@ exports.initSocket = (io) => {
         content,
       });
 
-      io.to(`campaign_${campaign_id}`).emit("new_message", newMessage);
+      io.to(`room_${campaign_id}`).emit("new_message", newMessage);
     });
 
     // 📜 Load lịch sử tin nhắn

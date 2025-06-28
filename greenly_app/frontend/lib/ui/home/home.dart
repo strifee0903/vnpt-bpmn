@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../components/colors.dart';
 import '../../shared/main_layout.dart'; // Import MainLayout
+import '../pages/chat/chat_room.dart'; // Import RoomChatPage
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -183,6 +184,22 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => RoomChatPage(
+                campaignId: 2,
+                userId: 1,
+                username: "binhluanvien",
+              ),
+            ),
+          );
+        },
+        backgroundColor: button,
+        child: const Icon(Icons.message, color: Colors.white),
+      ),
     );
   }
 
@@ -204,8 +221,8 @@ class _HomePageState extends State<HomePage> {
               Navigator.pushNamed(context, '/greenLibrary');
             } else if (title == 'Campaign') {
               Navigator.pushNamed(context, '/campaign');
-            }else if (title == 'Contribution') {
-              Navigator.pushNamed(context, '/groupChat'); 
+            } else if (title == 'Contribution') {
+              Navigator.pushNamed(context, '/groupChat');
             }
           },
           child: Stack(
