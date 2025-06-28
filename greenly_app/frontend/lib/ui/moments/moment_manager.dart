@@ -14,6 +14,8 @@ class MomentProvider with ChangeNotifier {
   bool _isLoading = false;
   bool _hasMore = true;
   String _typeFilter = 'all';
+  LatLng? _currentLocation;
+  LatLng? get currentLocation => _currentLocation;
 
   // State for ProfileScreen
   List<Moment> _profileMoments = [];
@@ -53,6 +55,11 @@ class MomentProvider with ChangeNotifier {
       _profileMoments[profileMomentIndex] = updatedMoment;
     }
 
+    notifyListeners();
+  }
+
+  void updateCurrentLocation(LatLng location) {
+    _currentLocation = location;
     notifyListeners();
   }
 

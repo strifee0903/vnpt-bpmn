@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenly_app/ui/pages/campaign/campaign_manager.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
@@ -105,7 +106,8 @@ class _GreenMapState extends State<GreenMap> {
       setState(() {
         currentLocation = newLocation;
       });
-
+      Provider.of<MomentProvider>(context, listen: false)
+          .updateCurrentLocation(newLocation);
       print(
           '📍📍📍 Current location: ${currentLocation!.latitude}, ${currentLocation!.longitude}');
       print('📍📍📍 Address: $nameOfLocation');
@@ -390,8 +392,6 @@ class _GreenMapState extends State<GreenMap> {
   //   );
   // }
 
-  
-  
   @override
   Widget build(BuildContext context) {
     if (ModalRoute.of(context)?.isCurrent == true) {
@@ -413,57 +413,92 @@ class _GreenMapState extends State<GreenMap> {
                   print('📍 Marker at: ${marker.point}');
                 }
 
-                return FlutterMap(
-                  mapController: _mapController,
-                  options: MapOptions(
-                    center: LatLng(16.047079, 108.206230),
-                    zoom: 6,
-                    onTap: (_, __) => _removePanel(),
-                  ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://api.mapbox.com/styles/v1/$username/$mapStyleId/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxAccessToken',
-                      additionalOptions: {
-                        'access_token': mapboxAccessToken,
-                      },
-                      userAgentPackageName: 'com.example.app',
+                return Stack(children: [
+                  FlutterMap(
+                    mapController: _mapController,
+                    options: MapOptions(
+                      center: LatLng(16.047079, 108.206230),
+                      zoom: 6,
+                      onTap: (_, __) => _removePanel(),
                     ),
-                    // MarkerLayer(
-                    //   markers: provider.markers,
-                    // ),
-                    MarkerClusterLayerWidget(
-                      options: MarkerClusterLayerOptions(
-                        maxClusterRadius: 45,
-                        disableClusteringAtZoom: 17,
-                        zoomToBoundsOnClick: false,
-                        spiderfyCluster: false,
-                        size: const Size(40, 40),
-                        markers: provider.markers,
-                        builder: (context, cluster) {
-                          return Container(
-                            decoration: const BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.orange,
-                            ),
-                            child: Center(
-                              child: Text(
-                                '${cluster.length}',
-                                style: const TextStyle(color: Colors.white),
-                              ),
-                            ),
-                          );
+                    children: [
+                      TileLayer(
+                        urlTemplate:
+                            'https://api.mapbox.com/styles/v1/$username/$mapStyleId/tiles/256/{z}/{x}/{y}@2x?access_token=$mapboxAccessToken',
+                        additionalOptions: {
+                          'access_token': mapboxAccessToken,
                         },
-                        onClusterTap: (cluster) {
-                          _showClusterInfo(context, cluster);
-                        },
-                        onMarkerTap: (marker) {
-                          _showMarkerInfo(context, marker);
-                        },
+                        userAgentPackageName: 'com.example.app',
                       ),
+                      // MarkerLayer(
+                      //   markers: provider.markers,
+                      // ),
+
+                      MarkerClusterLayerWidget(
+                        options: MarkerClusterLayerOptions(
+                          maxClusterRadius: 45,
+                          disableClusteringAtZoom: 17,
+                          zoomToBoundsOnClick: false,
+                          spiderfyCluster: false,
+                          size: const Size(40, 40),
+                          markers: provider.markers,
+                          builder: (context, cluster) {
+                            return Container(
+                              decoration: const BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: Colors.orange,
+                              ),
+                              child: Center(
+                                child: Text(
+                                  '${cluster.length}',
+                                  style: const TextStyle(color: Colors.white),
+                                ),
+                              ),
+                            );
+                          },
+                          onClusterTap: (cluster) {
+                            _showClusterInfo(context, cluster);
+                          },
+                          onMarkerTap: (marker) {
+                            _showMarkerInfo(context, marker);
+                          },
+                        ),
+                      ),
+                      if (provider.currentLocation != null)
+                        MarkerLayer(
+                          markers: [
+                            Marker(
+                              point: provider.currentLocation!,
+                              width: 50,
+                              height: 50,
+                              child: const Icon(Icons.my_location,
+                                  color: Colors.blue, size: 35),
+                            )
+                          ],
+                        ),
+                    ],
+                  ),
+                  Positioned(
+                    bottom: 20,
+                    right: 20,
+                    child: FloatingActionButton(
+                      backgroundColor: Colors.white,
+                      foregroundColor: Colors.black,
+                      onPressed: () {
+                        final location = provider.currentLocation;
+                        if (location != null) {
+                          _mapController.move(location, 16); // zoom = 16
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                                content: Text('Chưa có vị trí hiện tại')),
+                          );
+                        }
+                      },
+                      child: const Icon(Icons.my_location),
                     ),
-                  ],
-                );
+                  ),
+                ]);
               },
             )));
   }
