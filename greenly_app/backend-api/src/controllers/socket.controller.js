@@ -11,28 +11,44 @@ exports.initSocket = (io) => {
     });
 
     // 📩 Gửi tin nhắn
+    // socket.on("send_message", async (data) => {
+    //   const { campaign_id, sender_id, content } = data;
+    //   if (!campaign_id || !sender_id || !content) return;
+
+    //   //   const exists = await knex("participation")
+    //   //     .where({ campaign_id, u_id: sender_id })
+    //   //     .first();
+
+    //   //   if (!exists) {
+    //   //     return socket.emit("error_message", {
+    //   //       error: "Bạn không có quyền gửi tin nhắn vào chiến dịch này.",
+    //   //     });
+    //   //   }
+
+    //   const newMessage = await socketService.saveMessage({
+    //     campaign_id,
+    //     sender_id,
+    //     content,
+    //   });
+
+    //   io.to(`room_${campaign_id}`).emit("new_message", newMessage);
+    // });
+
     socket.on("send_message", async (data) => {
-      const { campaign_id, sender_id, content } = data;
-      if (!campaign_id || !sender_id || !content) return;
-
-      //   const exists = await knex("participation")
-      //     .where({ campaign_id, u_id: sender_id })
-      //     .first();
-
-      //   if (!exists) {
-      //     return socket.emit("error_message", {
-      //       error: "Bạn không có quyền gửi tin nhắn vào chiến dịch này.",
-      //     });
-      //   }
+      const { campaign_id, sender_id, content, type = 'text', moment } = data;
+      if (!campaign_id || !sender_id || (type === 'text' && !content)) return;
 
       const newMessage = await socketService.saveMessage({
         campaign_id,
         sender_id,
         content,
+        type,
+        moment,
       });
 
       io.to(`room_${campaign_id}`).emit("new_message", newMessage);
     });
+    
 
     // 📜 Load lịch sử tin nhắn
     socket.on("load_messages", async (data) => {

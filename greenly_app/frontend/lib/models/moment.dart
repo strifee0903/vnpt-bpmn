@@ -128,6 +128,26 @@ class Moment {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      'moment_id': id,
+      'moment_content': content,
+      'moment_address': address,
+      'latitude': latitude,
+      'longitude': longitude,
+      'moment_type': type,
+      'created_at': createdAt.toIso8601String(),
+      'user': user.toJson(),
+      'category': category.toJson(),
+      'media': media.map((m) => m.toJson()).toList(),
+      'is_public': isPublic,
+      'likeCount': likeCount,
+      'unlikeCount': unlikeCount,
+      'isLikedByCurrentUser': isLikedByCurrentUser,
+    };
+  }
+
+
   static int _parseIntSafe(dynamic value, String fieldName) {
     if (value == null) {
       throw FormatException('Required field $fieldName is null');

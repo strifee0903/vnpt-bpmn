@@ -6,6 +6,7 @@ import '../../models/moment.dart';
 import '../../services/moment_service.dart';
 import '../../shared/main_layout.dart';
 import '../auth/auth_manager.dart';
+import '../pages/chat/select_chat_room_screen.dart';
 import '../pages/profile/otherUserProfile.dart';
 import '../pages/profile/user_manager.dart';
 import 'edit_moment.dart';
@@ -445,11 +446,32 @@ class _MomentCardState extends State<MomentCard> {
                       ),
                       const SizedBox(width: 16),
 
+                      // Row(
+                      //   children: [
+                      //     FaIcon(FontAwesomeIcons.share,
+                      //         size: 19,
+                      //         color: const Color.fromARGB(255, 96, 96, 96)),
+                      //     const SizedBox(width: 4),
+                      //     const Text('0', style: TextStyle(fontSize: 14)),
+                      //   ],
+                      // ),
                       Row(
                         children: [
-                          FaIcon(FontAwesomeIcons.share,
-                              size: 19,
-                              color: const Color.fromARGB(255, 96, 96, 96)),
+                          IconButton(
+                            onPressed: () {
+                              // Điều hướng đến giao diện chọn phòng chat
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      SelectChatRoomScreen(moment: moment, userId: moment.user.u_id, username: moment.user.u_name,),
+                                ),
+                              );
+                            },
+                            icon: FaIcon(FontAwesomeIcons.share,
+                                size: 19,
+                                color: const Color.fromARGB(255, 96, 96, 96)),
+                          ),
                           const SizedBox(width: 4),
                           const Text('0', style: TextStyle(fontSize: 14)),
                         ],
