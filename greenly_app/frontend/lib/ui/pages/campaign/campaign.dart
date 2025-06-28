@@ -269,150 +269,162 @@ class _CampaignState extends State<Campaign> {
                         //     verifyParticipationStatus(); // Verify if "Leave" is shown
                         // });
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 16.0),
-                          decoration: BoxDecoration(
-                            color: colors['background'],
-                            borderRadius: BorderRadius.circular(25),
-                            boxShadow: [
-                              BoxShadow(
-                                color: const Color.fromARGB(255, 1, 15, 1)
-                                    .withAlpha((0.1 * 255).toInt()),
-                                blurRadius: 30,
-                                offset: const Offset(0, 12),
+                        return GestureDetector(
+                          onTap: () {
+                            showDialog(
+                              context: context,
+                              builder: (_) => Center(
+                                child: CampaignDetailCard(campaign: campaign),
                               ),
-                            ],
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(18.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                            );
+                          },
+                          child: Container(
+                            margin: const EdgeInsets.only(bottom: 16.0),
+                            decoration: BoxDecoration(
+                              color: colors['background'],
+                              borderRadius: BorderRadius.circular(25),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color.fromARGB(255, 1, 15, 1)
+                                      .withAlpha((0.1 * 255).toInt()),
+                                  blurRadius: 30,
+                                  offset: const Offset(0, 12),
+                                ),
+                              ],
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.all(18.0),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          campaign.title,
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontFamily: 'Oktah',
+                                            fontWeight: FontWeight.w700,
+                                            color: colors['text'],
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          campaign.description,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            fontFamily: 'Oktah',
+                                            fontWeight: FontWeight.w500,
+                                            color: colors['text']!
+                                                .withOpacity(0.7),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 6),
+                                        Text(
+                                          campaign.location ?? 'No location',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontFamily: 'Oktah',
+                                            fontWeight: FontWeight.w500,
+                                            color: colors['text']!
+                                                .withOpacity(0.5),
+                                          ),
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          'From ${formatDate(campaign.startDate)} to ${formatDate(campaign.endDate)}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            fontFamily: 'Oktah',
+                                            fontWeight: FontWeight.w400,
+                                            color: colors['text']!
+                                                .withOpacity(0.5),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  Column(
                                     children: [
-                                      Text(
-                                        campaign.title,
-                                        style: TextStyle(
-                                          fontSize: 20,
-                                          fontFamily: 'Oktah',
-                                          fontWeight: FontWeight.w700,
-                                          color: colors['text'],
+                                      TextButton(
+                                        onPressed: isCreator
+                                            ? null // Disable button for creator
+                                            : () async {
+                                                final success = isJoined
+                                                    ? await campaignManager
+                                                        .leaveCampaign(
+                                                            campaign.id)
+                                                    : await campaignManager
+                                                        .joinCampaign(
+                                                            campaign.id);
+                                                if (success) {
+                                                  setState(() {
+                                                    _fetchCampaigns(); // Reload campaigns
+                                                  });
+                                                } else {
+                                                  ScaffoldMessenger.of(context)
+                                                      .showSnackBar(
+                                                    SnackBar(
+                                                      content: Text(
+                                                        isJoined
+                                                            ? 'Failed to leave campaign'
+                                                            : 'Failed to join campaign',
+                                                      ),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                        style: TextButton.styleFrom(
+                                          backgroundColor: isCreator
+                                              ? Colors.grey
+                                              : isJoined
+                                                  ? Colors.red
+                                                  : button,
+                                          shape: RoundedRectangleBorder(
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                        ),
+                                        child: Text(
+                                          isCreator
+                                              ? 'Hosting'
+                                              : (isJoined ? 'Leave' : 'Join'),
+                                          style: const TextStyle(
+                                            fontFamily: 'Oktah',
+                                            fontWeight: FontWeight.w700,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        campaign.description,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontFamily: 'Oktah',
-                                          fontWeight: FontWeight.w500,
+                                      Center(
+                                        child: IconButton(
+                                          icon: const Icon(Icons.chevron_right,
+                                              size: 24),
                                           color:
                                               colors['text']!.withOpacity(0.7),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 6),
-                                      Text(
-                                        campaign.location ?? 'No location',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontFamily: 'Oktah',
-                                          fontWeight: FontWeight.w500,
-                                          color:
-                                              colors['text']!.withOpacity(0.5),
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        'From ${formatDate(campaign.startDate)} to ${formatDate(campaign.endDate)}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontFamily: 'Oktah',
-                                          fontWeight: FontWeight.w400,
-                                          color:
-                                              colors['text']!.withOpacity(0.5),
+                                          onPressed: () {
+                                            showDialog(
+                                              context: context,
+                                              builder: (_) => Center(
+                                                child: CampaignDetailCard(
+                                                    campaign: campaign),
+                                              ),
+                                            );
+                                          },
+                                          padding: EdgeInsets.zero,
                                         ),
                                       ),
                                     ],
                                   ),
-                                ),
-                                Column(
-                                  children: [
-                                    TextButton(
-                                      onPressed: isCreator
-                                          ? null // Disable button for creator
-                                          : () async {
-                                              final success = isJoined
-                                                  ? await campaignManager
-                                                      .leaveCampaign(
-                                                          campaign.id)
-                                                  : await campaignManager
-                                                      .joinCampaign(
-                                                          campaign.id);
-                                              if (success) {
-                                                setState(() {
-                                                  _fetchCampaigns(); // Reload campaigns
-                                                });
-                                              } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                      isJoined
-                                                          ? 'Failed to leave campaign'
-                                                          : 'Failed to join campaign',
-                                                    ),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                      style: TextButton.styleFrom(
-                                        backgroundColor: isCreator
-                                            ? Colors.grey
-                                            : isJoined
-                                                ? Colors.red
-                                                : button,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(10.0),
-                                        ),
-                                      ),
-                                      child: Text(
-                                        isCreator
-                                            ? 'Hosting'
-                                            : (isJoined ? 'Leave' : 'Join'),
-                                        style: const TextStyle(
-                                          fontFamily: 'Oktah',
-                                          fontWeight: FontWeight.w700,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                    Center(
-                                      child: IconButton(
-                                        icon: const Icon(Icons.chevron_right,
-                                            size: 24),
-                                        color: colors['text']!.withOpacity(0.7),
-                                        onPressed: () {
-                                          showDialog(
-                                            context: context,
-                                            builder: (_) => Center(
-                                              child: CampaignDetailCard(
-                                                  campaign: campaign),
-                                            ),
-                                          );
-                                        },
-                                        padding: EdgeInsets.zero,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
