@@ -45,8 +45,6 @@ exports.getMessagesByCampaign = async (campaignId) => {
   });
 };
 
-
-
 // // Lưu 1 message mới
 // exports.saveMessage = async ({ campaign_id, sender_id, content }) => {
 //   const [message_id] = await knex("messages").insert(
@@ -68,25 +66,34 @@ exports.getMessagesByCampaign = async (campaignId) => {
 //   };
 // };
 
-exports.saveMessage = async ({ campaign_id, sender_id, content, type = 'text', moment }) => {
+exports.saveMessage = async ({
+  campaign_id,
+  sender_id,
+  content,
+  type = "text",
+  moment,
+  username,
+}) => {
   const [message_id] = await knex("messages").insert(
     {
       campaign_id,
       sender_id,
       type,
-      content: type === 'text' ? content : null,
-      moment_json: type === 'moment' ? JSON.stringify(moment) : null,
+      content: type === "text" ? content : null,
+      moment_json: type === "moment" ? JSON.stringify(moment) : null,
     },
     ["message_id"]
   );
 
   return {
-    message_id: typeof message_id === "object" ? message_id.message_id : message_id,
+    message_id:
+      typeof message_id === "object" ? message_id.message_id : message_id,
     campaign_id,
     sender_id,
     type,
     content,
     moment,
+    username: username || null, // nếu có username thì thêm vào
     created_at: new Date().toISOString(),
   };
 };

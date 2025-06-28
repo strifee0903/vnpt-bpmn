@@ -35,8 +35,15 @@ exports.initSocket = (io) => {
     // });
 
     socket.on("send_message", async (data) => {
-      const { campaign_id, sender_id, content, type = 'text', moment } = data;
-      if (!campaign_id || !sender_id || (type === 'text' && !content)) return;
+      const {
+        campaign_id,
+        sender_id,
+        content,
+        type = "text",
+        moment,
+        username,
+      } = data;
+      if (!campaign_id || !sender_id || (type === "text" && !content)) return;
 
       const newMessage = await socketService.saveMessage({
         campaign_id,
@@ -44,11 +51,11 @@ exports.initSocket = (io) => {
         content,
         type,
         moment,
+        username,
       });
 
       io.to(`room_${campaign_id}`).emit("new_message", newMessage);
     });
-    
 
     // 📜 Load lịch sử tin nhắn
     socket.on("load_messages", async (data) => {

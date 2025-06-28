@@ -271,6 +271,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
       'sender_id': widget.userId,
       'content': content,
       'type': 'text',
+      'username': widget.username,
     });
 
     _controller.clear();
@@ -303,9 +304,9 @@ class _RoomChatPageState extends State<RoomChatPage> {
         children: [
           Expanded(
             child: ListView.builder(
-              padding: const EdgeInsets.all(12),
-              itemCount: messages.length,
-              itemBuilder: (context, index) {
+                padding: const EdgeInsets.all(12),
+                itemCount: messages.length,
+                itemBuilder: (context, index) {
                   final msg = messages[index];
                   final isMe = msg['sender_id'] == widget.userId;
                   final type = msg['type'] ?? 'text';
@@ -395,10 +396,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                       child: messageWidget,
                     ),
                   );
-                }
-
-            
-            ),
+                }),
           ),
           const Divider(height: 1),
           Padding(
