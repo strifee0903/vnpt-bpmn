@@ -6,6 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:greenly_app/models/moment.dart';
 import '../../../services/moment_service.dart';
 import '../../moments/moment_detail_screen.dart';
+import 'socket_config.dart';
 
 class RoomChatPage extends StatefulWidget {
   final int campaignId;
@@ -48,7 +49,9 @@ class _RoomChatPageState extends State<RoomChatPage> {
         });
       }
     });
-    _scrollToBottom();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _scrollToBottom();
+    });
   }
 
   @override
@@ -76,8 +79,9 @@ class _RoomChatPageState extends State<RoomChatPage> {
     }
   }
 
-  void _connectSocket() {
-    socket = IO.io('http://192.168.1.3:3000', <String, dynamic>{
+  void _connectSocket() async {
+    final socketUrl = await SocketConfig.getSocketUrl();
+    socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });

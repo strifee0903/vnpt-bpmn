@@ -3,7 +3,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:greenly_app/shared/not_found_screen.dart';
 import 'package:greenly_app/ui/pages/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
-
 import 'services/moment_service.dart';
 import 'ui/auth/auth_manager.dart';
 import 'ui/auth/auth_screen.dart';
@@ -118,16 +117,14 @@ class _MyAppState extends State<MyApp> {
                 '/myDiary': (ctx) => const SafeArea(child: MyDiary()),
                 '/greenLibrary': (ctx) => const SafeArea(child: GreenLibrary()),
                 '/campaign': (ctx) => const SafeArea(child: Campaign()),
-                '/moments': (ctx) => const SafeArea(child: MomentsPage()),
-                // '/profile': (ctx) => const SafeArea(child: ProfileScreen()),
+                MomentsPage.routeName: (ctx) =>
+                    const SafeArea(child: MomentsPage()),
                 '/groupChat': (context) => const ChatMain(),
 
                 ProfileScreen.routeName: (ctx) => const SafeArea(
                         child: MainLayout(
                       initialIndex: 3,
                     )),
-                // '/profile': (ctx) => const SafeArea(
-                //     child: MainLayout(initialIndex: 3)), // Update to MainLayout
               },
               onGenerateRoute: (settings) {
                 print('🔴 Navigating to route: ${settings.name}');
@@ -138,18 +135,16 @@ class _MyAppState extends State<MyApp> {
                     return SlideRightRoute(page: const MyDiary());
                   case '/greenLibrary':
                     return FadeSlideRoute(page: const GreenLibrary());
-                  case '/moments':
-                    return ScaleRoute(page: const MomentsPage());
-                  // case '/profile':
-                  //   return ScaleRoute(page: const ProfileScreen());
+                  case MomentsPage.routeName:
+                    return ScaleRoute(
+                        page: const MainLayout(
+                      initialIndex: 1,
+                    ));
                   case ProfileScreen.routeName:
                     return FadeSlideRoute(
                         page: const MainLayout(
                       initialIndex: 3,
                     ));
-                  // return ScaleRoute(
-                  //     page: const MainLayout(
-                  //         initialIndex: 3)); // Update to MainLayout
                   default:
                     print('🔴 Unknown route: ${settings.name}');
                     return SlideUpRoute(page: const NotFoundScreen());

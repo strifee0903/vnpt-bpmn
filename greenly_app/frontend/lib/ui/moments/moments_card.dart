@@ -336,22 +336,7 @@ class _MomentCardState extends State<MomentCard> {
                 ],
               ),
             ),
-
-            // Status
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(horizontal: 12.0),
-            //   child: Text(
-            //     moment.content,
-            //     style: const TextStyle(
-            //       fontFamily: 'Lato',
-            //       fontSize: 17,
-            //       fontWeight: FontWeight.w500,
-            //       color: Colors.black87,
-            //     ),
-            //     softWrap: true,
-            //     overflow: TextOverflow.visible,
-            //   ),
-            // ),
+            //status
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 12.0),
               child: GestureDetector(
@@ -470,18 +455,8 @@ class _MomentCardState extends State<MomentCard> {
                           const Text('0', style: TextStyle(fontSize: 14)),
                         ],
                       ),
-                      const SizedBox(width: 16),
+                      const SizedBox(width: 5),
 
-                      // Row(
-                      //   children: [
-                      //     FaIcon(FontAwesomeIcons.share,
-                      //         size: 19,
-                      //         color: const Color.fromARGB(255, 96, 96, 96)),
-                      //     const SizedBox(width: 4),
-                      //     const Text('0', style: TextStyle(fontSize: 14)),
-                      //   ],
-                      // ),
-                      // Trong moments_card.dart
                       Row(
                         children: [
                           IconButton(
@@ -507,7 +482,6 @@ class _MomentCardState extends State<MomentCard> {
                                 color: const Color.fromARGB(255, 96, 96, 96)),
                           ),
                           const SizedBox(width: 4),
-                          const Text('0', style: TextStyle(fontSize: 14)),
                         ],
                       ),
                     ],

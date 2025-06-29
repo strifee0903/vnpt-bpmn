@@ -8,6 +8,7 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../../../services/moment_service.dart';
 import '../../auth/auth_manager.dart';
 import 'chat_room.dart';
+import 'socket_config.dart';
 
 class SelectChatRoomScreen extends StatefulWidget {
   final Moment moment;
@@ -35,9 +36,10 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
     _initializeSocket();
   }
 
-  void _initializeSocket() {
+  Future<void> _initializeSocket() async {
     // Use the correct IP address for your server
-    _socket = IO.io('http://192.168.1.3:3000', <String, dynamic>{
+    final socketUrl = await SocketConfig.getSocketUrl();
+    _socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });

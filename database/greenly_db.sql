@@ -152,22 +152,22 @@ CREATE INDEX idx_vote_uid ON vote(u_id);
 -- ========================================
 -- BẢNG comment: Bình luận cho moment
 -- ========================================
-CREATE TABLE comment (
-    comment_id INT PRIMARY KEY AUTO_INCREMENT,
-    moment_id INT,
-    u_id INT,
-    content TEXT,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (moment_id) REFERENCES moment(moment_id) on delete cascade,
-    FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
-);
+-- CREATE TABLE comment (
+--     comment_id INT PRIMARY KEY AUTO_INCREMENT,
+--     moment_id INT,
+--     u_id INT,
+--     content TEXT,
+--     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+-- 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--     FOREIGN KEY (moment_id) REFERENCES moment(moment_id) on delete cascade,
+--     FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
+-- );
 
--- Tăng tốc truy vấn comment theo moment
-CREATE INDEX idx_comment_moment ON comment(moment_id);
+-- -- Tăng tốc truy vấn comment theo moment
+-- CREATE INDEX idx_comment_moment ON comment(moment_id);
 
--- Tăng tốc truy vấn comment theo user (nếu cần)
-CREATE INDEX idx_comment_uid ON comment(u_id);
+-- -- Tăng tốc truy vấn comment theo user (nếu cần)
+-- CREATE INDEX idx_comment_uid ON comment(u_id);
 
 -- ========================================
 -- BẢNG contribution: Ghi nhận điểm đóng góp người dùng theo ngày
@@ -194,17 +194,6 @@ CREATE INDEX idx_campaign_uid ON campaign(u_id);
 -- Tìm người tham gia theo campaign hoặc user
 CREATE INDEX idx_participation_campaign ON participation(campaign_id);
 CREATE INDEX idx_participation_uid ON participation(u_id);
--- ========================================
--- BẢNG diary: Nhật ký hoạt động phân loại rác / hành động vì môi trường
--- ========================================
--- CREATE TABLE diary (
---     diary_id INT PRIMARY KEY AUTO_INCREMENT,
---     u_id INT,
---     category_id INT, 
---     state ENUM('not started', 'in progress', 'completed'), 
--- 	FOREIGN KEY (u_id) REFERENCES users(u_id),
---     FOREIGN KEY (category_id) REFERENCES category(category_id)
--- );
 
 -- ========================================
 -- BẢNG campaign: Quản lý chiến dịch môi trường lớn
@@ -265,27 +254,6 @@ CREATE TABLE messages (
     FOREIGN KEY (shared_by) REFERENCES users(u_id),
     FOREIGN KEY (original_author_id) REFERENCES users(u_id)
 );
-
--- CREATE TABLE messages (
---     message_id INT PRIMARY KEY AUTO_INCREMENT,
---     campaign_id INT,
---     sender_id INT,
---     content TEXT,
---     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
---     FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id),
---     FOREIGN KEY (sender_id) REFERENCES users(u_id)
--- );
--- ALTER TABLE messages
---   ADD COLUMN type ENUM('text', 'moment') DEFAULT 'text',
---   ADD COLUMN moment_json JSON NULL;
---   
--- ALTER TABLE messages
--- ADD COLUMN shared_by INT NULL,
--- ADD COLUMN shared_by_name VARCHAR(255) NULL,
--- ADD COLUMN original_author_id INT NULL,
--- ADD COLUMN original_author_name VARCHAR(255) NULL,
--- ADD FOREIGN KEY (shared_by) REFERENCES users(u_id),
--- ADD FOREIGN KEY (original_author_id) REFERENCES users(u_id);
 
 select * from messages;
 

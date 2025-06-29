@@ -7,7 +7,7 @@ import 'add_moment_place.dart';
 
 class MomentsPage extends StatefulWidget {
   const MomentsPage({super.key});
-
+  static const routeName = '/moments_page';
   @override
   _MomentsPageState createState() => _MomentsPageState();
 }
