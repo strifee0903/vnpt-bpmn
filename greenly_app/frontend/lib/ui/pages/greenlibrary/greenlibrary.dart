@@ -23,16 +23,16 @@ class _GreenLibraryState extends State<GreenLibrary> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Error',
-            style: TextStyle(fontFamily: 'Oktah', fontWeight: FontWeight.w900)),
+            style: TextStyle(fontFamily: 'montserrat', fontWeight: FontWeight.w900)),
         content: Text('Failed to load process: $errorMessage',
-            style: const TextStyle(fontFamily: 'Oktah')),
+            style: const TextStyle(fontFamily: 'montserrat')),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(context).pop(); // Đóng dialog
             },
             child: const Text('Close',
-                style: TextStyle(fontFamily: 'Oktah', color: Colors.green)),
+                style: TextStyle(fontFamily: 'montserrat', color: Colors.green)),
           ),
         ],
       ),
@@ -71,7 +71,7 @@ class _GreenLibraryState extends State<GreenLibrary> {
         title: const Text(
           'Green Library',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
           ),
         ),

@@ -34,7 +34,6 @@ class _RoomChatPageState extends State<RoomChatPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isAtBottom = true;
   bool _hasNewMessage = false;
-  bool _isConnected = false; 
 
   @override
   void initState() {
@@ -89,14 +88,39 @@ class _RoomChatPageState extends State<RoomChatPage> {
 
   void attachSocketListeners() {
     socket.on('load_messages_success', (data) {
-      print('📥 Loaded messages: $data');
+      final parsed = List<Map<String, dynamic>>.from(data).map((msg) {
+        if (msg['type'] == 'moment' && msg['moment'] is String) {
+          try {
+            msg['moment'] = jsonDecode(msg['moment']);
+          } catch (e) {
+            print('⚠️ moment parse fail: $e');
+          }
+        }
+        return msg;
+      }).toList();
+
       setState(() {
-        messages = List<Map<String, dynamic>>.from(data);
+        messages = parsed;
       });
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToBottom();
       });
     });
+
+    // socket.on('new_message', (data) {
+    //   print('📨 New message received: $data');
+    //   setState(() {
+    //     messages.add(Map<String, dynamic>.from(data));
+    //     if (_isAtBottom) {
+    //       WidgetsBinding.instance.addPostFrameCallback((_) {
+    //         _scrollToBottom();
+    //       });
+    //     } else {
+    //       _hasNewMessage = true;
+    //     }
+    //   });
+    // });
 
     socket.on('new_message', (data) {
       final parsed = Map<String, dynamic>.from(data);

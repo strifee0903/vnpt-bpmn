@@ -32,7 +32,7 @@ class Blank extends StatelessWidget {
         title: const Text(
           'Blank Page',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -66,7 +66,7 @@ class Blank extends StatelessWidget {
           child: const Text(
             'Next',
             style: TextStyle(
-              fontFamily: 'Oktah',
+              fontFamily: 'montserrat',
               fontSize: 16,
               color: Colors.white,
               fontWeight: FontWeight.w700,

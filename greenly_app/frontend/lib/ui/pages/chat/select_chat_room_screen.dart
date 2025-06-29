@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:greenly_app/models/moment.dart';
 import 'package:greenly_app/services/campaign_service.dart';
 import 'package:greenly_app/models/campaign.dart';
+import 'package:greenly_app/ui/pages/chat/chat_main.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../../../services/moment_service.dart';
@@ -118,11 +119,8 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => RoomChatPage(
-              campaignId: campaign.id,
-              userId: currentUserId,
-              username: widget.username,
-              sharedMoment: widget.moment, // Pass the moment to ensure it loads
+            builder: (_) => ChatMain(
+              selectedCampaignId: campaign.id,
             ),
           ),
         );

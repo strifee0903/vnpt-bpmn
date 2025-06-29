@@ -10,14 +10,14 @@ class SuccessDialog extends StatelessWidget {
       title: const Text(
         'Success',
         style: TextStyle(
-          fontFamily: 'Oktah',
+          fontFamily: 'montserrat',
           fontWeight: FontWeight.w900,
         ),
       ),
       content: const Text(
         'Campaign created successfully!',
         style: TextStyle(
-          fontFamily: 'Oktah',
+          fontFamily: 'montserrat',
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -34,7 +34,7 @@ class SuccessDialog extends StatelessWidget {
           child: const Text(
             'Go to Campaigns',
             style: TextStyle(
-              fontFamily: 'Oktah',
+              fontFamily: 'montserrat',
               fontWeight: FontWeight.w700,
               color: Colors.blue,
             ),

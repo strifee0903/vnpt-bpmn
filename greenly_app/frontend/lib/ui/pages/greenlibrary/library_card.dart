@@ -155,7 +155,7 @@ class _LibraryCardState extends State<LibraryCard> {
                     textAlign: TextAlign.right,
                     style: TextStyle(
                       fontSize: 20,
-                      fontFamily: 'Oktah',
+                      fontFamily: 'montserrat',
                       fontWeight: FontWeight.w900,
                       color: textColor,
                     ),
@@ -172,7 +172,7 @@ class _LibraryCardState extends State<LibraryCard> {
                       textAlign: TextAlign.right,
                       style: TextStyle(
                         fontSize: 14,
-                        fontFamily: 'Oktah',
+                        fontFamily: 'montserrat',
                         fontWeight: FontWeight.w700,
                         color: textColor.withOpacity(0.8),
                       ),

@@ -7,7 +7,9 @@ import 'package:greenly_app/services/user_service.dart';
 import 'chat_room.dart'; // import trang chat đã có
 
 class ChatMain extends StatefulWidget {
-  const ChatMain({super.key});
+  final int? selectedCampaignId; // nhận từ ngoài nếu có
+
+  const ChatMain({super.key, this.selectedCampaignId});
 
   @override
   State<ChatMain> createState() => _ChatMainState();
@@ -25,38 +27,23 @@ class _ChatMainState extends State<ChatMain> {
       final user = await userService.getCurrentUser();
       if (mounted) {
         setState(() {
-          userId = user?.u_id ?? 0; // Default to 0 if user is null
+          userId = user?.u_id ?? 0;
           username = user?.u_name ?? 'User_${user?.u_id}';
         });
       }
     } catch (e) {
       print('⚠️ Failed to fetch user: $e');
-      if (mounted) {
-        setState(() {
-          userId = 0;
-        });
-      }
+      if (mounted) setState(() => userId = 0);
     }
   }
 
   @override
   void initState() {
     super.initState();
-    _loadCampaigns();
     _fetchUserId();
+    _loadCampaigns();
   }
 
-  // Future<void> _loadCampaigns() async {
-  //   final data = await CampaignService().getAllCampaigns();
-  //   if (mounted) {
-  //     setState(() {
-  //       campaigns = data;
-  //       if (data.isNotEmpty) {
-  //         selectedCampaignId = data.first.id;
-  //       }
-  //     });
-  //   }
-  // }
   Future<void> _loadCampaigns() async {
     final allCampaigns = await CampaignService().getAllCampaigns();
     final joinedCampaigns = <Campaign>[];
@@ -64,30 +51,26 @@ class _ChatMainState extends State<ChatMain> {
     for (final campaign in allCampaigns) {
       final isJoined =
           await CampaignService().getParticipationStatus(campaign.id);
-      if (isJoined) {
-        joinedCampaigns.add(campaign);
-      }
+      if (isJoined) joinedCampaigns.add(campaign);
     }
+
     setState(() {
       campaigns = joinedCampaigns;
       if (joinedCampaigns.isNotEmpty) {
-        selectedCampaignId = joinedCampaigns.first.id;
+        selectedCampaignId = widget.selectedCampaignId != null &&
+                joinedCampaigns.any((c) => c.id == widget.selectedCampaignId)
+            ? widget.selectedCampaignId
+            : joinedCampaigns.first.id;
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // SystemChrome.setSystemUIOverlayStyle(
-    //   const SystemUiOverlayStyle(
-    //     statusBarColor: Colors.white, // Set status bar color
-    //     statusBarIconBrightness: Brightness.light, // Dark icons for status bar
-    //   ),
-    // );
     return Scaffold(
       backgroundColor: Colors.white,
       body: campaigns.isEmpty
-          ? Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
                 Padding(
@@ -164,8 +147,8 @@ class _ChatMainState extends State<ChatMain> {
                       ? const Center(child: Text("Chọn một chiến dịch"))
                       : RoomChatPage(
                           campaignId: selectedCampaignId!,
-                          userId: userId!,
-                          username: username!,
+                          userId: userId ?? 0,
+                          username: username ?? 'Ẩn danh',
                         ),
                 ),
               ],
