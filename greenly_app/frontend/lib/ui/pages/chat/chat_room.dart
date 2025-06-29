@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:greenly_app/components/colors.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -32,6 +34,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
   final ScrollController _scrollController = ScrollController();
   bool _isAtBottom = true;
   bool _hasNewMessage = false;
+  bool _isConnected = false; 
 
   @override
   void initState() {
@@ -58,12 +61,79 @@ class _RoomChatPageState extends State<RoomChatPage> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.campaignId != oldWidget.campaignId) {
+// 1. Rời phòng cũ
       socket.emit('leave_room', oldWidget.campaignId);
+// 2. Dọn listener nếu socket.on đã đăng ký nhiều lần
+      socket.off('load_messages_success');
+      socket.off('new_message');
+      socket.off('error_message');
+
+// 3. Reset UI
       setState(() {
         messages.clear();
+        _hasNewMessage = false;
+        _isAtBottom = true;
       });
-      _connectSocket(); // Reconnect to new room
+
+// 4. Re-attach listeners
+      attachSocketListeners();
+
+// 5. Tham gia phòng mới + load lại tin nhắn
+      socket.emit('join_room', widget.campaignId);
+      socket.emit('load_messages', {
+        'campaign_id': widget.campaignId,
+        'user_id': widget.userId,
+      });
     }
+  }
+
+  void attachSocketListeners() {
+    socket.on('load_messages_success', (data) {
+      print('📥 Loaded messages: $data');
+      setState(() {
+        messages = List<Map<String, dynamic>>.from(data);
+      });
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _scrollToBottom();
+      });
+    });
+
+    socket.on('new_message', (data) {
+      final parsed = Map<String, dynamic>.from(data);
+
+      if (parsed['type'] == 'moment' && parsed['moment'] is String) {
+        try {
+          parsed['moment'] = jsonDecode(parsed['moment']);
+        } catch (e) {
+          print('⚠️ Lỗi khi parse moment JSON: $e');
+          parsed['moment'] = {}; // fallback
+        }
+      }
+
+      setState(() {
+        messages.add(parsed);
+        if (_isAtBottom) {
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _scrollToBottom();
+          });
+        } else {
+          _hasNewMessage = true;
+        }
+      });
+    });
+    socket.on('error_message', (data) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('⚠ ${data['error']}')),
+      );
+    });
+
+    socket.on('error_message', (data) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('⚠ ${data['error']}')),
+      );
+    });
+
+    socket.onDisconnect((_) => print('❌ Socket disconnected'));
   }
 
   void _connectSocket() async {
@@ -76,14 +146,13 @@ class _RoomChatPageState extends State<RoomChatPage> {
     socket.connect();
 
     socket.onConnect((_) {
+      print('📡 Socket connected: ${socket.id}');
       socket.emit('join_room', widget.campaignId);
-
       socket.emit('load_messages', {
         'campaign_id': widget.campaignId,
         'user_id': widget.userId,
       });
 
-      // Send shared moment if provided
       if (widget.sharedMoment != null) {
         socket.emit('send_message', {
           'campaign_id': widget.campaignId,
@@ -99,35 +168,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
       }
     });
 
-    socket.on('load_messages_success', (data) {
-      print('📥 Loaded messages: $data');
-      setState(() {
-        messages = List<Map<String, dynamic>>.from(data);
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToBottom();
-      });
-    });
-
-    socket.on('new_message', (data) {
-      print('📨 New message received: $data');
-      setState(() {
-        messages.add(Map<String, dynamic>.from(data));
-        if (_isAtBottom) {
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            _scrollToBottom();
-          });
-        } else {
-          _hasNewMessage = true;
-        }
-      });
-    });
-
-    socket.on('error_message', (data) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('⚠ ${data['error']}')),
-      );
-    });
+    attachSocketListeners(); // ✅ attach sau connect
   }
 
   void _scrollToBottom() {
