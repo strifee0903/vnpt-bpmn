@@ -136,6 +136,24 @@ onMounted(async () => {
   })
 
   await fetchProcesses()
+  setInterval(() => {
+    const idInput = document.getElementById('bio-properties-panel-id')
+    if (idInput && !idInput.hasAttribute('data-readonly-applied')) {
+      idInput.setAttribute('readonly', true)
+      idInput.style.backgroundColor = '#e9ecef'
+      idInput.title = 'Không thể chỉnh sửa ID của process'
+      idInput.setAttribute('data-readonly-applied', 'true') // Đánh dấu đã apply
+    }
+
+    const idError = document.querySelector('.bio-properties-panel-error')
+    if (
+      idError &&
+      idError.innerText.includes('ID must be unique') &&
+      idError.style.display !== 'none'
+    ) {
+      idError.style.display = 'none'
+    }
+  }, 200)
 })
 const notify = (msg) => {
   showToast.value = true
