@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import 'package:greenly_app/models/moment.dart';
 import '../../../services/moment_service.dart';
 import '../../moments/moment_detail_screen.dart';
+import 'chat_manager.dart';
 import 'socket_config.dart';
 
 class RoomChatPage extends StatefulWidget {
@@ -28,7 +29,7 @@ class RoomChatPage extends StatefulWidget {
 }
 
 class _RoomChatPageState extends State<RoomChatPage> {
-  late IO.Socket socket;
+  // final socket = SocketManager().instance;
   List<Map<String, dynamic>> messages = [];
   final TextEditingController _controller = TextEditingController();
   final ScrollController _scrollController = ScrollController();
@@ -37,7 +38,16 @@ class _RoomChatPageState extends State<RoomChatPage> {
 
   @override
   void initState() {
+    final socketManager = SocketManager();
+    final socket = socketManager.socket;
     super.initState();
+    // 👇 Nếu đang ở phòng cũ khác
+    if (socketManager.currentRoomId != null &&
+        socketManager.currentRoomId != widget.campaignId) {
+      socket.emit('leave_room', socketManager.currentRoomId);
+    }
+
+    socketManager.currentRoomId = widget.campaignId; // 🔁 update lại
     _connectSocket();
     _scrollController.addListener(() {
       final maxScroll = _scrollController.position.maxScrollExtent;
@@ -60,33 +70,56 @@ class _RoomChatPageState extends State<RoomChatPage> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.campaignId != oldWidget.campaignId) {
-// 1. Rời phòng cũ
+      final socket = SocketManager().socket;
+
+// Rời phòng cũ nếu cần
       socket.emit('leave_room', oldWidget.campaignId);
-// 2. Dọn listener nếu socket.on đã đăng ký nhiều lần
-      socket.off('load_messages_success');
-      socket.off('new_message');
-      socket.off('error_message');
 
-// 3. Reset UI
-      setState(() {
-        messages.clear();
-        _hasNewMessage = false;
-        _isAtBottom = true;
-      });
-
-// 4. Re-attach listeners
-      attachSocketListeners();
-
-// 5. Tham gia phòng mới + load lại tin nhắn
+// Vào phòng mới
       socket.emit('join_room', widget.campaignId);
       socket.emit('load_messages', {
         'campaign_id': widget.campaignId,
         'user_id': widget.userId,
       });
+
+// Không clear messages ngay lập tức, chờ load_messages_success
     }
   }
+//   @override
+//   void didUpdateWidget(covariant RoomChatPage oldWidget) {
+//     super.didUpdateWidget(oldWidget);
+//     final socketManager = SocketManager();
+//     final socket = socketManager.socket;
+//     if (widget.campaignId != oldWidget.campaignId) {
+// // 1. Rời phòng cũ
+//       socket.emit('leave_room', oldWidget.campaignId);
+// // 2. Dọn listener nếu socket.on đã đăng ký nhiều lần
+//       socket.off('load_messages_success');
+//       socket.off('new_message');
+//       socket.off('error_message');
+
+// // 3. Reset UI
+//       setState(() {
+//         messages.clear();
+//         _hasNewMessage = false;
+//         _isAtBottom = true;
+//       });
+
+// // 4. Re-attach listeners
+//       attachSocketListeners();
+
+// // 5. Tham gia phòng mới + load lại tin nhắn
+//       socket.emit('join_room', widget.campaignId);
+//       socket.emit('load_messages', {
+//         'campaign_id': widget.campaignId,
+//         'user_id': widget.userId,
+//       });
+//     }
+//   }
 
   void attachSocketListeners() {
+    final socketManager = SocketManager();
+    final socket = socketManager.socket;
     socket.on('load_messages_success', (data) {
       final parsed = List<Map<String, dynamic>>.from(data).map((msg) {
         if (msg['type'] == 'moment' && msg['moment'] is String) {
@@ -151,48 +184,33 @@ class _RoomChatPageState extends State<RoomChatPage> {
       );
     });
 
-    socket.on('error_message', (data) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('⚠ ${data['error']}')),
-      );
-    });
-
     socket.onDisconnect((_) => print('❌ Socket disconnected'));
   }
 
   void _connectSocket() async {
-    final socketUrl = await SocketConfig.getSocketUrl();
-    socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-
-    socket.connect();
-
-    socket.onConnect((_) {
-      print('📡 Socket connected: ${socket.id}');
-      socket.emit('join_room', widget.campaignId);
-      socket.emit('load_messages', {
-        'campaign_id': widget.campaignId,
-        'user_id': widget.userId,
-      });
-
-      if (widget.sharedMoment != null) {
-        socket.emit('send_message', {
-          'campaign_id': widget.campaignId,
-          'sender_id': widget.userId,
-          'type': 'moment',
-          'moment': widget.sharedMoment!.toJson(),
-          'username': widget.username,
-          'shared_by': widget.userId,
-          'shared_by_name': widget.username,
-          'original_author_id': widget.sharedMoment!.user.u_id,
-          'original_author_name': widget.sharedMoment!.user.u_name,
-        });
-      }
-    });
-
+    final socketManager = SocketManager();
+    final socket = socketManager.socket;
     attachSocketListeners(); // ✅ attach sau connect
+    print('📡 Socket connected: ${socket.id}');
+    socket.emit('join_room', widget.campaignId);
+    socket.emit('load_messages', {
+      'campaign_id': widget.campaignId,
+      'user_id': widget.userId,
+    });
+
+    if (widget.sharedMoment != null) {
+      socket.emit('send_message', {
+        'campaign_id': widget.campaignId,
+        'sender_id': widget.userId,
+        'type': 'moment',
+        'moment': widget.sharedMoment!.toJson(),
+        'username': widget.username,
+        'shared_by': widget.userId,
+        'shared_by_name': widget.username,
+        'original_author_id': widget.sharedMoment!.user.u_id,
+        'original_author_name': widget.sharedMoment!.user.u_name,
+      });
+    }
   }
 
   void _scrollToBottom() {
@@ -206,6 +224,8 @@ class _RoomChatPageState extends State<RoomChatPage> {
   }
 
   void _sendMessage() {
+    final socketManager = SocketManager();
+    final socket = socketManager.socket;
     final content = _controller.text.trim();
     if (content.isEmpty) return;
 
@@ -227,8 +247,10 @@ class _RoomChatPageState extends State<RoomChatPage> {
 
   @override
   void dispose() {
-    socket.disconnect();
-    socket.dispose();
+    final socket = SocketManager().socket;
+    socket.off('load_messages_success');
+    socket.off('new_message');
+    socket.off('error_message');
     _scrollController.dispose();
     super.dispose();
   }

@@ -62,6 +62,7 @@ class _ChatMainState extends State<ChatMain> {
             ? widget.selectedCampaignId
             : joinedCampaigns.first.id;
       }
+      print('🟢 Campaigns loaded: ${selectedCampaignId}');
     });
   }
 
@@ -146,6 +147,7 @@ class _ChatMainState extends State<ChatMain> {
                   child: selectedCampaignId == null
                       ? const Center(child: Text("Chọn một chiến dịch"))
                       : RoomChatPage(
+                          // key: ValueKey(selectedCampaignId),
                           campaignId: selectedCampaignId!,
                           userId: userId ?? 0,
                           username: username ?? 'Ẩn danh',

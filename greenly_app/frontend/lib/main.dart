@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:greenly_app/shared/not_found_screen.dart';
+import 'package:greenly_app/ui/pages/chat/chat_manager.dart';
 import 'package:greenly_app/ui/pages/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'services/moment_service.dart';
@@ -21,6 +22,7 @@ import 'ui/pages/chat/chat_main.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await SocketManager().init();
   try {
     await dotenv.load(fileName: ".env");
     print("✅ Dotenv loaded successfully!");
@@ -119,7 +121,6 @@ class _MyAppState extends State<MyApp> {
                 MomentsPage.routeName: (ctx) =>
                     const SafeArea(child: MomentsPage()),
                 '/groupChat': (context) => const ChatMain(),
-
                 ProfileScreen.routeName: (ctx) => const SafeArea(
                         child: MainLayout(
                       initialIndex: 3,

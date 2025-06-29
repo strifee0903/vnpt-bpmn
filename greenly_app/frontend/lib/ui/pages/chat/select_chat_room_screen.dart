@@ -4,6 +4,7 @@ import 'package:greenly_app/models/moment.dart';
 import 'package:greenly_app/services/campaign_service.dart';
 import 'package:greenly_app/models/campaign.dart';
 import 'package:greenly_app/ui/pages/chat/chat_main.dart';
+import 'package:greenly_app/ui/pages/chat/chat_manager.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../../../services/moment_service.dart';
@@ -28,7 +29,6 @@ class SelectChatRoomScreen extends StatefulWidget {
 }
 
 class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
-  late IO.Socket _socket;
   bool _isConnected = false;
 
   @override
@@ -38,20 +38,18 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
   }
 
   Future<void> _initializeSocket() async {
-    final socketUrl = await SocketConfig.getSocketUrl();
-    _socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-
-    _socket.onConnect((_) {
+    final socketManager = SocketManager();
+    final socket = socketManager.socket;
+    socket.onConnect((_) {
       print("🟢 Socket connected successfully");
       setState(() {
         _isConnected = true;
       });
     });
-
-    _socket.onConnectError((data) {
+    setState(() {
+      _isConnected = true;
+    });
+    socket.onConnectError((data) {
       print("❌ Socket connection error: $data");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -59,11 +57,11 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
         );
       }
     });
-
-    _socket.connect();
   }
 
   void _shareMomentToCampaign(Campaign campaign) {
+    final socketManager = SocketManager();
+    final socket = socketManager.socket;
     if (!_isConnected) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -108,13 +106,13 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
     print("📤 Sending moment share payload:");
     print(jsonEncode(payload));
 
-    _socket.off('new_message');
-    _socket.off('error_message');
+    socket.off('new_message');
+    socket.off('error_message');
 
     bool messageSent = false;
-    _socket.on('new_message', (data) {
-      print("✅ Message sent successfully: $data");
-      if (mounted && !messageSent) {
+    socket.on('load_messages_success', (data) {
+      print("✅ Tin nhắn đã load thành công: $data");
+      if (!messageSent && mounted) {
         messageSent = true;
         Navigator.pushReplacement(
           context,
@@ -127,26 +125,14 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
       }
     });
 
-    _socket.on('error_message', (data) {
-      print("❌ Error sending message: ${data['error']}");
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Lỗi: ${data['error']}")),
-        );
-      }
+    socket.emit('join_room', campaign.id);
+    socket.emit('load_messages', {
+      'campaign_id': campaign.id,
+      'user_id': currentUserId,
     });
-
-    _socket.emit('join_room', campaign.id);
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _socket.emit('send_message', payload);
+    Future.delayed(const Duration(milliseconds: 200), () {
+      socket.emit('send_message', payload);
     });
-  }
-
-  @override
-  void dispose() {
-    _socket.disconnect();
-    _socket.dispose();
-    super.dispose();
   }
 
   @override
