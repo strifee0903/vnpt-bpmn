@@ -1,46 +1,5 @@
 const knex = require("../database/knex");
 
-// exports.getMessagesByCampaign = async (campaignId) => {
-//   const rows = await knex("messages as m")
-//     .join("users as u", "m.sender_id", "u.u_id")
-//     .select(
-//       "m.message_id",
-//       "m.campaign_id",
-//       "m.sender_id",
-//       "m.content",
-//       "m.type",
-//       "m.created_at",
-//       "m.moment_json",
-//       "m.shared_by",
-//       "m.shared_by_name",
-//       "m.original_author_id",
-//       "m.original_author_name",
-//       "u.u_name as username"
-//     )
-//     .where("m.campaign_id", campaignId)
-//     .orderBy("m.created_at", "asc");
-
-//   return rows.map((row) => {
-//     if (row.type === "moment" && row.moment_json) {
-//       try {
-//         let parsedMoment = row.moment_json;
-//         if (typeof row.moment_json === "string") {
-//           parsedMoment = JSON.parse(row.moment_json);
-//         } else {
-//           console.warn("⚠ moment_json is not a string, attempting to stringify:", row.moment_json);
-//           parsedMoment = JSON.stringify(row.moment_json);
-//           parsedMoment = JSON.parse(parsedMoment);
-//         }
-//         result.moment = parsedMoment;
-//       } catch (err) {
-//         console.error("❌ JSON parse error for message_id", row.message_id, ":", err);
-//         result.moment = { error: "Parse failed", raw: row.moment_json };
-//       }
-//     } 
-//     return row;
-//   });
-// };
-
 exports.getMessagesByCampaign = async (campaignId) => {
   const rows = await knex("messages as m")
     .join("users as u", "m.sender_id", "u.u_id")
@@ -88,6 +47,23 @@ exports.saveMessage = async ({
     if (moment && typeof moment !== 'string') {
       moment = JSON.stringify(moment);
     }
+
+    // Validate moment data
+    if (type === "moment" && moment) {
+      if (moment.media && !Array.isArray(moment.media)) {
+        console.error("❌ Invalid media format in moment:", moment.media);
+        throw new Error("Media must be an array");
+      }
+      if (moment.media) {
+        for (const media of moment.media) {
+          if (!media.media_url || typeof media.media_url !== "string" || !media.media_url.trim()) {
+            console.error("❌ Invalid media_url in moment:", media);
+            throw new Error("Invalid or missing media_url");
+          }
+        }
+      }
+    }
+    
     console.log("💾 Saving message with data:", moment)
 
     const insertData = {
@@ -125,6 +101,8 @@ exports.saveMessage = async ({
         insertData.original_author_id = original_author_id;
         insertData.original_author_name = original_author_name;
       }
+
+
     }
 
     console.log("📝 Insert data:", insertData);

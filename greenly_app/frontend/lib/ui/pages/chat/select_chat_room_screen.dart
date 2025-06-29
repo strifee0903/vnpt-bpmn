@@ -5,6 +5,7 @@ import 'package:greenly_app/services/campaign_service.dart';
 import 'package:greenly_app/models/campaign.dart';
 import 'package:provider/provider.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
+import '../../../services/moment_service.dart';
 import '../../auth/auth_manager.dart';
 import 'chat_room.dart';
 
@@ -36,7 +37,7 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
 
   void _initializeSocket() {
     // Use the correct IP address for your server
-    _socket = IO.io('http://192.168.1.5:3000', <String, dynamic>{
+    _socket = IO.io('http://192.168.1.3:3000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
@@ -78,6 +79,23 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
 
     final authManager = Provider.of<AuthManager>(context, listen: false);
     final currentUserId = authManager.loggedInUser?.u_id ?? widget.userId;
+
+    // Validate media URLs
+    final momentJson = widget.moment.toJson();
+    if (momentJson['media'] != null &&
+        (momentJson['media'] as List).isNotEmpty) {
+      final mediaList = momentJson['media'] as List;
+      for (var media in mediaList) {
+        final url = media['media_url']?.toString();
+        final absoluteUrl = MomentService.fullImageUrl(url);
+        if (url == null || url.isEmpty || !Uri.tryParse(url)!.hasAbsolutePath) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Lỗi: URL hình ảnh không hợp lệ")),
+          );
+          return;
+        }
+      }
+    }
 
     // Prepare the moment data
     final momentData = widget.moment.toJson();
@@ -202,8 +220,15 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(4),
                       child: Image.network(
-                        widget.moment.media.first.media_url,
+                        MomentService.fullImageUrl(
+                            widget.moment.media.first.media_url),
                         fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          print('❌ Preview image load error: $error');
+                          print(
+                              '❌ Failed URL: ${widget.moment.media.first.media_url}');
+                          return const Icon(Icons.broken_image);
+                        },
                       ),
                     ),
                   ),

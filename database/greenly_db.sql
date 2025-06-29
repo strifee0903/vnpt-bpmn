@@ -245,18 +245,47 @@ update participation set status = 1 where u_id = 2 and campaign_id = 3;
 -- Mỗi tin nhắn liên kết đến một chiến dịch và người gửi
 -- ========================================
 
+-- Bước 1: Tạo bảng messages
 CREATE TABLE messages (
     message_id INT PRIMARY KEY AUTO_INCREMENT,
     campaign_id INT,
     sender_id INT,
     content TEXT,
+    type ENUM('text', 'moment') DEFAULT 'text',
+    moment_json JSON NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    
+    shared_by INT NULL,
+    shared_by_name VARCHAR(255) NULL,
+    original_author_id INT NULL,
+    original_author_name VARCHAR(255) NULL,
+    
     FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id),
-    FOREIGN KEY (sender_id) REFERENCES users(u_id)
+    FOREIGN KEY (sender_id) REFERENCES users(u_id),
+    FOREIGN KEY (shared_by) REFERENCES users(u_id),
+    FOREIGN KEY (original_author_id) REFERENCES users(u_id)
 );
-ALTER TABLE messages
-  ADD COLUMN type ENUM('text', 'moment') DEFAULT 'text',
-  ADD COLUMN moment_json JSON NULL;
+
+-- CREATE TABLE messages (
+--     message_id INT PRIMARY KEY AUTO_INCREMENT,
+--     campaign_id INT,
+--     sender_id INT,
+--     content TEXT,
+--     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+--     FOREIGN KEY (campaign_id) REFERENCES campaign(campaign_id),
+--     FOREIGN KEY (sender_id) REFERENCES users(u_id)
+-- );
+-- ALTER TABLE messages
+--   ADD COLUMN type ENUM('text', 'moment') DEFAULT 'text',
+--   ADD COLUMN moment_json JSON NULL;
+--   
+-- ALTER TABLE messages
+-- ADD COLUMN shared_by INT NULL,
+-- ADD COLUMN shared_by_name VARCHAR(255) NULL,
+-- ADD COLUMN original_author_id INT NULL,
+-- ADD COLUMN original_author_name VARCHAR(255) NULL,
+-- ADD FOREIGN KEY (shared_by) REFERENCES users(u_id),
+-- ADD FOREIGN KEY (original_author_id) REFERENCES users(u_id);
 
 select * from messages;
 

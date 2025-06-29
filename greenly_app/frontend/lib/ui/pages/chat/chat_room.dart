@@ -1,10 +1,10 @@
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:greenly_app/components/colors.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:intl/intl.dart';
 import 'package:greenly_app/models/moment.dart';
+import '../../../services/moment_service.dart';
 import '../../moments/moment_detail_screen.dart';
 
 class RoomChatPage extends StatefulWidget {
@@ -77,7 +77,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
   }
 
   void _connectSocket() {
-    socket = IO.io('http://192.168.1.5:3000', <String, dynamic>{
+    socket = IO.io('http://192.168.1.3:3000', <String, dynamic>{
       'transports': ['websocket'],
       'autoConnect': false,
     });
@@ -234,122 +234,15 @@ class _RoomChatPageState extends State<RoomChatPage> {
                       '👽👽👽👽 Message $index: type=${msg['type']}, moment=${msg['moment']}');
 
                   Widget messageWidget = Container();
-                  if ( type == 'moment' && msg['moment'] != null) {
+                  if (type == 'moment' && msg['moment'] != null) {
                     final momentData = msg['moment'] is Map<String, dynamic>
                         ? msg['moment']
-                        : null; // Ensure it's a map
-                    
-                    // if (momentData is String) {
-                    //   try {
-                    //     momentData = jsonDecode(momentData);
-                    //   } catch (e) {
-                    //     print('Error parsing moment data: $e');
-                    //     momentData = null;
-                    //   }
-                    // }
-                    // if (momentData != null) {
-                    //   final isShared = msg['shared_by'] != null;
-                    //   final sharedByName = msg['shared_by_name'] ?? 'Ẩn danh';
-                    //   final originalAuthorName =
-                    //       msg['original_author_name'] ?? 'Ẩn danh';
-
-                    //   messageWidget = GestureDetector(
-                    //     onTap: () {
-                    //       Navigator.push(
-                    //         context,
-                    //         MaterialPageRoute(
-                    //           builder: (_) => MomentDetailScreen(
-                    //             momentId: momentData['moment_id'],
-                    //           ),
-                    //         ),
-                    //       );
-                    //     },
-                    //     child: Container(
-                    //       padding: const EdgeInsets.all(10),
-                    //       decoration: BoxDecoration(
-                    //         color: isMe
-                    //             ? Colors.green.shade100
-                    //             : Colors.grey.shade200,
-                    //         borderRadius: BorderRadius.circular(12),
-                    //       ),
-                    //       child: Column(
-                    //         crossAxisAlignment: isMe
-                    //             ? CrossAxisAlignment.end
-                    //             : CrossAxisAlignment.start,
-                    //         children: [
-                    //           if (isShared && !isMe)
-                    //             Text(
-                    //               '$sharedByName đã chia sẻ bài viết của $originalAuthorName',
-                    //               style: const TextStyle(
-                    //                 fontWeight: FontWeight.bold,
-                    //                 color: Colors.blue,
-                    //               ),
-                    //             ),
-                    //           if (!isShared && !isMe)
-                    //             Text(
-                    //               msg['username'] ?? 'Ẩn danh',
-                    //               style: const TextStyle(
-                    //                   fontWeight: FontWeight.bold),
-                    //             ),
-                    //           const SizedBox(height: 8),
-                    //           Container(
-                    //             padding: const EdgeInsets.all(8),
-                    //             decoration: BoxDecoration(
-                    //               border:
-                    //                   Border.all(color: Colors.grey.shade300),
-                    //               borderRadius: BorderRadius.circular(8),
-                    //             ),
-                    //             child: Column(
-                    //               crossAxisAlignment: CrossAxisAlignment.start,
-                    //               children: [
-                    //                 Text(
-                    //                   momentData['moment_content'] ??
-                    //                       '(Không có nội dung)',
-                    //                   style: const TextStyle(fontSize: 14),
-                    //                   maxLines: 2,
-                    //                   overflow: TextOverflow.ellipsis,
-                    //                 ),
-                    //                 const SizedBox(height: 4),
-                    //                 if (momentData['media'] != null &&
-                    //                     (momentData['media'] as List)
-                    //                         .isNotEmpty)
-                    //                   ClipRRect(
-                    //                     borderRadius: BorderRadius.circular(4),
-                    //                     child: Image.network(
-                    //                       momentData['media'][0]['media_url'],
-                    //                       height: 80,
-                    //                       width: double.infinity,
-                    //                       fit: BoxFit.cover,
-                    //                     ),
-                    //                   ),
-                    //                 const SizedBox(height: 4),
-                    //                 Text(
-                    //                   '${momentData['likeCount'] ?? 0} lượt thích',
-                    //                   style: const TextStyle(
-                    //                     fontSize: 12,
-                    //                     color: Colors.grey,
-                    //                   ),
-                    //                 ),
-                    //               ],
-                    //             ),
-                    //           ),
-                    //           const SizedBox(height: 4),
-                    //           Text(
-                    //             formatTime(msg['created_at']),
-                    //             style: const TextStyle(
-                    //               fontSize: 10,
-                    //               color: Colors.black45,
-                    //             ),
-                    //           ),
-                    //         ],
-                    //       ),
-                    //     ),
-                    //   );
-                    // }
+                        : null;
                     if (momentData != null) {
                       final isShared = msg['shared_by'] != null;
                       final sharedByName = msg['shared_by_name'] ?? 'Ẩn danh';
-                      final originalAuthorName = msg['original_author_name'] ?? 'Ẩn danh';
+                      final originalAuthorName =
+                          msg['original_author_name'] ?? 'Ẩn danh';
 
                       messageWidget = GestureDetector(
                         onTap: () {
@@ -363,9 +256,13 @@ class _RoomChatPageState extends State<RoomChatPage> {
                           );
                         },
                         child: Container(
-                          padding: const EdgeInsets.all(10),
+                          width: MediaQuery.of(context).size.width *
+                              0.85, // Chiếm 85% chiều rộng màn hình
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: isMe ? Colors.green.shade100 : Colors.grey.shade200,
+                            color: isMe
+                                ? Colors.green.shade100
+                                : Colors.grey.shade200,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Column(
@@ -384,52 +281,101 @@ class _RoomChatPageState extends State<RoomChatPage> {
                               if (!isShared && !isMe)
                                 Text(
                                   msg['username'] ?? 'Ẩn danh',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontWeight: FontWeight.bold),
                                 ),
-                              const SizedBox(height: 8),
+                              const SizedBox(height: 12),
                               Container(
-                                padding: const EdgeInsets.all(8),
+                                width: double
+                                    .infinity, // Chiếm toàn bộ chiều rộng của container cha
+                                padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.shade300),
+                                  color: Colors.white.withAlpha(120),
+                                  border:
+                                      Border.all(color: Colors.grey.shade300),
                                   borderRadius: BorderRadius.circular(8),
                                 ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
                                     Text(
-                                      momentData['moment_content'] ?? '(Không có nội dung)',
-                                      style: const TextStyle(fontSize: 14),
-                                      maxLines: 2,
+                                      momentData['moment_content'] ??
+                                          '(Không có nội dung)',
+                                      style: const TextStyle(fontSize: 16),
+                                      maxLines: 3, // Hiển thị nhiều dòng hơn
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    const SizedBox(height: 4),
+                                    const SizedBox(height: 12),
                                     if (momentData['media'] != null &&
-                                        (momentData['media'] as List).isNotEmpty)
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(4),
-                                        child: Image.network(
-                                          momentData['media'][0]['media_url'],
-                                          height: 80,
-                                          width: double.infinity,
-                                          fit: BoxFit.cover,
+                                        (momentData['media'] as List)
+                                            .isNotEmpty &&
+                                        momentData['media'][0]['media_url'] !=
+                                            null &&
+                                        momentData['media'][0]['media_url']
+                                            .toString()
+                                            .isNotEmpty)
+                                      Container(
+                                        height: 180, // Tăng chiều cao ảnh
+                                        width: double
+                                            .infinity, // Chiếm toàn bộ chiều rộng
+                                        decoration: BoxDecoration(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                        ),
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(8),
+                                          child: Image.network(
+                                            MomentService.fullImageUrl(
+                                                momentData['media'][0]
+                                                    ['media_url']),
+                                            fit: BoxFit
+                                                .cover, // Thay đổi thành cover để ảnh lấp đầy khung
+                                            errorBuilder:
+                                                (context, error, stackTrace) {
+                                              print(
+                                                  '❌ Image load error: $error');
+                                              print(
+                                                  '❌ Failed URL: ${momentData['media'][0]['media_url']}');
+                                              return Container(
+                                                color: Colors.grey.shade200,
+                                                child: const Icon(
+                                                    Icons.broken_image,
+                                                    size: 50),
+                                              );
+                                            },
+                                          ),
                                         ),
                                       ),
-                                    const SizedBox(height: 4),
-                                    Text(
-                                      '${momentData['likeCount'] ?? 0} lượt thích',
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.grey,
-                                      ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          '${momentData['likeCount'] ?? 0} lượt thích',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        Text(
+                                          '${momentData['commentCount'] ?? 0} bình luận',
+                                          style: const TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(height: 4),
+                              const SizedBox(height: 8),
                               Text(
                                 formatTime(msg['created_at']),
                                 style: const TextStyle(
-                                  fontSize: 10,
+                                  fontSize: 12,
                                   color: Colors.black45,
                                 ),
                               ),
@@ -438,7 +384,6 @@ class _RoomChatPageState extends State<RoomChatPage> {
                         ),
                       );
                     }
-
                   }
 
                   else {

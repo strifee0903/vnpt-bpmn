@@ -1,102 +1,3 @@
-// const socketService = require("../services/socket.service");
-// const knex = require("../database/knex");
-
-// exports.initSocket = (io) => {
-//   io.on("connection", (socket) => {
-//     console.log("📡 Socket connected:", socket.id);
-//     // 🟢 Join room
-//     socket.on("join_room", (campaign_id) => {
-//       console.log(`🔗 ${socket.id} joined room_${campaign_id}`);
-//       socket.join(`room_${campaign_id}`);
-//     });
-//     socket.on("leave_room", (campaign_id) => {
-//       console.log(`🚪 ${socket.id} left room ${campaign_id}`);
-//       socket.leave(campaign_id.toString());
-//     });
-//     // // 📩 Gửi tin nhắn
-//     // socket.on("send_message", async (data) => {
-//     //   const {
-//     //     campaign_id,
-//     //     sender_id,
-//     //     content,
-//     //     type = "text",
-//     //     moment,
-//     //     username,
-//     //   } = data;
-//     //   if (!campaign_id || !sender_id || (type === "text" && !content)) return;
-
-//     //   const newMessage = await socketService.saveMessage({
-//     //     campaign_id,
-//     //     sender_id,
-//     //     content,
-//     //     type,
-//     //     moment,
-//     //     username,
-//     //   });
-
-//     //   io.to(`room_${campaign_id}`).emit("new_message", newMessage);
-//     // });
-
-//     socket.on("send_message", async (data) => {
-//       const {
-//         campaign_id,
-//         sender_id,
-//         content,
-//         type = "text",
-//         moment,
-//         username,
-//         shared_by,
-//         shared_by_name,
-//         original_author_id,
-//         original_author_name,
-//       } = data;
-//       if (!campaign_id || !sender_id || (type === "text" && !content)) return;
-
-//       try {
-//         const newMessage = await socketService.saveMessage({
-//           campaign_id,
-//           sender_id,
-//           content,
-//           type,
-//           moment,
-//           username,
-//           shared_by,
-//           shared_by_name,
-//           original_author_id,
-//           original_author_name,
-//         });
-//         io.to(`room_${campaign_id}`).emit("new_message", newMessage);
-//       } catch (error) {
-//         socket.emit("error_message", { error: "Failed to save message: " + error.message });
-//       }
-//     });
-
-//     // 📜 Load lịch sử tin nhắn
-//     socket.on("load_messages", async (data) => {
-//       const { campaign_id, user_id } = data;
-//       if (!campaign_id || !user_id) return;
-
-//       //   const exists = await knex("participation")
-//       //     .where({ campaign_id, u_id: user_id })
-//       //     .first();
-
-//       //   if (!exists) {
-//       //     return socket.emit("error_message", {
-//       //       error: "Bạn không có quyền xem tin nhắn của chiến dịch này.",
-//       //     });
-//       //   }
-
-//       const messages = await socketService.getMessagesByCampaign(campaign_id);
-//       console.log(`${messages} messages loaded for campaign ${campaign_id}`);
-//       socket.emit("load_messages_success", messages);
-//     });
-
-//     socket.on("disconnect", () => {
-//       console.log("❌ Socket disconnected:", socket.id);
-//     });
-//   });
-// };
-
 const socketService = require("../services/socket.service");
 const knex = require("../database/knex");
 
@@ -187,7 +88,8 @@ exports.initSocket = (io) => {
 
     // Load message history
     socket.on("load_messages", async (data) => {
-      console.log("📜 Loading messages for:", data);
+      // console.log("📜 Loading messages for:", data);
+      console.log("📜 Loading messages for:", JSON.stringify(data, null, 2));
 
       const { campaign_id, user_id } = data;
       if (!campaign_id || !user_id) {
