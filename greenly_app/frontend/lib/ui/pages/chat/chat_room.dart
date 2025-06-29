@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:greenly_app/components/colors.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -100,19 +102,54 @@ class _RoomChatPageState extends State<RoomChatPage> {
     });
 
     socket.on('load_messages_success', (data) {
-      print('📥 Loaded messages: $data');
+      final parsed = List<Map<String, dynamic>>.from(data).map((msg) {
+        if (msg['type'] == 'moment' && msg['moment'] is String) {
+          try {
+            msg['moment'] = jsonDecode(msg['moment']);
+          } catch (e) {
+            print('⚠️ moment parse fail: $e');
+          }
+        }
+        return msg;
+      }).toList();
+
       setState(() {
-        messages = List<Map<String, dynamic>>.from(data);
+        messages = parsed;
       });
+
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _scrollToBottom();
       });
     });
 
+    // socket.on('new_message', (data) {
+    //   print('📨 New message received: $data');
+    //   setState(() {
+    //     messages.add(Map<String, dynamic>.from(data));
+    //     if (_isAtBottom) {
+    //       WidgetsBinding.instance.addPostFrameCallback((_) {
+    //         _scrollToBottom();
+    //       });
+    //     } else {
+    //       _hasNewMessage = true;
+    //     }
+    //   });
+    // });
+
     socket.on('new_message', (data) {
-      print('📨 New message received: $data');
+      final parsed = Map<String, dynamic>.from(data);
+
+      if (parsed['type'] == 'moment' && parsed['moment'] is String) {
+        try {
+          parsed['moment'] = jsonDecode(parsed['moment']);
+        } catch (e) {
+          print('⚠️ Lỗi khi parse moment JSON: $e');
+          parsed['moment'] = {}; // fallback
+        }
+      }
+
       setState(() {
-        messages.add(Map<String, dynamic>.from(data));
+        messages.add(parsed);
         if (_isAtBottom) {
           WidgetsBinding.instance.addPostFrameCallback((_) {
             _scrollToBottom();
@@ -122,7 +159,6 @@ class _RoomChatPageState extends State<RoomChatPage> {
         }
       });
     });
-
     socket.on('error_message', (data) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('⚠ ${data['error']}')),
