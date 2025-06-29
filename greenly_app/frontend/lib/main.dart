@@ -9,6 +9,7 @@ import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
 import 'ui/moments/moment_manager.dart';
 import 'ui/pages/campaign/campaign_manager.dart';
+import 'ui/pages/chat/socket_manager.dart';
 import 'ui/pages/profile/user_manager.dart';
 import 'ui/slpash_screen.dart';
 import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary
@@ -78,7 +79,16 @@ class _MyAppState extends State<MyApp> {
         Provider(create: (_) => MomentService()),
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => MomentProvider()),
-        ChangeNotifierProvider(create: (_) => CampaignManager())
+        ChangeNotifierProvider(create: (_) => CampaignManager()),
+        // Trong phần MultiProvider
+        ChangeNotifierProvider(
+          create: (_) {
+            final manager = SocketManager();
+            manager.initialize(); // Khởi tạo socket ngay khi app bắt đầu
+            return manager;
+          },
+          lazy: false, // Khởi tạo ngay lập tức
+        ),
       ],
       child: Builder(builder: (context) {
         final authManager = Provider.of<AuthManager>(context, listen: false);

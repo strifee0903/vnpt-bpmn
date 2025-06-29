@@ -5,11 +5,10 @@ import 'package:greenly_app/services/campaign_service.dart';
 import 'package:greenly_app/models/campaign.dart';
 import 'package:greenly_app/ui/pages/chat/chat_main.dart';
 import 'package:provider/provider.dart';
-import 'package:socket_io_client/socket_io_client.dart' as IO;
 import '../../../services/moment_service.dart';
 import '../../auth/auth_manager.dart';
 import 'chat_room.dart';
-import 'socket_config.dart';
+import 'socket_manager.dart';
 
 class SelectChatRoomScreen extends StatefulWidget {
   final Moment moment;
@@ -28,46 +27,44 @@ class SelectChatRoomScreen extends StatefulWidget {
 }
 
 class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
-  late IO.Socket _socket;
-  bool _isConnected = false;
+  late SocketManager socketManager;
 
   @override
   void initState() {
     super.initState();
+    socketManager = Provider.of<SocketManager>(context, listen: false);
     _initializeSocket();
   }
 
   Future<void> _initializeSocket() async {
-    final socketUrl = await SocketConfig.getSocketUrl();
-    _socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
-
-    _socket.onConnect((_) {
-      print("🟢 Socket connected successfully");
-      setState(() {
-        _isConnected = true;
-      });
-    });
-
-    _socket.onConnectError((data) {
-      print("❌ Socket connection error: $data");
+    try {
+      await socketManager.initialize();
+      if (!socketManager.isConnected) {
+        socketManager.reconnect();
+      }
+      // Listen for connection status changes
+      socketManager.addListener(_handleConnectionChange);
+    } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Không thể kết nối tới máy chủ chat: $data")),
+          SnackBar(content: Text("Lỗi khởi tạo socket: $e")),
         );
       }
-    });
+    }
+  }
 
-    _socket.connect();
+  void _handleConnectionChange() {
+    if (mounted) {
+      setState(() {}); // Update UI when connection status changes
+    }
   }
 
   void _shareMomentToCampaign(Campaign campaign) {
-    if (!_isConnected) {
+    if (!socketManager.isConnected) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-            content: Text("Chưa kết nối tới máy chủ. Vui lòng thử lại.")),
+          content: Text("Chưa kết nối tới máy chủ. Vui lòng thử lại."),
+        ),
       );
       return;
     }
@@ -75,15 +72,17 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
     final authManager = Provider.of<AuthManager>(context, listen: false);
     final currentUserId = authManager.loggedInUser?.u_id ?? widget.userId;
 
+    // Validate moment media URLs
     final momentJson = widget.moment.toJson();
     if (momentJson['media'] != null &&
         (momentJson['media'] as List).isNotEmpty) {
       final mediaList = momentJson['media'] as List;
       for (var media in mediaList) {
         final url = media['media_url']?.toString();
-        // ignore: unused_local_variable
         final absoluteUrl = MomentService.fullImageUrl(url);
-        if (url == null || url.isEmpty || !Uri.tryParse(url)!.hasAbsolutePath) {
+        if (url == null ||
+            url.isEmpty ||
+            !Uri.tryParse(absoluteUrl)!.hasAbsolutePath) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Lỗi: URL hình ảnh không hợp lệ")),
           );
@@ -92,12 +91,12 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
       }
     }
 
-    final momentData = widget.moment.toJson();
+    // Prepare payload
     final payload = {
       'campaign_id': campaign.id,
       'sender_id': currentUserId,
       'type': 'moment',
-      'moment': momentData,
+      'moment': momentJson,
       'username': widget.username,
       'shared_by': currentUserId,
       'shared_by_name': widget.username,
@@ -105,47 +104,58 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
       'original_author_name': widget.moment.user.u_name,
     };
 
-    print("📤 Sending moment share payload:");
-    print(jsonEncode(payload));
+    // Remove existing listeners to prevent duplicates
+    socketManager.socket.off('new_message');
+    socketManager.socket.off('error_message');
 
-    _socket.off('new_message');
-    _socket.off('error_message');
-
-    bool messageSent = false;
-    _socket.on('new_message', (data) {
+    // Set up listeners for this specific share action
+    socketManager.socket.on('new_message', (data) {
       print("✅ Message sent successfully: $data");
-      if (mounted && !messageSent) {
-        messageSent = true;
+      if (mounted) {
+        // Navigate directly to RoomChatPage with the shared moment
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => ChatMain(
-              selectedCampaignId: campaign.id,
+            builder: (_) => RoomChatPage(
+              campaignId: campaign.id,
+              userId: currentUserId,
+              username: widget.username,
+              sharedMoment: widget.moment,
             ),
           ),
         );
+        // Remove listeners after navigation to prevent memory leaks
+        socketManager.socket.off('new_message');
+        socketManager.socket.off('error_message');
       }
     });
 
-    _socket.on('error_message', (data) {
+    socketManager.socket.on('error_message', (data) {
       print("❌ Error sending message: ${data['error']}");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text("Lỗi: ${data['error']}")),
         );
+        // Remove listeners after error to prevent memory leaks
+        socketManager.socket.off('new_message');
+        socketManager.socket.off('error_message');
       }
     });
 
-    _socket.emit('join_room', campaign.id);
-    Future.delayed(const Duration(milliseconds: 100), () {
-      _socket.emit('send_message', payload);
+    // Join room and send message
+    socketManager.joinRoom(campaign.id);
+    socketManager.sendMessage(payload);
+    socketManager.loadMessages({
+      'campaign_id': campaign.id,
+      'user_id': currentUserId,
     });
   }
 
   @override
   void dispose() {
-    _socket.disconnect();
-    _socket.dispose();
+    socketManager.removeListener(_handleConnectionChange);
+    socketManager.socket.off('new_message');
+    socketManager.socket.off('error_message');
     super.dispose();
   }
 
@@ -160,16 +170,17 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
             child: Row(
               children: [
                 Icon(
-                  _isConnected ? Icons.wifi : Icons.wifi_off,
-                  color: _isConnected ? Colors.green : Colors.red,
+                  socketManager.isConnected ? Icons.wifi : Icons.wifi_off,
+                  color: socketManager.isConnected ? Colors.green : Colors.red,
                   size: 16,
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  _isConnected ? "Đã kết nối" : "Chưa kết nối",
+                  socketManager.isConnected ? "Đã kết nối" : "Chưa kết nối",
                   style: TextStyle(
                     fontSize: 12,
-                    color: _isConnected ? Colors.green : Colors.red,
+                    color:
+                        socketManager.isConnected ? Colors.green : Colors.red,
                   ),
                 ),
               ],
@@ -254,7 +265,7 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
                       title: Text(campaign.title),
                       subtitle: Text("ID: ${campaign.id}"),
                       trailing: const Icon(Icons.send),
-                      onTap: _isConnected
+                      onTap: socketManager.isConnected
                           ? () => _shareMomentToCampaign(campaign)
                           : null,
                     );
