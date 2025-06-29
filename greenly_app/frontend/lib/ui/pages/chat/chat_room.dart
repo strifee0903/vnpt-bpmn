@@ -60,47 +60,33 @@ class _RoomChatPageState extends State<RoomChatPage> {
     super.didUpdateWidget(oldWidget);
 
     if (widget.campaignId != oldWidget.campaignId) {
+// 1. Rời phòng cũ
       socket.emit('leave_room', oldWidget.campaignId);
+// 2. Dọn listener nếu socket.on đã đăng ký nhiều lần
+      socket.off('load_messages_success');
+      socket.off('new_message');
+      socket.off('error_message');
+
+// 3. Reset UI
       setState(() {
         messages.clear();
+        _hasNewMessage = false;
+        _isAtBottom = true;
       });
-      _connectSocket(); // Reconnect to new room
-    }
-  }
 
-  void _connectSocket() async {
-    final socketUrl = await SocketConfig.getSocketUrl();
-    socket = IO.io(socketUrl, <String, dynamic>{
-      'transports': ['websocket'],
-      'autoConnect': false,
-    });
+// 4. Re-attach listeners
+      attachSocketListeners();
 
-    socket.connect();
-
-    socket.onConnect((_) {
+// 5. Tham gia phòng mới + load lại tin nhắn
       socket.emit('join_room', widget.campaignId);
-
       socket.emit('load_messages', {
         'campaign_id': widget.campaignId,
         'user_id': widget.userId,
       });
+    }
+  }
 
-      // Send shared moment if provided
-      if (widget.sharedMoment != null) {
-        socket.emit('send_message', {
-          'campaign_id': widget.campaignId,
-          'sender_id': widget.userId,
-          'type': 'moment',
-          'moment': widget.sharedMoment!.toJson(),
-          'username': widget.username,
-          'shared_by': widget.userId,
-          'shared_by_name': widget.username,
-          'original_author_id': widget.sharedMoment!.user.u_id,
-          'original_author_name': widget.sharedMoment!.user.u_name,
-        });
-      }
-    });
-
+  void attachSocketListeners() {
     socket.on('load_messages_success', (data) {
       final parsed = List<Map<String, dynamic>>.from(data).map((msg) {
         if (msg['type'] == 'moment' && msg['moment'] is String) {
@@ -164,6 +150,49 @@ class _RoomChatPageState extends State<RoomChatPage> {
         SnackBar(content: Text('⚠ ${data['error']}')),
       );
     });
+
+    socket.on('error_message', (data) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('⚠ ${data['error']}')),
+      );
+    });
+
+    socket.onDisconnect((_) => print('❌ Socket disconnected'));
+  }
+
+  void _connectSocket() async {
+    final socketUrl = await SocketConfig.getSocketUrl();
+    socket = IO.io(socketUrl, <String, dynamic>{
+      'transports': ['websocket'],
+      'autoConnect': false,
+    });
+
+    socket.connect();
+
+    socket.onConnect((_) {
+      print('📡 Socket connected: ${socket.id}');
+      socket.emit('join_room', widget.campaignId);
+      socket.emit('load_messages', {
+        'campaign_id': widget.campaignId,
+        'user_id': widget.userId,
+      });
+
+      if (widget.sharedMoment != null) {
+        socket.emit('send_message', {
+          'campaign_id': widget.campaignId,
+          'sender_id': widget.userId,
+          'type': 'moment',
+          'moment': widget.sharedMoment!.toJson(),
+          'username': widget.username,
+          'shared_by': widget.userId,
+          'shared_by_name': widget.username,
+          'original_author_id': widget.sharedMoment!.user.u_id,
+          'original_author_name': widget.sharedMoment!.user.u_name,
+        });
+      }
+    });
+
+    attachSocketListeners(); // ✅ attach sau connect
   }
 
   void _scrollToBottom() {
