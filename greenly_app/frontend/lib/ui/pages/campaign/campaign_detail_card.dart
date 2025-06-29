@@ -93,7 +93,7 @@ class _CampaignDetailCardState extends State<CampaignDetailCard> {
               style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                fontFamily: 'Oktah',
+                fontFamily: 'montserrat',
               ),
             ),
             const SizedBox(height: 12),

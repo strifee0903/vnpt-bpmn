@@ -127,7 +127,7 @@ class _CampaignState extends State<Campaign> {
         title: const Text(
           'Campaign',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
           ),
         ),
@@ -183,7 +183,7 @@ class _CampaignState extends State<Campaign> {
                             child: Text(
                               'Created',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'montserrat',
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
@@ -193,7 +193,7 @@ class _CampaignState extends State<Campaign> {
                         : Text(
                             'Created',
                             style: TextStyle(
-                              fontFamily: 'Oktah',
+                              fontFamily: 'montserrat',
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
                               color: Colors.black54,
@@ -222,7 +222,7 @@ class _CampaignState extends State<Campaign> {
                             child: Text(
                               'Joined',
                               style: TextStyle(
-                                fontFamily: 'Oktah',
+                                fontFamily: 'montserrat',
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
@@ -232,7 +232,7 @@ class _CampaignState extends State<Campaign> {
                         : Text(
                             'Joined',
                             style: TextStyle(
-                              fontFamily: 'Oktah',
+                              fontFamily: 'montserrat',
                               fontSize: 17,
                               fontWeight: FontWeight.w700,
                               color: Colors.black54,
@@ -319,7 +319,7 @@ class _CampaignState extends State<Campaign> {
                                           campaign.title,
                                           style: TextStyle(
                                             fontSize: 20,
-                                            fontFamily: 'Oktah',
+                                            fontFamily: 'montserrat',
                                             fontWeight: FontWeight.w700,
                                             color: colors['text'],
                                           ),
@@ -331,7 +331,7 @@ class _CampaignState extends State<Campaign> {
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
                                             fontSize: 16,
-                                            fontFamily: 'Oktah',
+                                            fontFamily: 'montserrat',
                                             fontWeight: FontWeight.w500,
                                             color: colors['text']!
                                                 .withOpacity(0.7),
@@ -342,7 +342,7 @@ class _CampaignState extends State<Campaign> {
                                           campaign.location ?? 'No location',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            fontFamily: 'Oktah',
+                                            fontFamily: 'montserrat',
                                             fontWeight: FontWeight.w500,
                                             color: colors['text']!
                                                 .withOpacity(0.5),
@@ -353,7 +353,7 @@ class _CampaignState extends State<Campaign> {
                                           'From ${formatDate(campaign.startDate)} to ${formatDate(campaign.endDate)}',
                                           style: TextStyle(
                                             fontSize: 12,
-                                            fontFamily: 'Oktah',
+                                            fontFamily: 'montserrat',
                                             fontWeight: FontWeight.w400,
                                             color: colors['text']!
                                                 .withOpacity(0.5),
@@ -408,7 +408,7 @@ class _CampaignState extends State<Campaign> {
                                               ? 'Hosting'
                                               : (isJoined ? 'Leave' : 'Join'),
                                           style: const TextStyle(
-                                            fontFamily: 'Oktah',
+                                            fontFamily: 'montserrat',
                                             fontWeight: FontWeight.w700,
                                             color: Colors.white,
                                           ),
@@ -479,7 +479,7 @@ class _CampaignState extends State<Campaign> {
               const Text(
                 'Create Campaign',
                 style: TextStyle(
-                  fontFamily: 'Oktah',
+                  fontFamily: 'montserrat',
                   fontWeight: FontWeight.w700,
                   fontSize: 16,
                   color: Color.fromARGB(255, 255, 255, 255),

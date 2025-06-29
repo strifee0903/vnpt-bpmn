@@ -117,7 +117,7 @@ class _Step1State extends State<Step1> {
         title: const Text(
           'Campaign Details',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -140,7 +140,7 @@ class _Step1State extends State<Step1> {
                 const Text(
                   'Campaign Name',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -150,7 +150,7 @@ class _Step1State extends State<Step1> {
                   controller: nameController,
                   cursorColor: button,
                   style: const TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -173,7 +173,7 @@ class _Step1State extends State<Step1> {
                 const Text(
                   'Category',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -185,7 +185,7 @@ class _Step1State extends State<Step1> {
                   hint: const Text(
                     'Select a Category',
                     style: TextStyle(
-                      fontFamily: 'Oktah',
+                      fontFamily: 'montserrat',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                     ),
@@ -196,7 +196,7 @@ class _Step1State extends State<Step1> {
                       child: Text(
                         category.category_name,
                         style: const TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'montserrat',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -208,7 +208,7 @@ class _Step1State extends State<Step1> {
                       return Text(
                         category.category_name,
                         style: const TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'montserrat',
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
@@ -245,7 +245,7 @@ class _Step1State extends State<Step1> {
                 const Text(
                   'Description',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -256,7 +256,7 @@ class _Step1State extends State<Step1> {
                   maxLines: 3,
                   cursorColor: button,
                   style: const TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -279,7 +279,7 @@ class _Step1State extends State<Step1> {
                 const Text(
                   'Execution Date',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -306,7 +306,7 @@ class _Step1State extends State<Step1> {
                           child: TextField(
                             cursorColor: button,
                             style: const TextStyle(
-                              fontFamily: 'Oktah',
+                              fontFamily: 'montserrat',
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -338,7 +338,7 @@ class _Step1State extends State<Step1> {
                     const Text(
                       'to',
                       style: TextStyle(
-                        fontFamily: 'Oktah',
+                        fontFamily: 'montserrat',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
                       ),
@@ -363,7 +363,7 @@ class _Step1State extends State<Step1> {
                           child: TextField(
                             cursorColor: button,
                             style: const TextStyle(
-                              fontFamily: 'Oktah',
+                              fontFamily: 'montserrat',
                               fontSize: 14,
                               fontWeight: FontWeight.w500,
                             ),
@@ -397,7 +397,7 @@ class _Step1State extends State<Step1> {
                 const Text(
                   'Location',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -407,7 +407,7 @@ class _Step1State extends State<Step1> {
                   controller: locationController,
                   cursorColor: button,
                   style: const TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -469,7 +469,7 @@ class _Step1State extends State<Step1> {
           child: const Text(
             'Next',
             style: TextStyle(
-              fontFamily: 'Oktah',
+              fontFamily: 'montserrat',
               fontSize: 16,
               color: Colors.white,
               fontWeight: FontWeight.w700,

@@ -1,12 +1,9 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
 import '../../../components/colors.dart';
 import 'package:greenly_app/models/process.dart' as model;
 import 'package:dio/dio.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
-import 'dart:io';
 
 Future<void> openPdfFromUrl(String url) async {
   try {
@@ -81,7 +78,7 @@ class _ProcessCardState extends State<ProcessCard> {
       title: Text(
         widget.libraryName,
         style: const TextStyle(
-          fontFamily: 'Oktah',
+          fontFamily: 'montserrat',
           fontWeight: FontWeight.w900,
           color: Colors.black,
         ),
@@ -94,7 +91,7 @@ class _ProcessCardState extends State<ProcessCard> {
             Text(
               widget.description,
               style: const TextStyle(
-                fontFamily: 'Oktah',
+                fontFamily: 'montserrat',
                 fontSize: 16,
                 fontWeight: FontWeight.w400,
                 color: Colors.black54,
@@ -112,7 +109,7 @@ class _ProcessCardState extends State<ProcessCard> {
                   Flexible(
                     child: Text(
                       '📄 ${widget.file.split('/').last.split('\\').last}',
-                      style: const TextStyle(fontFamily: 'Oktah'),
+                      style: const TextStyle(fontFamily: 'montserrat'),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -123,7 +120,7 @@ class _ProcessCardState extends State<ProcessCard> {
             const Text(
               'Quy trình thực hiện:',
               style: TextStyle(
-                fontFamily: 'Oktah',
+                fontFamily: 'montserrat',
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
               ),
@@ -191,7 +188,7 @@ class _ProcessCardState extends State<ProcessCard> {
                                 Text(
                                   'Step ${index + 1}',
                                   style: TextStyle(
-                                    fontFamily: 'Oktah',
+                                    fontFamily: 'montserrat',
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
                                     color: textColor,
@@ -201,7 +198,7 @@ class _ProcessCardState extends State<ProcessCard> {
                                 Text(
                                   title,
                                   style: TextStyle(
-                                    fontFamily: 'Oktah',
+                                    fontFamily: 'montserrat',
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
                                     color: textColor,
@@ -218,7 +215,7 @@ class _ProcessCardState extends State<ProcessCard> {
               )
             else
               const Text('Không có bước nào.',
-                  style: TextStyle(fontFamily: 'Oktah')),
+                  style: TextStyle(fontFamily: 'montserrat')),
           ],
         ),
       ),
@@ -228,7 +225,7 @@ class _ProcessCardState extends State<ProcessCard> {
           child: Text(
             'Đóng',
             style: TextStyle(
-              fontFamily: 'Oktah',
+              fontFamily: 'montserrat',
               fontWeight: FontWeight.w700,
               fontSize: 16,
               color: button,

@@ -66,7 +66,7 @@ class _Step3State extends State<Step3> {
         title: const Text(
           'Campaign Participant',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -87,7 +87,7 @@ class _Step3State extends State<Step3> {
                 const Text(
                   'Share via Link',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -105,7 +105,7 @@ class _Step3State extends State<Step3> {
                         child: Text(
                           campaignLink,
                           style: const TextStyle(
-                            fontFamily: 'Oktah',
+                            fontFamily: 'montserrat',
                             fontSize: 14,
                             fontWeight: FontWeight.w500,
                           ),
@@ -124,7 +124,7 @@ class _Step3State extends State<Step3> {
                       child: const Text(
                         'Copy',
                         style: TextStyle(
-                          fontFamily: 'Oktah',
+                          fontFamily: 'montserrat',
                           fontSize: 14,
                           color: Colors.white,
                           fontWeight: FontWeight.w700,
@@ -137,7 +137,7 @@ class _Step3State extends State<Step3> {
                 const Text(
                   'Invite via Email',
                   style: TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 18,
                     fontWeight: FontWeight.w500,
                   ),
@@ -147,7 +147,7 @@ class _Step3State extends State<Step3> {
                   controller: emailController,
                   cursorColor: button,
                   style: const TextStyle(
-                    fontFamily: 'Oktah',
+                    fontFamily: 'montserrat',
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -183,7 +183,7 @@ class _Step3State extends State<Step3> {
                     child: const Text(
                       'Send Invite',
                       style: TextStyle(
-                        fontFamily: 'Oktah',
+                        fontFamily: 'montserrat',
                         fontSize: 16,
                         color: Colors.white,
                         fontWeight: FontWeight.w700,
@@ -212,7 +212,7 @@ class _Step3State extends State<Step3> {
           child: const Text(
             'Next',
             style: TextStyle(
-              fontFamily: 'Oktah',
+              fontFamily: 'montserrat',
               fontSize: 16,
               color: Colors.white,
               fontWeight: FontWeight.w700,

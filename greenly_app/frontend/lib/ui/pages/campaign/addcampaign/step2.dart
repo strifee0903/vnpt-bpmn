@@ -106,7 +106,7 @@ class _Step2State extends State<Step2> {
         title: const Text(
           'Create Announcement Post',
           style: TextStyle(
-            fontFamily: 'Oktah',
+            fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -159,7 +159,7 @@ class _Step2State extends State<Step2> {
           child: const Text(
             'Next',
             style: TextStyle(
-              fontFamily: 'Oktah',
+              fontFamily: 'montserrat',
               fontSize: 16,
               color: Colors.white,
               fontWeight: FontWeight.w700,
