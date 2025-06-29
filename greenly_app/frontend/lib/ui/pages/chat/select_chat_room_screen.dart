@@ -37,7 +37,6 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
   }
 
   Future<void> _initializeSocket() async {
-    // Use the correct IP address for your server
     final socketUrl = await SocketConfig.getSocketUrl();
     _socket = IO.io(socketUrl, <String, dynamic>{
       'transports': ['websocket'],
@@ -50,13 +49,6 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
         _isConnected = true;
       });
     });
-
-    // _socket.onDisconnect((_) {
-    //   print("🔴 Socket disconnected");
-    //   setState(() {
-    //     _isConnected = false;
-    //   });
-    // });
 
     _socket.onConnectError((data) {
       print("❌ Socket connection error: $data");
@@ -82,13 +74,13 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
     final authManager = Provider.of<AuthManager>(context, listen: false);
     final currentUserId = authManager.loggedInUser?.u_id ?? widget.userId;
 
-    // Validate media URLs
     final momentJson = widget.moment.toJson();
     if (momentJson['media'] != null &&
         (momentJson['media'] as List).isNotEmpty) {
       final mediaList = momentJson['media'] as List;
       for (var media in mediaList) {
         final url = media['media_url']?.toString();
+        // ignore: unused_local_variable
         final absoluteUrl = MomentService.fullImageUrl(url);
         if (url == null || url.isEmpty || !Uri.tryParse(url)!.hasAbsolutePath) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -99,9 +91,7 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
       }
     }
 
-    // Prepare the moment data
     final momentData = widget.moment.toJson();
-
     final payload = {
       'campaign_id': campaign.id,
       'sender_id': currentUserId,
@@ -117,14 +107,14 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
     print("📤 Sending moment share payload:");
     print(jsonEncode(payload));
 
-    // Set up listeners before sending
-    _socket.off('new_message'); // Remove existing listeners
+    _socket.off('new_message');
     _socket.off('error_message');
 
+    bool messageSent = false;
     _socket.on('new_message', (data) {
       print("✅ Message sent successfully: $data");
-      if (mounted) {
-        // Navigate to chat room
+      if (mounted && !messageSent) {
+        messageSent = true;
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -132,6 +122,7 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
               campaignId: campaign.id,
               userId: currentUserId,
               username: widget.username,
+              sharedMoment: widget.moment, // Pass the moment to ensure it loads
             ),
           ),
         );
@@ -147,10 +138,7 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
       }
     });
 
-    // Join room and send message
     _socket.emit('join_room', campaign.id);
-
-    // Add a small delay to ensure room join is processed
     Future.delayed(const Duration(milliseconds: 100), () {
       _socket.emit('send_message', payload);
     });
@@ -193,7 +181,6 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
       ),
       body: Column(
         children: [
-          // Preview of the moment being shared
           Container(
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(12),

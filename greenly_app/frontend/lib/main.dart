@@ -9,7 +9,6 @@ import 'ui/auth/auth_screen.dart';
 import 'ui/home/home.dart';
 import 'ui/moments/moment_manager.dart';
 import 'ui/pages/campaign/campaign_manager.dart';
-import 'ui/pages/group_chat_screen.dart';
 import 'ui/pages/profile/user_manager.dart';
 import 'ui/slpash_screen.dart';
 import 'ui/pages/greenlibrary/greenlibrary.dart'; // Import GreenLibrary

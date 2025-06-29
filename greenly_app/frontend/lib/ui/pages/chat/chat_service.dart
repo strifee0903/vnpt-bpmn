@@ -7,12 +7,14 @@ class ChatRoomService {
   static Future<void> sendMomentToCampaign(
       int campaignId, Moment moment) async {
     _campaignMessages.putIfAbsent(campaignId, () => []);
-    _campaignMessages[campaignId]!.add(ChatMessage(
+    final message = ChatMessage(
       content: '[Moment được chia sẻ]',
       senderId: 0,
       timestamp: DateTime.now(),
       moment: moment,
-    ));
+    );
+    _campaignMessages[campaignId]!.add(message);
+    // Simulate real-time broadcast (server-side logic would handle this)
   }
 
   static Future<List<ChatMessage>> getMessagesForCampaign(

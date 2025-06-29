@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:greenly_app/components/colors.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
@@ -63,19 +62,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
       setState(() {
         messages.clear();
       });
-      socket.emit('join_room', widget.campaignId);
-      socket.emit('load_messages', {
-        'campaign_id': widget.campaignId,
-        'user_id': widget.userId,
-      });
-      if (widget.sharedMoment != null) {
-        socket.emit('send_message', {
-          'campaign_id': widget.campaignId,
-          'sender_id': widget.userId,
-          'type': 'moment',
-          'moment': widget.sharedMoment!.toJson(),
-        });
-      }
+      _connectSocket(); // Reconnect to new room
     }
   }
 
@@ -96,12 +83,18 @@ class _RoomChatPageState extends State<RoomChatPage> {
         'user_id': widget.userId,
       });
 
+      // Send shared moment if provided
       if (widget.sharedMoment != null) {
         socket.emit('send_message', {
           'campaign_id': widget.campaignId,
           'sender_id': widget.userId,
           'type': 'moment',
           'moment': widget.sharedMoment!.toJson(),
+          'username': widget.username,
+          'shared_by': widget.userId,
+          'shared_by_name': widget.username,
+          'original_author_id': widget.sharedMoment!.user.u_id,
+          'original_author_name': widget.sharedMoment!.user.u_name,
         });
       }
     });
@@ -117,6 +110,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
     });
 
     socket.on('new_message', (data) {
+      print('📨 New message received: $data');
       setState(() {
         messages.add(Map<String, dynamic>.from(data));
         if (_isAtBottom) {
@@ -134,11 +128,6 @@ class _RoomChatPageState extends State<RoomChatPage> {
         SnackBar(content: Text('⚠ ${data['error']}')),
       );
     });
-
-    // socket.onDisconnect((_) {
-    //   print('❌ Socket disconnected, attempting reconnect...');
-    //   socket.connect();
-    // });
   }
 
   void _scrollToBottom() {
@@ -254,14 +243,12 @@ class _RoomChatPageState extends State<RoomChatPage> {
                             context,
                             MaterialPageRoute(
                               builder: (_) => MomentDetailScreen(
-                                momentId: momentData['moment_id'],
-                              ),
+                                  momentId: momentData['moment_id']),
                             ),
                           );
                         },
                         child: Container(
-                          width: MediaQuery.of(context).size.width *
-                              0.85, // Chiếm 85% chiều rộng màn hình
+                          width: MediaQuery.of(context).size.width * 0.85,
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
                             color: isMe
@@ -290,8 +277,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                                 ),
                               const SizedBox(height: 12),
                               Container(
-                                width: double
-                                    .infinity, // Chiếm toàn bộ chiều rộng của container cha
+                                width: double.infinity,
                                 padding: const EdgeInsets.all(12),
                                 decoration: BoxDecoration(
                                   color: Colors.white.withAlpha(120),
@@ -306,7 +292,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                                       momentData['moment_content'] ??
                                           '(Không có nội dung)',
                                       style: const TextStyle(fontSize: 16),
-                                      maxLines: 3, // Hiển thị nhiều dòng hơn
+                                      maxLines: 3,
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                     const SizedBox(height: 12),
@@ -319,9 +305,8 @@ class _RoomChatPageState extends State<RoomChatPage> {
                                             .toString()
                                             .isNotEmpty)
                                       Container(
-                                        height: 180, // Tăng chiều cao ảnh
-                                        width: double
-                                            .infinity, // Chiếm toàn bộ chiều rộng
+                                        height: 180,
+                                        width: double.infinity,
                                         decoration: BoxDecoration(
                                           borderRadius:
                                               BorderRadius.circular(8),
@@ -333,8 +318,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                                             MomentService.fullImageUrl(
                                                 momentData['media'][0]
                                                     ['media_url']),
-                                            fit: BoxFit
-                                                .cover, // Thay đổi thành cover để ảnh lấp đầy khung
+                                            fit: BoxFit.cover,
                                             errorBuilder:
                                                 (context, error, stackTrace) {
                                               print(
@@ -388,9 +372,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                         ),
                       );
                     }
-                  }
-
-                  else {
+                  } else {
                     messageWidget = Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -425,7 +407,8 @@ class _RoomChatPageState extends State<RoomChatPage> {
                   }
 
                   return Align(
-                    alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
+                    alignment:
+                        isMe ? Alignment.centerRight : Alignment.centerLeft,
                     child: Container(
                       margin: const EdgeInsets.symmetric(vertical: 6),
                       child: messageWidget,
@@ -447,7 +430,8 @@ class _RoomChatPageState extends State<RoomChatPage> {
                       });
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: button,
                         borderRadius: BorderRadius.circular(20),
