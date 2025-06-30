@@ -20,6 +20,7 @@ class MomentCard extends StatefulWidget {
   final VoidCallback? refreshFeed;
   final VoidCallback? onLikeToggle;
   final void Function(Moment updatedMoment)? onUpdateMoment;
+  final bool alwaysShowLocation;
 
   const MomentCard({
     super.key,
@@ -28,6 +29,7 @@ class MomentCard extends StatefulWidget {
     this.refreshFeed,
     this.onLikeToggle,
     this.onUpdateMoment,
+    this.alwaysShowLocation = false,
   });
 
   @override
@@ -513,7 +515,7 @@ class _MomentCardState extends State<MomentCard> {
                     ],
                   ),
 
-                  if (_isExpanded) ...[
+                  if (widget.alwaysShowLocation || _isExpanded) ...[
                     const SizedBox(height: 8),
                     // Coordinates
                     Row(
