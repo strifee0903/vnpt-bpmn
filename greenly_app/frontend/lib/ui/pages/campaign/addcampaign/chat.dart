@@ -45,7 +45,7 @@ class _ChatState extends State<Chat> {
         elevation: 0,
         backgroundColor: button,
         title: const Text(
-          'Blank Page',
+          'Phòng trò chuyện',
           style: TextStyle(
             fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,

@@ -125,7 +125,7 @@ class _CampaignState extends State<Campaign> {
         backgroundColor: background,
         elevation: 0,
         title: const Text(
-          'Campaign',
+          'Chiến dịch xanh',
           style: TextStyle(
             fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
@@ -181,7 +181,7 @@ class _CampaignState extends State<Campaign> {
                               borderRadius: BorderRadius.circular(17.0),
                             ),
                             child: Text(
-                              'Created',
+                              'Tất cả',
                               style: TextStyle(
                                 fontFamily: 'montserrat',
                                 fontSize: 17,
@@ -191,7 +191,7 @@ class _CampaignState extends State<Campaign> {
                             ),
                           )
                         : Text(
-                            'Created',
+                            'Tất cả',
                             style: TextStyle(
                               fontFamily: 'montserrat',
                               fontSize: 17,
@@ -220,7 +220,7 @@ class _CampaignState extends State<Campaign> {
                               borderRadius: BorderRadius.circular(17.0),
                             ),
                             child: Text(
-                              'Joined',
+                              'Đã tham gia',
                               style: TextStyle(
                                 fontFamily: 'montserrat',
                                 fontSize: 17,
@@ -230,7 +230,7 @@ class _CampaignState extends State<Campaign> {
                             ),
                           )
                         : Text(
-                            'Joined',
+                            'Đã tham gia',
                             style: TextStyle(
                               fontFamily: 'montserrat',
                               fontSize: 17,
@@ -244,8 +244,7 @@ class _CampaignState extends State<Campaign> {
             ),
             Expanded(
               child: campaigns.isEmpty
-                  ? Center(
-                    child: CircularProgressIndicator())
+                  ? Center(child: CircularProgressIndicator())
                   // Center(
                   //     child: Text(_errorMessage ?? 'No campaigns available'))
                   //           const Center(
@@ -477,7 +476,7 @@ class _CampaignState extends State<Campaign> {
               ),
               const SizedBox(width: 4),
               const Text(
-                'Create Campaign',
+                'Tạo chiến dịch',
                 style: TextStyle(
                   fontFamily: 'montserrat',
                   fontWeight: FontWeight.w700,

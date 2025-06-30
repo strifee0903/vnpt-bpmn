@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:greenly_app/services/user_service.dart';
 import 'package:greenly_app/ui/pages/campaign/addcampaign/success_dialog.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -31,11 +32,39 @@ class Step2 extends StatefulWidget {
 class _Step2State extends State<Step2> {
   Moment? moment;
   final MomentService momentService = MomentService();
+  final UserService userService = UserService();
   final CategoryService categoryService = CategoryService();
   final List<Category> categories = [];
   final TextEditingController contentController = TextEditingController();
   File? selectedImage;
   final ImagePicker picker = ImagePicker();
+  int? _currentUserId;
+  String? _username;
+  File? _avatarFile;
+  String? _errorMessage;
+
+  Future<void> _fetchUserId() async {
+    try {
+      final user = await userService.getCurrentUser();
+      if (mounted) {
+        setState(() {
+          _currentUserId = user?.u_id;
+          _username = user?.u_name;
+          _avatarFile = user?.u_avt != null ? File(user!.u_avt!) : null;
+
+          print('✅ Current User ID: ${_currentUserId}');
+        });
+      }
+    } catch (e) {
+      print('⚠️ Failed to fetch user: $e');
+      if (mounted) {
+        setState(() {
+          _currentUserId = null;
+          _errorMessage = 'Failed to load user data. Please log in again.';
+        });
+      }
+    }
+  }
 
   Future<void> pickImage() async {
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -65,7 +94,7 @@ class _Step2State extends State<Step2> {
     super.initState();
     // Khởi tạo moment nếu cần
     int? id = context.read<CampaignManager>().campaignId;
-
+    _fetchUserId();
     if (id != null) {
       print('🔍 DEBUG - Campaign ID: $id');
       // Nếu có id, lấy thông tin moment từ service
@@ -104,7 +133,7 @@ class _Step2State extends State<Step2> {
         backgroundColor: button,
         elevation: 0,
         title: const Text(
-          'Create Announcement Post',
+          'Tạo bài thông báo',
           style: TextStyle(
             fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
@@ -128,8 +157,9 @@ class _Step2State extends State<Step2> {
                 contentController: contentController,
                 selectedImages: selectedImage != null ? [selectedImage!] : [],
                 onPickImages: pickImage,
-                avatarPath: 'assets/images/pagediary.png',
-                username: 'jane smith',
+                avatarPath: moment?.user?.u_avt ?? '',
+                avatarFile: _avatarFile,
+                username: _username ?? 'User',
                 categories: categories,
                 selectedCategory: moment?.category,
                 onCategoryChanged: (value) {},

@@ -192,7 +192,8 @@ class _AddMomentPageState extends State<AddMomentPage> {
           ),
         );
 
-        await Provider.of<MomentProvider>(context, listen: false).refreshAllFeeds();
+        await Provider.of<MomentProvider>(context, listen: false)
+            .refreshAllFeeds();
         Navigator.pop(context, 'refresh');
       }
     } catch (e) {
@@ -223,7 +224,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
         title: const Text(
           'Create a new post',
           style: TextStyle(
-            fontFamily: 'Baloo Bhaijaan 2',
+            fontFamily: 'montserrat',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -303,9 +304,9 @@ class _AddMomentPageState extends State<AddMomentPage> {
                                 ),
                               )
                             : const Text(
-                                'Post',
+                                'Chia sẻ',
                                 style: TextStyle(
-                                  fontFamily: 'Baloo Bhaijaan 2',
+                                  fontFamily: 'montserrat',
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,

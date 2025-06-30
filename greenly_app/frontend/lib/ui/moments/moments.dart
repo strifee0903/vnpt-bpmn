@@ -124,7 +124,8 @@ class _MomentsPageState extends State<MomentsPage> {
                         ),
                       );
                     },
-                    childCount: momentProvider.moments.length + (momentProvider.hasMore ? 1 : 0),
+                    childCount: momentProvider.moments.length +
+                        (momentProvider.hasMore ? 1 : 0),
                   ),
                 ),
               ],

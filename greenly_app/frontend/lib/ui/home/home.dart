@@ -37,7 +37,6 @@ class _HomePageState extends State<HomePage> {
         child: SingleChildScrollView(
           child: Column(
             children: [
-
               // Greenly App Section with Overlay Box and Add Post
               Padding(
                 padding: const EdgeInsets.all(15),
@@ -82,7 +81,7 @@ class _HomePageState extends State<HomePage> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   const Text(
-                                    'Share Your Moment',
+                                    'Chia sẻ khoảnh khắc nào',
                                     style: TextStyle(
                                       fontSize: 18,
                                       fontFamily: 'Manrope',
@@ -92,7 +91,7 @@ class _HomePageState extends State<HomePage> {
                                   ),
                                   const SizedBox(height: 4),
                                   const Text(
-                                    'Capture your favorite memories',
+                                    'Ghi lại từng khoảnh khắc',
                                     style: TextStyle(
                                       fontSize: 12,
                                       fontFamily: 'Manrope',
@@ -130,9 +129,9 @@ class _HomePageState extends State<HomePage> {
               ),
               const SizedBox(height: 20),
               Padding(
-                padding: const EdgeInsets.only(right: 135.0),
+                padding: const EdgeInsets.only(right: 111.0),
                 child: const Text(
-                  'Explore Your Options',
+                  'Khám Phá Các Tùy Chọn',
                   textAlign: TextAlign.left,
                   style: TextStyle(
                     fontSize: 21,
@@ -154,25 +153,25 @@ class _HomePageState extends State<HomePage> {
                   physics: const NeverScrollableScrollPhysics(),
                   children: [
                     _buildOptionCard(
-                      'My Diary',
+                      'Nhật ký Xanh',
                       'assets/images/mydiary.png',
                       const Color(0xFFFFFFFF),
                       const Color(0xFFFFFFFF),
                     ),
                     _buildOptionCard(
-                      'Green Library',
+                      'Thư viện Xanh',
                       'assets/images/greenlibrary.jpg',
                       const Color(0xFFFFFFFF),
                       const Color(0xFFFFFFFF),
                     ),
                     _buildOptionCard(
-                      'Campaign',
+                      'Chiến dịch Xanh',
                       'assets/images/campaign.jpg',
                       const Color(0xFFFFFFFF),
                       const Color(0xFFFFFFFF),
                     ),
                     _buildOptionCard(
-                      'Group Chat',
+                      'Nhóm Chat',
                       'assets/images/contribution.png',
                       const Color(0xFFFFFFFF),
                       const Color(0xFFFFFFFF),
@@ -199,13 +198,13 @@ class _HomePageState extends State<HomePage> {
         color: backgroundColor,
         child: InkWell(
           onTap: () {
-            if (title == 'My Diary') {
+            if (title == 'Nhật ký Xanh') {
               Navigator.pushNamed(context, '/myDiary');
-            } else if (title == 'Green Library') {
+            } else if (title == 'Thư viện Xanh') {
               Navigator.pushNamed(context, '/greenLibrary');
-            } else if (title == 'Campaign') {
+            } else if (title == 'Chiến dịch Xanh') {
               Navigator.pushNamed(context, '/campaign');
-            } else if (title == 'Group Chat') {
+            } else if (title == 'Nhóm Chat') {
               Navigator.pushNamed(context, '/groupChat');
             }
           },

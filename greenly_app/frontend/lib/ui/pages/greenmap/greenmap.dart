@@ -116,22 +116,22 @@ class _GreenMapState extends State<GreenMap> {
     }
   }
 
-  String formatPlacemark(Placemark place) {
-    final parts = [
-      place.name,
-      place.street,
-      place.subLocality,
-      place.locality,
-      place.administrativeArea,
-      place.country,
-    ];
+  // String formatPlacemark(Placemark place) {
+  //   final parts = [
+  //     place.name,
+  //     place.street,
+  //     place.subLocality,
+  //     place.locality,
+  //     place.administrativeArea,
+  //     place.country,
+  //   ];
 
-    // Loại bỏ các phần tử null hoặc rỗng
-    final nonEmpty =
-        parts.where((part) => part != null && part.trim().isNotEmpty).toList();
+  //   // Loại bỏ các phần tử null hoặc rỗng
+  //   final nonEmpty =
+  //       parts.where((part) => part != null && part.trim().isNotEmpty).toList();
 
-    return nonEmpty.join(', ');
-  }
+  //   return nonEmpty.join(', ');
+  // }
 
   Future<String?> getAddressFromLatLng(
       double latitude, double longitude) async {
