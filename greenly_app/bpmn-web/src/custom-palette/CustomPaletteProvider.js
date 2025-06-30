@@ -47,7 +47,7 @@ CustomPaletteProvider.prototype.getPaletteEntries = function () {
     'Nhập thông tin chiến dịch',
     'Chia sẻ chiến dịch',
     'Mời tham gia',
-    'Trang mới',
+    'Phòng trò chuyện',
   ]
   customSteps.forEach((step, index) => {
     const id = `create.user-task-${index + 1}`

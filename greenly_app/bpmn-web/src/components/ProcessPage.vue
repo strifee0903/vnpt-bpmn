@@ -321,7 +321,7 @@ const exportXML = async () => {
       'Nhập thông tin chiến dịch',
       'Chia sẻ chiến dịch',
       'Mời tham gia',
-      'Trang mới',
+      'Phòng trò chuyện',
     ]
 
     for (const name of requiredNames) {

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'step1.dart';
 import 'step2.dart';
 import 'step3.dart';
-import 'blank.dart';
+import 'chat.dart';
 
 final Map<
     String,
@@ -18,6 +18,6 @@ final Map<
       Step2(onNext: next, onBack: back, isLast: last, onComplete: onComplete),
   'Mời tham gia': (next, back, last, onComplete) =>
       Step3(onNext: next, onBack: back, isLast: last, onComplete: onComplete),
-  'Trang mới': (next, back, last, onComplete) =>
-      Blank(onNext: next, onBack: back, isLast: last, onComplete: onComplete),
+  'Phòng trò chuyện': (next, back, last, onComplete) =>
+      Chat(onNext: next, onBack: back, isLast: last, onComplete: onComplete),
 };

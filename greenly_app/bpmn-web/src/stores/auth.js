@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import axios from 'axios'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -15,6 +16,14 @@ export const useAuthStore = defineStore('auth', {
     logout() {
       this.user = null
       localStorage.removeItem('user')
+      axios
+        .post('/api/users/logout')
+        .then(() => {
+          console.log('✅ Đăng xuất thành công')
+        })
+        .catch((error) => {
+          console.error('❌ Lỗi khi đăng xuất:', error)
+        })
     },
     restore() {
       const saved = localStorage.getItem('user')
