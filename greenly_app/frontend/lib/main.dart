@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:greenly_app/shared/not_found_screen.dart';
+import 'package:greenly_app/ui/moments/add_moment.dart';
 import 'package:greenly_app/ui/pages/profile/profile_screen.dart';
 import 'package:provider/provider.dart';
 import 'services/moment_service.dart';
@@ -153,6 +154,11 @@ class _MyAppState extends State<MyApp> {
                         page: const MainLayout(
                       initialIndex: 3,
                     ));
+                  case AddMomentPage.routeName:
+                    return MaterialPageRoute(
+                      builder: (context) => const AddMomentPage(),
+                    );
+
                   default:
                     print('🔴 Unknown route: ${settings.name}');
                     return SlideUpRoute(page: const NotFoundScreen());

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:greenly_app/ui/moments/add_moment.dart';
 import '../../components/colors.dart';
 import '../../shared/main_layout.dart'; // Import MainLayout
 import '../pages/chat/chat_room.dart'; // Import RoomChatPage
@@ -107,8 +108,10 @@ class _HomePageState extends State<HomePage> {
                               child: FloatingActionButton(
                                 heroTag: 'moment',
                                 onPressed: () {
-                                  Navigator.pushNamed(context,
-                                      '/moments'); // Điều hướng trực tiếp đến Moments
+                                  Navigator.pushNamed(
+                                      context,
+                                      AddMomentPage
+                                          .routeName); // Điều hướng trực tiếp đến Moments
                                 },
                                 backgroundColor: button,
                                 elevation: 0,
