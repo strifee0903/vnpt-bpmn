@@ -40,9 +40,12 @@ class _RoomChatPageState extends State<RoomChatPage> {
     socketManager = Provider.of<SocketManager>(context, listen: false);
     _initializeSocket();
     _scrollController.addListener(_handleScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _scrollToBottom();
-    });
+
+    // Future.delayed(const Duration(milliseconds: 100), () {
+    //   WidgetsBinding.instance.addPostFrameCallback((_) {
+    //     _scrollToBottom();
+    //   });
+    // });
   }
 
   void _initializeSocket() {
@@ -90,9 +93,11 @@ class _RoomChatPageState extends State<RoomChatPage> {
 
       setState(() {
         messages = parsed;
-      });
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        _scrollToBottom();
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Future.delayed(const Duration(milliseconds: 100), () {
+            _scrollToBottom();
+          });
+        });
       });
     });
 
@@ -171,13 +176,20 @@ class _RoomChatPageState extends State<RoomChatPage> {
   }
 
   void _scrollToBottom() {
-    if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent,
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOut,
-      );
-    }
+    if (!mounted || !_scrollController.hasClients) return;
+
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
+
+// Fallback: dùng jumpTo nếu vẫn chưa tới đáy sau 500ms
+    Future.delayed(const Duration(milliseconds: 500), () {
+      if (mounted && _scrollController.hasClients) {
+        _scrollController.jumpTo(_scrollController.position.maxScrollExtent);
+      }
+    });
   }
 
   void _sendMessage() {
@@ -229,11 +241,22 @@ class _RoomChatPageState extends State<RoomChatPage> {
     _controller.dispose();
     super.dispose();
   }
-  
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(bottom: 20),
+        child: FloatingActionButton(
+          onPressed: () {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              _scrollToBottom();
+            });
+          },
+          child: const Icon(Icons.arrow_downward),
+          backgroundColor: button,
+        ),
+      ),
       body: Column(
         children: [
           Container(
@@ -280,7 +303,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
                 ListView.builder(
                   controller: _scrollController,
                   physics: const AlwaysScrollableScrollPhysics(),
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 50),
                   itemCount: messages.length,
                   itemBuilder: (context, index) {
                     final msg = messages[index];
