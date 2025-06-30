@@ -129,7 +129,6 @@ class _MyAppState extends State<MyApp> {
                 MomentsPage.routeName: (ctx) =>
                     const SafeArea(child: MomentsPage()),
                 '/groupChat': (context) => const ChatMain(),
-
                 ProfileScreen.routeName: (ctx) => const SafeArea(
                         child: MainLayout(
                       initialIndex: 3,

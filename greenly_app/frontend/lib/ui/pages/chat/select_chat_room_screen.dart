@@ -109,22 +109,40 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
     socketManager.socket.off('error_message');
 
     // Set up listeners for this specific share action
+    // socketManager.socket.on('new_message', (data) {
+    //   print("✅ Message sent successfully: $data");
+    //   if (mounted) {
+    //     // Navigate directly to RoomChatPage with the shared moment
+    //     Navigator.pushReplacement(
+    //       context,
+    //       MaterialPageRoute(
+    //         builder: (_) => RoomChatPage(
+    //           campaignId: campaign.id,
+    //           userId: currentUserId,
+    //           username: widget.username,
+    //           sharedMoment: widget.moment,
+    //         ),
+    //       ),
+    //     );
+    //     // Remove listeners after navigation to prevent memory leaks
+    //     socketManager.socket.off('new_message');
+    //     socketManager.socket.off('error_message');
+    //   }
+    // });
+
+    // In SelectChatRoomScreen.dart, modify the 'new_message' listener:
     socketManager.socket.on('new_message', (data) {
       print("✅ Message sent successfully: $data");
       if (mounted) {
-        // Navigate directly to RoomChatPage with the shared moment
+        // Navigate to ChatMain with the selected campaign ID
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => RoomChatPage(
-              campaignId: campaign.id,
-              userId: currentUserId,
-              username: widget.username,
-              sharedMoment: widget.moment,
+            builder: (_) => ChatMain(
+              selectedCampaignId: campaign.id,
             ),
           ),
         );
-        // Remove listeners after navigation to prevent memory leaks
         socketManager.socket.off('new_message');
         socketManager.socket.off('error_message');
       }

@@ -133,8 +133,29 @@ class _RoomChatPageState extends State<RoomChatPage> {
     });
   }
 
+  // void _sendSharedMoment() {
+  //   if (widget.sharedMoment != null) {
+  //     socketManager.sendMessage({
+  //       'campaign_id': widget.campaignId,
+  //       'sender_id': widget.userId,
+  //       'type': 'moment',
+  //       'moment': widget.sharedMoment!.toJson(),
+  //       'username': widget.username,
+  //       'shared_by': widget.userId,
+  //       'shared_by_name': widget.username,
+  //       'original_author_id': widget.sharedMoment!.user.u_id,
+  //       'original_author_name': widget.sharedMoment!.user.u_name,
+  //     });
+  //   }
+  // }
+
+  // In RoomChatPage.dart, modify the _sendSharedMoment method:
   void _sendSharedMoment() {
-    if (widget.sharedMoment != null) {
+    // Only send if we didn't come from SelectChatRoomScreen
+    final cameFromSelection =
+        ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
+
+    if (widget.sharedMoment != null && cameFromSelection == null) {
       socketManager.sendMessage({
         'campaign_id': widget.campaignId,
         'sender_id': widget.userId,
@@ -208,6 +229,7 @@ class _RoomChatPageState extends State<RoomChatPage> {
     _controller.dispose();
     super.dispose();
   }
+  
 
   @override
   Widget build(BuildContext context) {
