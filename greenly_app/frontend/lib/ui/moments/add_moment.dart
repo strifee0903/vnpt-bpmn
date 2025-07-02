@@ -224,7 +224,7 @@ class _AddMomentPageState extends State<AddMomentPage> {
         title: const Text(
           'Create a new post',
           style: TextStyle(
-            fontFamily: 'montserrat',
+            fontFamily: 'Baloo Bhaijaan 2',
             fontWeight: FontWeight.w900,
             color: Colors.white,
           ),
@@ -304,9 +304,9 @@ class _AddMomentPageState extends State<AddMomentPage> {
                                 ),
                               )
                             : const Text(
-                                'Chia sẻ',
+                                'Post',
                                 style: TextStyle(
-                                  fontFamily: 'montserrat',
+                                  fontFamily: 'Baloo Bhaijaan 2',
                                   fontSize: 18,
                                   fontWeight: FontWeight.w700,
                                   color: Colors.white,

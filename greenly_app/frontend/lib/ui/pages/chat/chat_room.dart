@@ -245,18 +245,20 @@ class _RoomChatPageState extends State<RoomChatPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      floatingActionButton: Padding(
-        padding: const EdgeInsets.only(bottom: 20),
-        child: FloatingActionButton(
-          onPressed: () {
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              _scrollToBottom();
-            });
-          },
-          child: const Icon(Icons.arrow_downward),
-          backgroundColor: button,
-        ),
-      ),
+      floatingActionButton: _hasNewMessage
+          ? Padding(
+              padding: const EdgeInsets.only(bottom: 20),
+              child: FloatingActionButton(
+                onPressed: () {
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    _scrollToBottom();
+                  });
+                },
+                child: const Icon(Icons.arrow_downward),
+                backgroundColor: button,
+              ),
+            )
+          : null,
       body: Column(
         children: [
           Container(

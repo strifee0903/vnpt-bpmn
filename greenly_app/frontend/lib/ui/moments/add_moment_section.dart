@@ -1,21 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:greenly_app/ui/moments/moment_manager.dart';
-import 'package:latlong2/latlong.dart';
-import 'package:path/path.dart';
-import 'package:provider/provider.dart';
 import 'dart:io';
 import '../../components/colors.dart';
 import '../../models/category.dart';
 
-class AddPostSection extends StatefulWidget {
+class AddPostSection extends StatelessWidget {
   final TextEditingController contentController;
   final List<File> selectedImages;
   final VoidCallback onPickImages;
   final Function(int)? onRemoveImage; // Add callback for removing images
   final String avatarPath;
-  final File? avatarFile;
   final String username;
   final List<Category> categories;
   final Category? selectedCategory;
@@ -33,7 +26,6 @@ class AddPostSection extends StatefulWidget {
     required this.onPickImages,
     this.onRemoveImage,
     required this.avatarPath,
-    this.avatarFile,
     required this.username,
     required this.categories,
     required this.selectedCategory,
@@ -46,96 +38,6 @@ class AddPostSection extends StatefulWidget {
   });
 
   @override
-  State<AddPostSection> createState() => _AddPostSectionState();
-}
-
-class _AddPostSectionState extends State<AddPostSection> {
-  LatLng? currentLocation;
-  String? nameOfLocation;
-  Future<void> _getLocation() async {
-    LocationPermission permission;
-
-    permission = await Geolocator.checkPermission();
-    if (permission == LocationPermission.denied) {
-      permission = await Geolocator.requestPermission();
-    }
-    final serviceEnabled = await Geolocator.isLocationServiceEnabled();
-    print('📍📍📍 Service enabled: $serviceEnabled');
-
-    if (permission == LocationPermission.deniedForever) return;
-
-    try {
-      final pos = await Geolocator.getCurrentPosition();
-      final newLocation = LatLng(pos.latitude, pos.longitude);
-      nameOfLocation = await getAddressFromLatLng(
-          newLocation.latitude, newLocation.longitude);
-
-      setState(() {
-        currentLocation = newLocation;
-      });
-      Provider.of<MomentProvider>(this.context, listen: false)
-          .updateCurrentLocation(newLocation);
-      print(
-          '📍📍📍 Current location: ${currentLocation!.latitude}, ${currentLocation!.longitude}');
-      print('📍📍📍 Address: $nameOfLocation');
-    } catch (e) {
-      print('❌ Error getting location: $e');
-    }
-  }
-
-// String formatPlacemark(Placemark place) {
-//   final parts = [
-//     place.name,
-//     place.street,
-//     place.subLocality,
-//     place.locality,
-//     place.administrativeArea,
-//     place.country,
-//   ];
-
-//   // Loại bỏ các phần tử null hoặc rỗng
-//   final nonEmpty =
-//       parts.where((part) => part != null && part.trim().isNotEmpty).toList();
-
-//   return nonEmpty.join(', ');
-// }
-
-  Future<String?> getAddressFromLatLng(
-      double latitude, double longitude) async {
-    try {
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(latitude, longitude);
-      if (placemarks.isNotEmpty) {
-        final place = placemarks[0];
-        final parts = [
-          place.name,
-          place.street,
-          place.subLocality,
-          place.locality,
-          place.administrativeArea,
-          place.country,
-        ];
-
-        // Loại bỏ các phần tử null hoặc rỗng
-        final nonEmpty = parts
-            .where((part) => part != null && part.trim().isNotEmpty)
-            .toList();
-        return nonEmpty.join(', ');
-      }
-    } catch (e) {
-      print('❌ Lỗi khi reverse geocoding: $e');
-    }
-    return null;
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    // Lấy vị trí hiện tại khi khởi tạo
-    _getLocation();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final List<String> momentTypes = ['diary', 'event', 'report'];
 
@@ -146,10 +48,20 @@ class _AddPostSectionState extends State<AddPostSection> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             CircleAvatar(
-              radius: 30,
-              backgroundImage: widget.avatarFile != null
-                  ? FileImage(widget.avatarFile!)
-                  : AssetImage('public/images/blank_avt.jpg') as ImageProvider,
+              radius: 20,
+              backgroundColor: Colors.grey[300],
+              child: ClipOval(
+                child: Image.network(
+                  avatarPath,
+                  width: 40,
+                  height: 40,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return const Icon(Icons.person,
+                        color: Colors.white, size: 20);
+                  },
+                ),
+              ),
             ),
             const SizedBox(width: 15),
             Expanded(
@@ -157,9 +69,9 @@ class _AddPostSectionState extends State<AddPostSection> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    widget.username.isNotEmpty ? widget.username : 'Anonymous',
+                    username.isNotEmpty ? username : 'Anonymous',
                     style: const TextStyle(
-                      fontFamily: 'montserrat',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontWeight: FontWeight.w700,
                       fontSize: 18,
                     ),
@@ -175,11 +87,9 @@ class _AddPostSectionState extends State<AddPostSection> {
                       const SizedBox(width: 4),
                       Expanded(
                         child: Text(
-                          nameOfLocation ??
-                              widget.address ??
-                              'Không rõ địa điểm',
+                          address ?? 'Fetching location...',
                           style: const TextStyle(
-                            fontFamily: 'montserrat',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -201,12 +111,12 @@ class _AddPostSectionState extends State<AddPostSection> {
           children: [
             Expanded(
               child: DropdownButtonFormField<String>(
-                value: widget.selectedMomentType,
+                value: selectedMomentType,
                 isExpanded: true,
                 hint: const Text(
-                  'Loại khoảnh khắc',
+                  'Moment Type',
                   style: TextStyle(
-                      fontFamily: 'montserrat',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontSize: 14,
                       fontWeight: FontWeight.w500),
                 ),
@@ -216,41 +126,41 @@ class _AddPostSectionState extends State<AddPostSection> {
                     child: Text(
                       type,
                       style: const TextStyle(
-                          fontFamily: 'montserrat',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
                     ),
                   );
                 }).toList(),
-                onChanged: widget.onMomentTypeChanged,
+                onChanged: onMomentTypeChanged,
                 decoration: _dropdownDecoration,
               ),
             ),
             const SizedBox(width: 5.0),
             Expanded(
               child: DropdownButtonFormField<Category>(
-                value: widget.selectedCategory,
+                value: selectedCategory,
                 isExpanded: true,
                 hint: const Text(
-                  'Chọn danh mục',
+                  'Category',
                   style: TextStyle(
-                      fontFamily: 'montserrat',
+                      fontFamily: 'Baloo Bhaijaan 2',
                       fontSize: 14,
                       fontWeight: FontWeight.w500),
                 ),
-                items: widget.categories.map((category) {
+                items: categories.map((category) {
                   return DropdownMenuItem<Category>(
                     value: category,
                     child: Text(
                       category.category_name,
                       style: const TextStyle(
-                          fontFamily: 'montserrat',
+                          fontFamily: 'Baloo Bhaijaan 2',
                           fontSize: 14,
                           fontWeight: FontWeight.w500),
                     ),
                   );
                 }).toList(),
-                onChanged: widget.onCategoryChanged,
+                onChanged: onCategoryChanged,
                 decoration: _dropdownDecoration,
               ),
             ),
@@ -264,16 +174,16 @@ class _AddPostSectionState extends State<AddPostSection> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
-              widget.isPublic ? 'Công khai' : 'Riêng tư',
+              isPublic ? 'Public' : 'Private',
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
-                fontFamily: 'montserrat',
+                fontFamily: 'Baloo Bhaijaan 2',
               ),
             ),
             Switch(
-              value: widget.isPublic,
-              onChanged: widget.onPublicChanged,
+              value: isPublic,
+              onChanged: onPublicChanged,
               activeColor: Colors.green,
             ),
           ],
@@ -283,15 +193,15 @@ class _AddPostSectionState extends State<AddPostSection> {
 
         // Content Input
         TextField(
-          controller: widget.contentController,
+          controller: contentController,
           maxLines: null,
           cursorColor: button,
           decoration: const InputDecoration(
-            hintText: 'Chia sẻ khoảnh khắc...',
+            hintText: 'Write your moment...',
             border: InputBorder.none,
           ),
           style: const TextStyle(
-            fontFamily: 'montserrat',
+            fontFamily: 'Baloo Bhaijaan 2',
             fontSize: 16,
             fontWeight: FontWeight.w500,
           ),
@@ -301,7 +211,7 @@ class _AddPostSectionState extends State<AddPostSection> {
 
         // Image Picker with Delete functionality
         GestureDetector(
-          onTap: widget.onPickImages,
+          onTap: onPickImages,
           child: Container(
             height: 190,
             width: double.infinity,
@@ -310,7 +220,7 @@ class _AddPostSectionState extends State<AddPostSection> {
               border: Border.all(color: fieldborder),
               borderRadius: BorderRadius.circular(25.0),
             ),
-            child: widget.selectedImages.isEmpty
+            child: selectedImages.isEmpty
                 ? const Center(
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -319,9 +229,9 @@ class _AddPostSectionState extends State<AddPostSection> {
                             size: 50, color: Colors.grey),
                         SizedBox(height: 8.0),
                         Text(
-                          'Ấn để chọn ảnh',
+                          'Tap to add photos',
                           style: TextStyle(
-                            fontFamily: 'montserrat',
+                            fontFamily: 'Baloo Bhaijaan 2',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey,
@@ -335,7 +245,7 @@ class _AddPostSectionState extends State<AddPostSection> {
                     child: Row(
                       children: [
                         // Display selected images with delete buttons
-                        ...widget.selectedImages.asMap().entries.map((entry) {
+                        ...selectedImages.asMap().entries.map((entry) {
                           int index = entry.key;
                           File image = entry.value;
 
@@ -357,8 +267,7 @@ class _AddPostSectionState extends State<AddPostSection> {
                                   top: 5,
                                   right: 5,
                                   child: GestureDetector(
-                                    onTap: () =>
-                                        widget.onRemoveImage?.call(index),
+                                    onTap: () => onRemoveImage?.call(index),
                                     child: Container(
                                       padding: const EdgeInsets.all(4),
                                       decoration: BoxDecoration(
@@ -387,9 +296,9 @@ class _AddPostSectionState extends State<AddPostSection> {
                         }).toList(),
 
                         // Add more photos button
-                        if (widget.selectedImages.isNotEmpty)
+                        if (selectedImages.isNotEmpty)
                           GestureDetector(
-                            onTap: widget.onPickImages,
+                            onTap: onPickImages,
                             child: Container(
                               width: 150,
                               height: 150,
@@ -413,9 +322,9 @@ class _AddPostSectionState extends State<AddPostSection> {
                                   ),
                                   SizedBox(height: 8),
                                   Text(
-                                    'Thêm',
+                                    'Add more',
                                     style: TextStyle(
-                                      fontFamily: 'montserrat',
+                                      fontFamily: 'Baloo Bhaijaan 2',
                                       fontSize: 12,
                                       fontWeight: FontWeight.w500,
                                       color: Colors.grey,

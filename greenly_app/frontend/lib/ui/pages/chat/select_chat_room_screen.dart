@@ -28,12 +28,26 @@ class SelectChatRoomScreen extends StatefulWidget {
 
 class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
   late SocketManager socketManager;
+  final joinedCampaigns = <Campaign>[];
 
   @override
   void initState() {
     super.initState();
     socketManager = Provider.of<SocketManager>(context, listen: false);
     _initializeSocket();
+  }
+
+  Future<List<Campaign>> getAllJoinedCampaigns() async {
+    final allCampaigns = await CampaignService().getAllCampaigns();
+    final joinedCampaigns = <Campaign>[];
+
+    for (final campaign in allCampaigns) {
+      final isJoined =
+          await CampaignService().getParticipationStatus(campaign.id);
+      if (isJoined) joinedCampaigns.add(campaign);
+    }
+
+    return joinedCampaigns;
   }
 
   Future<void> _initializeSocket() async {
@@ -262,7 +276,7 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
           const Divider(),
           Expanded(
             child: FutureBuilder<List<Campaign>>(
-              future: CampaignService().getAllCampaigns(),
+              future: getAllJoinedCampaigns(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -272,8 +286,8 @@ class _SelectChatRoomScreenState extends State<SelectChatRoomScreen> {
                     child: Text("Bạn chưa tham gia chiến dịch nào."),
                   );
                 }
-
                 final campaigns = snapshot.data!;
+
                 return ListView.builder(
                   itemCount: campaigns.length,
                   itemBuilder: (context, index) {

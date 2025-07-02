@@ -172,15 +172,15 @@ CREATE INDEX idx_vote_uid ON vote(u_id);
 -- ========================================
 -- BẢNG contribution: Ghi nhận điểm đóng góp người dùng theo ngày
 -- ========================================
-CREATE TABLE contribution (
-    contr_id INT PRIMARY KEY AUTO_INCREMENT,
-    u_id INT,
-    eco_point INT,
-	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (time_id) REFERENCES times(time_id) on delete cascade,
-	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
-);
+-- CREATE TABLE contribution (
+--     contr_id INT PRIMARY KEY AUTO_INCREMENT,
+--     u_id INT,
+--     eco_point INT,
+-- 	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+-- 	updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--     FOREIGN KEY (time_id) REFERENCES times(time_id) on delete cascade,
+-- 	FOREIGN KEY (u_id) REFERENCES users(u_id) on delete cascade
+-- );
 -- ======= TABLE: contribution =======
 -- Tìm contribution theo user hoặc ngày
 CREATE INDEX idx_contribution_uid ON contribution(u_id);
@@ -243,7 +243,6 @@ CREATE TABLE messages (
     type ENUM('text', 'moment') DEFAULT 'text',
     moment_json JSON NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-    
     shared_by INT NULL,
     shared_by_name VARCHAR(255) NULL,
     original_author_id INT NULL,
@@ -297,16 +296,6 @@ CREATE TABLE flows (
     FOREIGN KEY (target_ref) REFERENCES steps(step_id),
     PRIMARY KEY (flow_id, process_id)
 );
-
--- Table for custom properties (e.g., magic:spell)
-CREATE TABLE custom_properties (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    step_id VARCHAR(100),
-    property_name VARCHAR(100),
-    property_value TEXT,
-    FOREIGN KEY (step_id) REFERENCES steps(step_id)
-);
-
 
 CREATE TABLE library(
   library_id int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
